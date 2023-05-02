@@ -11,7 +11,8 @@ export const useSocket = (serverPath: string) => {
   }, [serverPath, socket]);
 
   const disconnectSocket = useCallback(() => {
-    socket?.disconnect();
+    if (!socket) return;
+    socket.disconnect();
   }, [socket]);
 
   return {
