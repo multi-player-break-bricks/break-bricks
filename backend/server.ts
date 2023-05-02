@@ -23,15 +23,20 @@ io.on("connection", (socket) => {
     socket.emit("name-saved");
   });
 
-  socket.on("create-wait-room", ({ isPublic }) => {
+  socket.on("create-wait-room", ({ isPublic, name }) => {
     console.log("create-wait-room");
+    savePlayerName(socket.id, name);
     const { waitRoomNumber, roomId } = createWaitRoom(isPublic, socket.id);
     socket.join(roomId);
-    socket.emit("wait-room-created", { roomId, waitRoomNumber });
+    socket.emit("wait-room-created", {
+      players: [name],
+      roomNumber: waitRoomNumber,
+    });
   });
 
-  socket.on("join-wait-room-with-id", ({ roomNumber }) => {
+  socket.on("join-wait-room-with-id", ({ roomNumber, name }) => {
     console.log("join-wait-room-with-id");
+    savePlayerName(socket.id, name);
     const result = joinWaitRoomWithNumber(roomNumber, socket.id);
     if (result.error) {
       socket.emit("join-wait-room-error", result.error);
@@ -45,7 +50,8 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("join-random-wait-room", () => {
+  socket.on("join-random-wait-room", (name) => {
+    savePlayerName(socket.id, name);
     const { players, roomId, waitRoomNumber } = joinRandomRoom(socket.id);
     socket.join(roomId);
     socket.emit("join-wait-room", { players, roomNumber: waitRoomNumber });

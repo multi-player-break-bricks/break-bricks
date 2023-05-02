@@ -4,57 +4,46 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./index.module.css";
 
 export default function JoinPage() {
-  const { connectSocket, disconnectSocket, socket } = useSocketContext();
+  const { connectSocket, disconnectSocket } = useSocketContext();
   const { name } = useGameContext();
-  const [isSocketConnected, setIsSocketConnected] = useState(false);
   const [roomId, setRoomId] = useState("");
 
   const isPublicRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    connectSocket();
-    return () => {
-      disconnectSocket();
-    };
-  }, [connectSocket, disconnectSocket]);
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("connect", () => {
-      console.log("socket connected");
-      socket.emit("send-name", name);
-      socket.on("name-saved", () => {
-        setIsSocketConnected(true);
-      });
-    });
-  }, [name, socket]);
+    console.log("disconnecting socket");
+    disconnectSocket();
+  }, [disconnectSocket]);
 
   const createRoom = () => {
-    console.log({ socket }, isPublicRef.current?.checked);
-    socket?.emit("create-wait-room", {
+    const socket = connectSocket();
+    socket.emit("create-wait-room", {
       isPublic: isPublicRef.current?.checked,
+      name,
     });
-    socket?.on("wait-room-created", (data) => {
+    socket.on("wait-room-created", (data) => {
       console.log(data);
     });
   };
 
   const joinRoomWithId = () => {
-    socket?.emit("join-wait-room-with-id", {
+    const socket = connectSocket();
+    socket.emit("join-wait-room-with-id", {
       roomNumber: roomId,
+      name,
     });
-    socket?.on("join-wait-room", ({ players, roomNumber }) => {
+    socket.on("join-wait-room", ({ players, roomNumber }) => {
       console.log({ players, roomNumber });
     });
-    socket?.on("join-wait-room-error", (error) => {
+    socket.on("join-wait-room-error", (error) => {
       console.log({ error });
     });
   };
 
   const joinRandomRoom = () => {
-    socket?.emit("join-random-wait-room");
-    socket?.on("join-wait-room", ({ players, roomNumber }) => {
+    const socket = connectSocket();
+    socket.emit("join-random-wait-room", name);
+    socket.on("join-wait-room", ({ players, roomNumber }) => {
       console.log({ players, roomNumber });
     });
   };
@@ -73,9 +62,7 @@ export default function JoinPage() {
               <input type="checkbox" id="isPublic" ref={isPublicRef} />
               <label htmlFor="isPublic">Public room</label>
             </div>
-            <button disabled={!isSocketConnected} onClick={createRoom}>
-              Create Room
-            </button>
+            <button onClick={createRoom}>Create Room</button>
           </article>
           <article>
             <h2>Join a room with a room id.</h2>
@@ -88,18 +75,13 @@ export default function JoinPage() {
                 onChange={(e) => setRoomId(e.target.value)}
               />
             </div>
-            <button
-              disabled={!isSocketConnected || !isValidRoomId}
-              onClick={joinRoomWithId}
-            >
+            <button disabled={!isValidRoomId} onClick={joinRoomWithId}>
               Join
             </button>
           </article>
           <article>
             <h2>Join a random room.</h2>
-            <button disabled={!isSocketConnected} onClick={joinRandomRoom}>
-              Quick Start
-            </button>
+            <button onClick={joinRandomRoom}>Quick Start</button>
           </article>
         </div>
       </div>

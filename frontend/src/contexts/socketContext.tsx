@@ -4,7 +4,7 @@ import { Socket } from "socket.io-client";
 
 type SocketContextType = {
   socket: Socket | null;
-  connectSocket: () => void;
+  connectSocket: () => Socket;
   disconnectSocket: () => void;
 };
 
