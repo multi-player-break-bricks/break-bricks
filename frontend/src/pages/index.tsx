@@ -1,11 +1,11 @@
-import { useGameContext } from "@/contexts/gameContext";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import Head from "next/head";
-import Image from "next/image";
 import Link from "next/link";
 import styles from "./Home.module.css";
 
 export default function Home() {
-  const { name, setName } = useGameContext();
+  const [name, setName] = useLocalStorage("name");
+
   return (
     <>
       <Head>

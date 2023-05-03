@@ -14,12 +14,18 @@ type GameRoom = {
   players: string[];
 };
 
+type Player = {
+  id: string;
+  name: string;
+  isReady: boolean;
+};
+
 const waitRooms: Record<string, WaitRoom> = {};
 const gameRooms: Record<string, GameRoom> = {};
-const players: Record<string, string> = {};
+const players: Record<string, Player> = {};
 
 export const savePlayerName = (playerId: string, name: string) => {
-  players[playerId] = name;
+  players[playerId] = { id: playerId, name, isReady: false };
 };
 
 export const createWaitRoom = (isPublic: boolean, playerId: string) => {
@@ -63,7 +69,7 @@ export const joinWaitRoomWithNumber = (
 
 export const joinRandomRoom = (playerId: string) => {
   const waitRoom = Object.values(waitRooms).find(
-    (room) => room.players.length < 4
+    (room) => room.players.length < 4 && room.isPublic
   );
   if (!waitRoom) {
     const { roomId, waitRoomNumber } = createWaitRoom(true, playerId);
@@ -81,15 +87,69 @@ export const joinRandomRoom = (playerId: string) => {
   };
 };
 
-export const moveWaitRoomToGameRoom = (
-  waitRoomId: string,
-  gameRoomId: string
-) => {
-  const waitRoom = waitRooms[Number(waitRoomId)];
+export const findWaitRoom = (waitRoomId: string) => {
+  const waitRoom = waitRooms[waitRoomId];
   if (!waitRoom) return;
-  delete waitRooms[Number(waitRoomId)];
-  gameRooms[gameRoomId] = {
-    id: gameRoomId,
+  return {
+    id: waitRoom.id,
+    number: waitRoom.number,
+    players: waitRoom.players.map((playerId) => players[playerId]),
+  };
+};
+
+export const removePlayerFromRoom = (playerId: string) => {
+  const waitRoom = Object.values(waitRooms).find((room) =>
+    room.players.includes(playerId)
+  );
+  if (waitRoom) {
+    waitRoom.players = waitRoom.players.filter((id) => id !== playerId);
+    return {
+      roomId: waitRoom.id,
+      players: waitRoom.players.map((playerId) => players[playerId]),
+    };
+  }
+  const gameRoom = Object.values(gameRooms).find((room) =>
+    room.players.includes(playerId)
+  );
+  if (!gameRoom) return;
+  gameRoom.players = gameRoom.players.filter((id) => id !== playerId);
+  return {
+    roomId: gameRoom.id,
+    players: gameRoom.players.map((playerId) => players[playerId]),
+  };
+};
+
+export const updatePlayerReady = (
+  roomNumber: string,
+  playerId: string,
+  isReady: boolean
+) => {
+  const waitRoom = Object.values(waitRooms).find(
+    (room) => room.number === roomNumber
+  );
+  if (!waitRoom) return;
+  players[playerId].isReady = isReady;
+  return {
+    roomId: waitRoom.id,
+    players: waitRoom.players.map((playerId) => players[playerId]),
+  };
+};
+
+export const moveWaitRoomToGameRoom = (roomId: string) => {
+  const waitRoom = waitRooms[roomId];
+  if (!waitRoom) return;
+  delete waitRooms[roomId];
+  gameRooms[roomId] = {
+    id: roomId,
     players: waitRoom.players,
+  };
+};
+
+export const findGameRoom = (roomId: string) => {
+  const gameRoom = gameRooms[roomId];
+  if (!gameRoom) return;
+  return {
+    id: gameRoom.id,
+    players: gameRoom.players.map((playerId) => players[playerId]),
   };
 };

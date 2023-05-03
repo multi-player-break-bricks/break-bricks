@@ -1,19 +1,36 @@
-import { useGameContext } from "@/contexts/gameContext";
 import { useSocketContext } from "@/contexts/socketContext";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import { Socket } from "socket.io-client";
 import styles from "./index.module.css";
 
 export default function JoinPage() {
   const { connectSocket, disconnectSocket } = useSocketContext();
-  const { name } = useGameContext();
   const [roomId, setRoomId] = useState("");
 
+  const router = useRouter();
+  const [name] = useLocalStorage("name");
+
   const isPublicRef = useRef<HTMLInputElement>(null);
+  const firstRender = useRef(true);
 
   useEffect(() => {
     console.log("disconnecting socket");
-    disconnectSocket();
-  }, [disconnectSocket]);
+    if (firstRender.current) {
+      firstRender.current = false;
+      disconnectSocket();
+    }
+    if (!name) {
+      router.push("/");
+    }
+  }, [disconnectSocket, name, router]);
+
+  const listenToJoinRoom = (socket: Socket) => {
+    socket.on("join-wait-room", () => {
+      router.push("/room");
+    });
+  };
 
   const createRoom = () => {
     const socket = connectSocket();
@@ -21,9 +38,7 @@ export default function JoinPage() {
       isPublic: isPublicRef.current?.checked,
       name,
     });
-    socket.on("wait-room-created", (data) => {
-      console.log(data);
-    });
+    listenToJoinRoom(socket);
   };
 
   const joinRoomWithId = () => {
@@ -32,9 +47,7 @@ export default function JoinPage() {
       roomNumber: roomId,
       name,
     });
-    socket.on("join-wait-room", ({ players, roomNumber }) => {
-      console.log({ players, roomNumber });
-    });
+    listenToJoinRoom(socket);
     socket.on("join-wait-room-error", (error) => {
       console.log({ error });
     });
@@ -43,9 +56,7 @@ export default function JoinPage() {
   const joinRandomRoom = () => {
     const socket = connectSocket();
     socket.emit("join-random-wait-room", name);
-    socket.on("join-wait-room", ({ players, roomNumber }) => {
-      console.log({ players, roomNumber });
-    });
+    listenToJoinRoom(socket);
   };
 
   const isValidRoomId =
