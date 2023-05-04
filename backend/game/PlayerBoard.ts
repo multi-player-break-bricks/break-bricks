@@ -1,4 +1,4 @@
-import { ICollidable, IGameObject, GameObjectType } from "./GameData.ts";
+import * as GameData from "./GameData.ts";
 
 export default class PlayerBoard
   implements GameData.ICollidable, GameData.IGameObject
@@ -24,14 +24,28 @@ export default class PlayerBoard
   colidable: GameData.ICollidable;
 
   /**
-   * @param playerNumber  the player number of the board
+   * @param playerNumber  the player number of the board, can only be 1-4
    * @param canvas        the canvas that the board will be drawn on
    */
   constructor(playerNumber: number) {
-    this.gameObjectType = GameObjectType.player;
+    //player number can only be 1-4
+    if (playerNumber < 1 || playerNumber > 4) {
+      throw new Error("player number can only be 1-4");
+    }
+
+    this.name = "player";
+    this.gameObjectType = GameData.GameObjectType.player;
     this.img =
       "https://www.pngall.com/wp-content/uploads/5/Sports-Ball-Transparent.png";
     this.playerNumber = playerNumber;
+    this.xPos = 0;
+    this.yPos = 0;
+    this.imageHeight = 0;
+    this.imageWidth = 0;
+    this.width = 0;
+    this.height = 0;
+    this.displayHeight = 0;
+    this.displayWidth = 0;
     this.wallMargin = GameData.PLAYER_BOARD_WALL_MARGIN;
     this.gameObject = this;
     this.colidable = this;
@@ -95,24 +109,24 @@ export default class PlayerBoard
     this.yPos = yPos;
   }
 
-  /**
-   * @deprecated should not use canvas directly in this class
-   */
-  drawThis(canvasContext: CanvasRenderingContext2D) {
-    canvasContext.drawImage(
-      this.img,
-      0,
-      0,
-      this.imageWidth,
-      this.imageHeight,
-      this.xPos,
-      this.yPos,
-      this.displayWidth,
-      this.displayHeight
-    );
-  }
+  // /**
+  //  * @deprecated should not use canvas directly in this class
+  //  */
+  // drawThis(canvasContext: CanvasRenderingContext2D) {
+  //   canvasContext.drawImage(
+  //     this.img,
+  //     0,
+  //     0,
+  //     this.imageWidth,
+  //     this.imageHeight,
+  //     this.xPos,
+  //     this.yPos,
+  //     this.displayWidth,
+  //     this.displayHeight
+  //   );
+  // }
 
-  moveTo(direction) {
+  moveTo(direction: string) {
     if (direction == "top") {
       this.yPos = this.yPos - GameData.PLAYER_MOVE_SPEED;
     } else if (direction == "bottom") {

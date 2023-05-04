@@ -82,7 +82,10 @@ class ColliderUtil {
 }
 
 //functions
-export { GameObjectType, IGameObject, ICollidable, ColliderUtil };
+export { GameObjectType, ColliderUtil };
+
+//type
+export type { IGameObject, ICollidable };
 
 //data
 export {
