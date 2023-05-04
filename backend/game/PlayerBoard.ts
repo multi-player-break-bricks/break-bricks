@@ -1,6 +1,8 @@
-import { ICollidable, IGameObject, GameObjectType } from "./GameData";
+import * as GameData from "./GameData";
 
-export default class PlayerBoard implements ICollidable, IGameObject {
+export default class PlayerBoard
+  implements GameData.ICollidable, GameData.IGameObject
+{
   name: string;
   img: HTMLImageElement;
   imageHeight: number;
@@ -17,19 +19,19 @@ export default class PlayerBoard implements ICollidable, IGameObject {
 
   wallMargin: number;
 
-  gameObjectType: GameObjectType;
-  gameObject: IGameObject;
-  colidable: ICollidable;
+  gameObjectType: GameData.GameObjectType;
+  gameObject: GameData.IGameObject;
+  colidable: GameData.ICollidable;
 
   /**
    * @param playerNumber  the player number of the board
    * @param canvas        the canvas that the board will be drawn on
    */
   constructor(playerNumber: number) {
-    this.gameObjectType = GameObjectType.player;
+    this.gameObjectType = GameData.GameObjectType.player;
     this.img = new Image();
     this.playerNumber = playerNumber;
-    this.wallMargin = 10;
+    this.wallMargin = GameData.PLAYER_BOARD_WALL_MARGIN;
     this.gameObject = this;
     this.colidable = this;
 
@@ -41,8 +43,8 @@ export default class PlayerBoard implements ICollidable, IGameObject {
 
     if (playerNumber == 1) {
       this.name = "player 1";
-      this.height = this.displayHeight = 10;
-      this.width = this.displayWidth = 50;
+      this.height = this.displayHeight = GameData.PLAYER_BOARD_HEIGHT;
+      this.width = this.displayWidth = GameData.PLAYER_BOARD_WIDTH;
 
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = canvas.height - (this.displayHeight + this.wallMargin);
@@ -52,8 +54,8 @@ export default class PlayerBoard implements ICollidable, IGameObject {
       this.imageHeight = boardImageHeight;
     } else if (playerNumber == 2) {
       this.name = "player 2";
-      this.height = this.displayHeight = 50;
-      this.width = this.displayWidth = 10;
+      this.height = this.displayHeight = GameData.PLAYER_BOARD_WIDTH;
+      this.width = this.displayWidth = GameData.PLAYER_BOARD_HEIGHT;
 
       //   this.xPos = 0 + this.wallMargin;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
@@ -63,8 +65,8 @@ export default class PlayerBoard implements ICollidable, IGameObject {
       this.imageHeight = boardImageWidth;
     } else if (playerNumber == 3) {
       this.name = "player 3";
-      this.height = this.displayHeight = 10;
-      this.width = this.displayWidth = 50;
+      this.height = this.displayHeight = GameData.PLAYER_BOARD_HEIGHT;
+      this.width = this.displayWidth = GameData.PLAYER_BOARD_WIDTH;
 
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = this.wallMargin;
@@ -74,8 +76,8 @@ export default class PlayerBoard implements ICollidable, IGameObject {
       this.imageHeight = boardImageHeight;
     } else if (playerNumber == 4) {
       this.name = "player 4";
-      this.height = this.displayHeight = 50;
-      this.width = this.displayWidth = 10;
+      this.height = this.displayHeight = GameData.PLAYER_BOARD_WIDTH;
+      this.width = this.displayWidth = GameData.PLAYER_BOARD_HEIGHT;
 
       //   this.xPos = canvas.width - this.wallMargin - this.displayWidth;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
@@ -110,13 +112,13 @@ export default class PlayerBoard implements ICollidable, IGameObject {
 
   moveTo(direction) {
     if (direction == "top") {
-      this.yPos = this.yPos - 1;
+      this.yPos = this.yPos - GameData.PLAYER_MOVE_SPEED;
     } else if (direction == "bottom") {
-      this.yPos = this.yPos + 1;
+      this.yPos = this.yPos + GameData.PLAYER_MOVE_SPEED;
     } else if (direction == "left") {
-      this.xPos = this.xPos - 1;
+      this.xPos = this.xPos - GameData.PLAYER_MOVE_SPEED;
     } else if (direction == "right") {
-      this.xPos = this.xPos + 1;
+      this.xPos = this.xPos + GameData.PLAYER_MOVE_SPEED;
     }
   }
 
@@ -172,17 +174,5 @@ export default class PlayerBoard implements ICollidable, IGameObject {
         this.moveTo("top");
       }
     }
-  }
-
-  isColliding(collidable: ICollidable): boolean {
-    if (
-      this.xPos < collidable.gameObject.xPos + collidable.width &&
-      this.xPos + this.displayWidth > collidable.gameObject.xPos &&
-      this.yPos < collidable.gameObject.yPos + collidable.height &&
-      this.yPos + this.displayHeight > collidable.gameObject.yPos
-    ) {
-      return true;
-    }
-    return false;
   }
 }
