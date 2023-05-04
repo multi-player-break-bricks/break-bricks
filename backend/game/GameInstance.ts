@@ -1,7 +1,7 @@
-import Circle from "./circle";
-import Brick from "./brick";
-import PlayerBoard from "./PlayerBoard";
-import * as GameData from "./GameData";
+import Circle from "./circle.ts";
+import Brick from "./brick.ts";
+import PlayerBoard from "./PlayerBoard.ts";
+import * as GameData from "./GameData.ts";
 
 export default class GameInstance {
   gameRoomId: string;

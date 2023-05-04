@@ -1,5 +1,5 @@
-import { ICollidable, IGameObject, GameObjectType } from "./GameData";
-import playerBoard from "./PlayerBoard";
+import { ICollidable, IGameObject, GameObjectType } from "./GameData.ts";
+import playerBoard from "./PlayerBoard.ts";
 
 export default class Circle implements ICollidable, IGameObject {
   name: string;

@@ -1,4 +1,5 @@
 import { randomUUID } from "https://deno.land/std@0.134.0/node/crypto.ts";
+import GameInstance from "../game/gameInstance.ts";
 
 let lastWaitRoomNumber = 0;
 
@@ -12,6 +13,7 @@ type WaitRoom = {
 type GameRoom = {
   id: string;
   players: string[];
+  gameInstance?: GameInstance;
 };
 
 type Player = {
@@ -149,7 +151,24 @@ export const findGameRoom = (roomId: string) => {
   const gameRoom = gameRooms[roomId];
   if (!gameRoom) return;
   return {
-    id: gameRoom.id,
+    ...gameRoom,
     players: gameRoom.players.map((playerId) => players[playerId]),
+  };
+};
+
+export const createGameRoomTest = (playerId: string) => {
+  gameRooms["test"] = {
+    id: "test",
+    players: [playerId],
+    gameInstance: new GameInstance("test"),
+  };
+  players[playerId] = {
+    id: playerId,
+    name: "test",
+    isReady: true,
+  };
+  return {
+    ...gameRooms["test"],
+    players: gameRooms["test"].players.map((playerId) => players[playerId]),
   };
 };

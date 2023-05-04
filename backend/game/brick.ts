@@ -1,4 +1,4 @@
-import { ICollidable, IGameObject, GameObjectType } from "./GameData";
+import { ICollidable, IGameObject, GameObjectType } from "./GameData.ts";
 
 export default class Brick implements ICollidable, IGameObject {
   name: string;

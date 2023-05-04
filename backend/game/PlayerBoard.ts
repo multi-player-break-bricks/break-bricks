@@ -1,8 +1,8 @@
-import { ICollidable, IGameObject, GameObjectType } from "./GameData";
+import { ICollidable, IGameObject, GameObjectType } from "./GameData.ts";
 
 export default class PlayerBoard implements ICollidable, IGameObject {
   name: string;
-  img: HTMLImageElement;
+  img: string;
   imageHeight: number;
   imageWidth: number;
 
@@ -27,7 +27,8 @@ export default class PlayerBoard implements ICollidable, IGameObject {
    */
   constructor(playerNumber: number) {
     this.gameObjectType = GameObjectType.player;
-    this.img = new Image();
+    this.img =
+      "https://www.pngall.com/wp-content/uploads/5/Sports-Ball-Transparent.png";
     this.playerNumber = playerNumber;
     this.wallMargin = 10;
     this.gameObject = this;
@@ -47,7 +48,8 @@ export default class PlayerBoard implements ICollidable, IGameObject {
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = canvas.height - (this.displayHeight + this.wallMargin);
 
-      this.img.src = "./imgs/board.png";
+      this.img =
+        "https://www.pngall.com/wp-content/uploads/5/Sports-Ball-Transparent.png";
       this.imageWidth = boardImageWidth;
       this.imageHeight = boardImageHeight;
     } else if (playerNumber == 2) {
@@ -58,7 +60,7 @@ export default class PlayerBoard implements ICollidable, IGameObject {
       //   this.xPos = 0 + this.wallMargin;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
 
-      this.img.src = "./imgs/board_rotated.png";
+      this.img = "./imgs/board_rotated.png";
       this.imageWidth = boardImageHeight;
       this.imageHeight = boardImageWidth;
     } else if (playerNumber == 3) {
@@ -69,7 +71,7 @@ export default class PlayerBoard implements ICollidable, IGameObject {
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = this.wallMargin;
 
-      this.img.src = "./imgs/board.png";
+      this.img = "./imgs/board.png";
       this.imageWidth = boardImageWidth;
       this.imageHeight = boardImageHeight;
     } else if (playerNumber == 4) {
@@ -80,7 +82,7 @@ export default class PlayerBoard implements ICollidable, IGameObject {
       //   this.xPos = canvas.width - this.wallMargin - this.displayWidth;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
 
-      this.img.src = "./imgs/board_rotated.png";
+      this.img = "./imgs/board_rotated.png";
       this.imageWidth = boardImageHeight;
       this.imageHeight = boardImageWidth;
     }
