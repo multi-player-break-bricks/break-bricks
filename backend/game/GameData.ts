@@ -1,6 +1,13 @@
 //global game data
-export const GAME_CANVAS_WIDTH = 500;
-export const GAME_CANVAS_HEIGHT = 500;
+const GAME_CANVAS_WIDTH = 500;
+const GAME_CANVAS_HEIGHT = 500;
+const BALL_SIZE = 10;
+const PLAYER_BOARD_WIDTH = 50;
+const PLAYER_BOARD_HEIGHT = 10;
+const PLAYER_BOARD_WALL_MARGIN = 10;
+const PLAYER_MOVE_SPEED = 1;
+const BRICK_WIDTH = 25;
+const BRICK_HEIGHT = 25;
 
 /**
  * use this enum to identify game objects
@@ -24,6 +31,8 @@ interface IGameObject {
   name: string;
   xPos: number;
   yPos: number;
+  displayWidth: number;
+  displayHeight: number;
 }
 
 /**
@@ -35,8 +44,55 @@ interface ICollidable {
   width: number;
   height: number;
   gameObjectType: GameObjectType;
-  isColliding(collidable: ICollidable): boolean;
   gameObject: IGameObject;
 }
 
-export { GameObjectType, IGameObject, ICollidable };
+/**
+ * @class ColliderUtil class for collision detection
+ * @description this class will have all the methods for collision detection
+ */
+class ColliderUtil {
+  /**
+   * @method isColliding
+   * @description this method will check if two rect collidable objects are colliding or not
+   *
+   * @param collidable1 first collidable object
+   * @param collidable2 second collidable object
+   *
+   * @returns true if colliding, false otherwise
+   */
+  static isColliding(
+    collidable1: ICollidable,
+    collidable2: ICollidable
+  ): boolean {
+    if (
+      collidable1.gameObject.xPos <
+        collidable2.gameObject.xPos + collidable2.width &&
+      collidable1.gameObject.xPos + collidable1.width >
+        collidable2.gameObject.xPos &&
+      collidable1.gameObject.yPos <
+        collidable2.gameObject.yPos + collidable2.height &&
+      collidable1.gameObject.yPos + collidable1.height >
+        collidable2.gameObject.yPos
+    ) {
+      return true;
+    }
+    return false;
+  }
+}
+
+//functions
+export { GameObjectType, IGameObject, ICollidable, ColliderUtil };
+
+//data
+export {
+  GAME_CANVAS_WIDTH,
+  GAME_CANVAS_HEIGHT,
+  BALL_SIZE,
+  PLAYER_BOARD_WIDTH,
+  PLAYER_BOARD_HEIGHT,
+  BRICK_WIDTH,
+  BRICK_HEIGHT,
+  PLAYER_MOVE_SPEED,
+  PLAYER_BOARD_WALL_MARGIN,
+};

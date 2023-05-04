@@ -1,18 +1,22 @@
 import { ICollidable, IGameObject, GameObjectType } from "./GameData.ts";
 import playerBoard from "./PlayerBoard.ts";
 
-export default class Circle implements ICollidable, IGameObject {
+export default class Circle
+  implements GameData.ICollidable, GameData.IGameObject
+{
   name: string;
   xPos: number;
   yPos: number;
   size: number;
   width: number;
   height: number;
-  gameObjectType: GameObjectType;
+  displayWidth: number;
+  displayHeight: number;
+  gameObjectType: GameData.GameObjectType;
   movingDirectionX: number;
   movingDirectionY: number;
-  gameObject: IGameObject;
-  lastCollidedObject: ICollidable;
+  gameObject: GameData.IGameObject;
+  lastCollidedObject: GameData.ICollidable;
 
   /**
    * @param yPos
@@ -23,10 +27,10 @@ export default class Circle implements ICollidable, IGameObject {
     this.xPos = 0;
     this.yPos = 0;
     this.size = size;
-    this.gameObjectType = GameObjectType.circle;
+    this.gameObjectType = GameData.GameObjectType.circle;
     this.name = "circle";
-    this.width = size * 0.75;
-    this.height = size * 0.75;
+    this.displayWidth = this.width = size * 0.75;
+    this.displayHeight = this.height = size * 0.75;
     this.movingDirectionX = 0;
     this.movingDirectionY = 0;
     this.gameObject = this;
@@ -42,6 +46,9 @@ export default class Circle implements ICollidable, IGameObject {
     this.movingDirectionY = yDirection;
   }
 
+  /**
+   * @deprecated should not use canvas directly in this class
+   */
   drawThis(canvasContext) {
     canvasContext.beginPath();
     canvasContext.moveTo(this.yPos, this.yPos);
@@ -72,27 +79,15 @@ export default class Circle implements ICollidable, IGameObject {
     this.yPos += this.movingDirectionY;
   }
 
-  isColliding(collidable: ICollidable): boolean {
-    if (
-      this.xPos <= collidable.gameObject.xPos + collidable.width &&
-      this.xPos + this.width >= collidable.gameObject.xPos &&
-      this.yPos <= collidable.gameObject.yPos + collidable.height &&
-      this.yPos + this.height >= collidable.gameObject.yPos
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  collissionHandler(collidable: ICollidable) {
+  collissionHandler(collidable: GameData.ICollidable) {
     //make sure not to collide with itself
     if (collidable == this || collidable == this.lastCollidedObject) {
       return;
     }
 
-    if (this.isColliding(collidable)) {
+    if (GameData.ColliderUtil.isColliding(this, collidable)) {
       this.lastCollidedObject = collidable;
-      if (collidable.gameObjectType == GameObjectType.player) {
+      if (collidable.gameObjectType == GameData.GameObjectType.player) {
         //if the ball is colliding with the player, the ball flying direction will be changed
         //the ball will be flying to the position based on where it collides with the player
         let player = <playerBoard>collidable;
@@ -112,7 +107,7 @@ export default class Circle implements ICollidable, IGameObject {
               (player.yPos + player.displayHeight / 2)) /
             (player.height / 2);
         }
-      } else if (collidable.gameObjectType == GameObjectType.circle) {
+      } else if (collidable.gameObjectType == GameData.GameObjectType.circle) {
         // doesnt seem to work that way
         //the ball will change the moving direction based on the x or y axis of the ball it collides with
         this.movingDirectionX =
