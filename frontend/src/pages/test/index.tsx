@@ -16,16 +16,22 @@ export default function TestPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const socket = connectSocket();
-    socket.emit("join-game-room-test");
-    socket.on("join-room-success", (room) => {
+    if (socket) return;
+    const tempSocket = connectSocket();
+    tempSocket.emit("join-game-room-test");
+    tempSocket.on("join-room-success", (room) => {
+      console.log(room);
       setRoomId(room.id);
       setPlayers(room.players);
       setInterval(() => {
-        socket?.emit("request-game-info", room.id);
+        tempSocket.emit("request-game-info", room.id);
       }, 1000);
     });
-  }, [connectSocket, router, socket]);
+
+    return () => {
+      disconnectSocket();
+    };
+  }, [connectSocket, disconnectSocket, socket]);
 
   useEffect(() => {
     socket?.on("game-info", (data) => {
