@@ -11,8 +11,9 @@ import {
   updatePlayerReady,
   moveWaitRoomToGameRoom,
   findGameRoom,
+  createGameRoomTest,
 } from "./utils/rooms.ts";
-import GameInstance from "./game/gameInstance.js";
+// import GameInstance from "./game/gameInstance.ts";
 
 const developmentUrl = "http://localhost:3000";
 const productionUrl = "https://lingpal.vercel.app";
@@ -106,6 +107,23 @@ io.on("connection", (socket) => {
       return;
     }
     socket.emit("join-room-success", gameRoom);
+  });
+
+  socket.on("request-game-info", (roomId) => {
+    const gameRoom = findGameRoom(roomId.toString());
+    if (!gameRoom) {
+      socket.emit("join-room-error", "Room not found");
+      return;
+    }
+    const { gameInstance } = gameRoom;
+    const player1 = [gameInstance?.player1.xPos, gameInstance?.player1.yPos];
+    socket.emit("frame-change", { player1 });
+  });
+
+  socket.on("join-game-room-test", () => {
+    const room = createGameRoomTest(socket.id);
+    socket.join(room.id);
+    socket.emit("join-room-success", room);
   });
 
   socket.on("disconnect", () => {

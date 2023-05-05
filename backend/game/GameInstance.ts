@@ -1,7 +1,6 @@
-import Circle from "./circle";
-import Brick from "./brick";
-import PlayerBoard from "./PlayerBoard";
-import * as GameData from "./GameData";
+import Circle from "./Circle.ts";
+import PlayerBoard from "./PlayerBoard.ts";
+import * as GameData from "./GameData.ts";
 
 export default class GameInstance {
   gameRoomId: string;
@@ -17,6 +16,8 @@ export default class GameInstance {
   ball: Circle;
 
   constructor(gameRoomId: string) {
+    this.gameRoomId = gameRoomId;
+    this.gameObjects = new Array<GameData.ICollidable>();
     //initialize player
     this.playersMap = new Map<number, PlayerBoard>();
     this.playersMap.set(1, (this.player1 = new PlayerBoard(1)));
@@ -24,27 +25,27 @@ export default class GameInstance {
     this.playersMap.set(3, (this.player3 = new PlayerBoard(3)));
     this.playersMap.set(4, (this.player4 = new PlayerBoard(4)));
 
-    let player1PosX =
+    const player1PosX =
       GameData.GAME_CANVAS_WIDTH / 2 - this.player1.displayWidth / 2;
-    let player1PosY =
+    const player1PosY =
       GameData.GAME_CANVAS_WIDTH -
       (this.player1.displayHeight + this.player1.wallMargin);
     this.player1.setPosition(player1PosX, player1PosY);
 
-    let player2PosX = 0 + this.player2.wallMargin;
-    let player2PosY =
+    const player2PosX = 0 + this.player2.wallMargin;
+    const player2PosY =
       GameData.GAME_CANVAS_HEIGHT / 2 - this.player2.displayHeight / 2;
     this.player2.setPosition(player2PosX, player2PosY);
 
-    let player3PosX =
+    const player3PosX =
       GameData.GAME_CANVAS_WIDTH / 2 - this.player3.displayWidth / 2;
-    let player3PosY = 0 + this.player3.wallMargin;
+    const player3PosY = 0 + this.player3.wallMargin;
     this.player3.setPosition(player3PosX, player3PosY);
 
-    let player4PosX =
+    const player4PosX =
       GameData.GAME_CANVAS_WIDTH -
       (this.player4.displayWidth + this.player4.wallMargin);
-    let player4PosY =
+    const player4PosY =
       GameData.GAME_CANVAS_HEIGHT / 2 - this.player4.displayHeight / 2;
     this.player4.setPosition(player4PosX, player4PosY);
 
@@ -67,7 +68,7 @@ export default class GameInstance {
       throw new Error("Invalid direction");
     }
 
-    let player = this.playersMap.get(playerNumber);
+    const player = this.playersMap.get(playerNumber);
     if (player) {
       player.movePlayer(direction);
     }

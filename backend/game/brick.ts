@@ -1,4 +1,4 @@
-import * as GameData from "./GameData";
+import * as GameData from "./GameData.ts";
 
 export default class Brick
   implements GameData.ICollidable, GameData.IGameObject
@@ -34,14 +34,10 @@ export default class Brick
     this.yPos = y;
   }
 
-  /**
-   * @param canvasContext
-   * @deppreciated should not draw canvas within this class
-   */
-  drawThis(canvasContext) {
-    canvasContext.beginPath();
-    canvasContext.moveTo(this.yPos, this.yPos);
-    canvasContext.rect(this.xPos, this.yPos, this.width, this.height);
-    canvasContext.fill();
-  }
+  // drawThis(canvasContext) {
+  //   canvasContext.beginPath();
+  //   canvasContext.moveTo(this.yPos, this.yPos);
+  //   canvasContext.rect(this.xPos, this.yPos, this.width, this.height);
+  //   canvasContext.fill();
+  // }
 }

@@ -41,10 +41,11 @@ interface IGameObject {
  *              so we will use rectangle for all collidable objects
  */
 interface ICollidable {
+  xPos: number;
+  yPos: number;
   width: number;
   height: number;
   gameObjectType: GameObjectType;
-  gameObject: IGameObject;
 }
 
 /**
@@ -66,14 +67,10 @@ class ColliderUtil {
     collidable2: ICollidable
   ): boolean {
     if (
-      collidable1.gameObject.xPos <
-        collidable2.gameObject.xPos + collidable2.width &&
-      collidable1.gameObject.xPos + collidable1.width >
-        collidable2.gameObject.xPos &&
-      collidable1.gameObject.yPos <
-        collidable2.gameObject.yPos + collidable2.height &&
-      collidable1.gameObject.yPos + collidable1.height >
-        collidable2.gameObject.yPos
+      collidable1.xPos < collidable2.xPos + collidable2.width &&
+      collidable1.xPos + collidable1.width > collidable2.xPos &&
+      collidable1.yPos < collidable2.yPos + collidable2.height &&
+      collidable1.yPos + collidable1.height > collidable2.yPos
     ) {
       return true;
     }
@@ -82,7 +79,10 @@ class ColliderUtil {
 }
 
 //functions
-export { GameObjectType, IGameObject, ICollidable, ColliderUtil };
+export { GameObjectType, ColliderUtil };
+
+//type
+export type { IGameObject, ICollidable };
 
 //data
 export {
