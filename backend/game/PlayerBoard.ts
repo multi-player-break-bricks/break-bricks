@@ -20,8 +20,6 @@ export default class PlayerBoard
   wallMargin: number;
 
   gameObjectType: GameData.GameObjectType;
-  gameObject: GameData.IGameObject;
-  colidable: GameData.ICollidable;
 
   /**
    * @param playerNumber  the player number of the board, can only be 1-4
@@ -47,8 +45,6 @@ export default class PlayerBoard
     this.displayHeight = 0;
     this.displayWidth = 0;
     this.wallMargin = GameData.PLAYER_BOARD_WALL_MARGIN;
-    this.gameObject = this;
-    this.colidable = this;
 
     //尝试用图片的宽高来控制板子的宽高 但是失败了 所以直接hardcode了，
     //之后如果要改图片的话，需要重新hardcode 或者找到更好的方法
