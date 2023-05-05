@@ -15,7 +15,6 @@ export default class Circle
   gameObjectType: GameData.GameObjectType;
   movingDirectionX: number;
   movingDirectionY: number;
-  gameObject: GameData.IGameObject;
   lastCollidedObject: GameData.ICollidable;
 
   /**
@@ -33,8 +32,7 @@ export default class Circle
     this.displayHeight = this.height = size * 0.75;
     this.movingDirectionX = 0;
     this.movingDirectionY = 0;
-    this.gameObject = this;
-    this.lastCollidedObject = this;
+    this.lastCollidedObject = {} as GameData.ICollidable;
   }
 
   setPosition(yPos: number, xPos: number) {
