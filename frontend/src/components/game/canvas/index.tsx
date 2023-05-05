@@ -18,14 +18,21 @@ const Canvas = ({}) => {
 
   useEffect(() => {
     const onKeydown = (event: KeyboardEvent) => {
-      console.log("key pressed: " + event.key);
       if (event.key === "ArrowLeft") {
-        drawOnCanvas({ bouncers, ball, bricks });
+        socket?.emit("move-bouncer", { direction: "left", pressed: true });
+      }
+      if (event.key === "ArrowRight") {
+        socket?.emit("move-bouncer", { direction: "right", pressed: true });
       }
     };
 
     const onKeyup = (event: KeyboardEvent) => {
-      console.log("key released: " + event.key);
+      if (event.key === "ArrowLeft") {
+        socket?.emit("move-bouncer", { direction: "left", pressed: false });
+      }
+      if (event.key === "ArrowRight") {
+        socket?.emit("move-bouncer", { direction: "right", pressed: false });
+      }
     };
 
     window.addEventListener("keydown", onKeydown);
@@ -35,7 +42,7 @@ const Canvas = ({}) => {
       window.removeEventListener("keydown", onKeydown);
       window.removeEventListener("keyup", onKeyup);
     };
-  }, [ball, bouncers, bricks, drawOnCanvas, drawRect]);
+  }, [ball, bouncers, bricks, drawOnCanvas, drawRect, socket]);
 
   useEffect(() => {
     socket?.on("frame-change", ({ bouncers, ball }) => {
