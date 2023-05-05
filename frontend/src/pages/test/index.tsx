@@ -11,7 +11,6 @@ export default function TestPage() {
 
   const [players, setPlayers] = useState<Player[]>([]);
   const [roomId, setRoomId] = useState("");
-  const [gameInstance, setGameInstance] = useState<object>({});
 
   const router = useRouter();
 
@@ -33,22 +32,12 @@ export default function TestPage() {
     };
   }, [connectSocket, disconnectSocket, socket]);
 
-  useEffect(() => {
-    socket?.on("game-info", (data) => {
-      console.log(data);
-    });
-
-    return () => {
-      socket?.off("game-info");
-    };
-  }, [socket]);
-
   return (
     <main className="main">
       <h1 className={styles.title}>
         Room {roomId} with player {players?.[0]?.name}
       </h1>
-      {Canvas()}
+      <Canvas />
     </main>
   );
 }
