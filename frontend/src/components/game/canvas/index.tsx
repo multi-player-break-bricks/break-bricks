@@ -1,6 +1,6 @@
 import { useSocketContext } from "@/contexts/socketContext";
 import { useCanvas } from "@/hooks/useCanvas";
-import { Brick, GameObject, Player } from "@/types/types";
+import { Bouncer, Brick, GameObject, Player } from "@/types/types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import { initialBall, initialBouncers, initialBricks } from "./seeds";
@@ -12,8 +12,7 @@ const Canvas = ({}) => {
 
   const { socket } = useSocketContext();
 
-  const [bouncers, setBouncers] =
-    useState<Record<string, GameObject>>(initialBouncers);
+  const [bouncers, setBouncers] = useState<Bouncer[]>(initialBouncers);
   const [ball, setBall] = useState<GameObject>(initialBall);
   const [bricks, setBricks] = useState<Brick[]>(initialBricks);
 
@@ -38,15 +37,33 @@ const Canvas = ({}) => {
     };
   }, [ball, bouncers, bricks, drawOnCanvas, drawRect]);
 
-  // useEffect(() => {
-  //   socket?.on("game-info", (data) => {
-  //     console.log(data);
-  //   });
+  useEffect(() => {
+    socket?.on("frame-change", ({ bouncers, ball }) => {
+      console.log({ bouncers, ball });
+      setBall(ball);
+      setBouncers(bouncers);
+      drawOnCanvas({ bouncers, ball, bricks });
+    });
 
-  //   return () => {
-  //     socket?.off("game-info");
-  //   };
-  // }, [socket]);
+    return () => {
+      socket?.off("frame-change");
+    };
+  }, [bricks, drawOnCanvas, socket]);
+
+  useEffect(() => {
+    socket?.on("brick-destroyed", (brick) => {
+      const newBricks = bricks
+        .map((b) => {
+          if (b.id === brick.id) {
+            return { ...b, level: b.level - 1 };
+          }
+          return b;
+        })
+        .filter((b) => b.level > 0);
+      setBricks(newBricks);
+      drawOnCanvas({ bouncers, ball, bricks });
+    });
+  }, [ball, bouncers, bricks, drawOnCanvas, socket]);
 
   return (
     <div>

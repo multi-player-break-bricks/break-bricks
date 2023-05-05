@@ -1,8 +1,8 @@
-import { Brick, GameObject } from "@/types/types";
+import { Bouncer, Brick, GameObject } from "@/types/types";
 import { useCallback, useEffect, useRef } from "react";
 
 type GameObjects = {
-  bouncers: Record<string, GameObject>;
+  bouncers: Bouncer[];
   ball: GameObject;
   bricks: Brick[];
 };
@@ -11,6 +11,7 @@ export const useCanvas = () => {
   const bouncerWidth = 50;
   const bouncerHeight = 10;
   const brickWidth = 25;
+  const ballSize = 10;
 
   const canvasWidth = 400;
   const displayRatio = canvasWidth / 500;
@@ -21,6 +22,8 @@ export const useCanvas = () => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     console.log("setting up canvas");
+    canvas.width = canvasWidth;
+    canvas.height = canvasWidth;
     canvas?.style.setProperty("width", `${canvasWidth}px`);
     canvas?.style.setProperty("height", `${canvasWidth}px`);
   }, [canvasRef, canvasWidth]);
@@ -48,9 +51,9 @@ export const useCanvas = () => {
   }, [canvasWidth, canvasRef]);
 
   const drawOnCanvas = useCallback(
-    ({ bouncers, bricks }: GameObjects) => {
+    ({ bouncers, bricks, ball }: GameObjects) => {
       clear();
-      Object.entries(bouncers).forEach(([id, { xPos, yPos }]) => {
+      bouncers.forEach(({ id, xPos, yPos }) => {
         if (id === "1" || id === "3") {
           drawRect(xPos, yPos, bouncerWidth, bouncerHeight, "green");
         } else {
@@ -60,6 +63,8 @@ export const useCanvas = () => {
       bricks.forEach(({ xPos, yPos, level }) => {
         drawRect(xPos, yPos, brickWidth, brickWidth, "red");
       });
+      const { xPos, yPos } = ball;
+      drawRect(xPos, yPos, ballSize, ballSize, "red");
     },
     [clear, drawRect]
   );

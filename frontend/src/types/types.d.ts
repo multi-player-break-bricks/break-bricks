@@ -9,6 +9,11 @@ export type GameObject = {
   yPos: number;
 };
 
+export type Bouncer = GameObject & {
+  id: string;
+};
+
 export type Brick = GameObject & {
+  id: string;
   level: number;
 };

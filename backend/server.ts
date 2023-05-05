@@ -117,7 +117,7 @@ io.on("connection", (socket) => {
     }
     const { gameInstance } = gameRoom;
     const player1 = [gameInstance?.player1.xPos, gameInstance?.player1.yPos];
-    socket.emit("game-info", { player1 });
+    socket.emit("frame-change", { player1 });
   });
 
   socket.on("join-game-room-test", () => {
