@@ -1,4 +1,4 @@
-import Circle from "./circle.ts";
+import Circle from "./Circle.ts";
 import PlayerBoard from "./PlayerBoard.ts";
 import * as GameData from "./GameData.ts";
 

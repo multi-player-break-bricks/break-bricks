@@ -110,12 +110,12 @@ export default class Circle
         this.movingDirectionX =
           (this.xPos +
             this.width / 2 -
-            (collidable.gameObject.xPos + collidable.width / 2)) /
+            (collidable.xPos + collidable.width / 2)) /
           (collidable.width / 2);
         this.movingDirectionY =
           (this.yPos +
             this.height / 2 -
-            (collidable.gameObject.yPos + collidable.height / 2)) /
+            (collidable.yPos + collidable.height / 2)) /
           (collidable.height / 2);
       } else {
         //the ball will flip the moving direction based on the x or y axis it collides with
@@ -123,13 +123,11 @@ export default class Circle
         //find out which face did this ball hit
         // find the difference between the center of the ball and the center of the colliding object
         const dx =
-          this.xPos +
-          this.width / 2 -
-          (collidable.gameObject.xPos + collidable.width / 2);
+          this.xPos + this.width / 2 - (collidable.xPos + collidable.width / 2);
         const dy =
           this.yPos +
           this.height / 2 -
-          (collidable.gameObject.yPos + collidable.height / 2);
+          (collidable.yPos + collidable.height / 2);
 
         // find the absolute differences between the x and y positions
         const absDx = Math.abs(dx);
