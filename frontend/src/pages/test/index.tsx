@@ -1,5 +1,4 @@
 import { useSocketContext } from "@/contexts/socketContext";
-import { Player } from "@/types/types";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";

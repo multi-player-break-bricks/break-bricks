@@ -1,19 +1,20 @@
-export type Player = {
+type Player = {
   id: string;
   name: string;
   isReady: boolean;
 };
 
-export type GameObject = {
+type GameObject = {
   xPos: number;
   yPos: number;
 };
 
-export type Bouncer = GameObject & {
+type Bouncer = GameObject & {
+  number: number;
   id: string;
 };
 
-export type Brick = GameObject & {
+type Brick = GameObject & {
   id: string;
   level: number;
 };

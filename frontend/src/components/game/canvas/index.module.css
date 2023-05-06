@@ -1,3 +1,9 @@
 .canvas {
   background-color: rgb(255, 145, 0);
+  position: relative;
+  /* overflow: hidden; */
+}
+
+.canvas > div {
+  position: absolute;
 }

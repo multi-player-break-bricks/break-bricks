@@ -1,4 +1,3 @@
-import { Bouncer, Brick, GameObject } from "@/types/types";
 import { useCallback, useEffect, useRef } from "react";
 
 type GameObjects = {
@@ -53,6 +52,7 @@ export const useCanvas = () => {
   const drawOnCanvas = useCallback(
     ({ bouncers, bricks, ball }: GameObjects) => {
       clear();
+      console.log({ bouncers });
       bouncers.forEach(({ id, xPos, yPos }) => {
         if (id === "1" || id === "3") {
           drawRect(xPos, yPos, bouncerWidth, bouncerHeight, "green");
