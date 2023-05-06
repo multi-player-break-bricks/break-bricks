@@ -4,6 +4,6 @@
   /* overflow: hidden; */
 }
 
-.canvas > div {
+.canvas > * {
   position: absolute;
 }
