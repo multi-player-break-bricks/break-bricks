@@ -11,14 +11,15 @@ export const Bouncer = ({ xPos, yPos, number }: Props) => {
     <svg
       style={{
         backgroundColor: "blue",
-        left: `${xPos * displayRatio}px`,
+        left: `${
+          xPos * displayRatio -
+          ((number + 1) % 2) *
+            (((BOUNCER_WIDTH - BOUNCER_HEIGHT) / 2) * displayRatio)
+        }px`,
         top: `${yPos * displayRatio}px`,
-        width: `${
-          (number % 2 === 0 ? BOUNCER_HEIGHT : BOUNCER_WIDTH) * displayRatio
-        }px`,
-        height: `${
-          (number % 2 === 0 ? BOUNCER_WIDTH : BOUNCER_HEIGHT) * displayRatio
-        }px`,
+        width: `${BOUNCER_WIDTH * displayRatio}px`,
+        height: `${BOUNCER_HEIGHT * displayRatio}px`,
+        transform: `rotate(${number % 2 === 0 ? 90 : 0}deg)`,
       }}
       viewBox="0 0 451 80"
       fill="none"
