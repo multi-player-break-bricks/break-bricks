@@ -1,5 +1,4 @@
 import { useSocketContext } from "@/contexts/socketContext";
-import { Player } from "../../types/main";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";
@@ -62,7 +61,7 @@ export default function GamePage() {
     <main className="main">
       <h1 className={styles.title}>Game Page</h1>
       <p>{JSON.stringify(players)}</p>
-      {Canvas()}
+      {<Canvas />}
     </main>
   );
 }
