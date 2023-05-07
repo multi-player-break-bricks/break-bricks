@@ -222,9 +222,52 @@ export default class GameInstance {
    * @returns all gameTransferData to send to client
    */
   debugGetCurrentGameTransferData(): Object {
-    let gameTransferData = {
+    const gameTransferData = {
       allGameObjects: this.gameObjects,
     };
+    return gameTransferData;
+  }
+
+  getCurrentBouncerInfo(roomId: string): Array<Object> {
+    const gameTransferData: Array<Object> = [];
+
+    this.playersMap.forEach((player, key) => {
+      gameTransferData.push({
+        number: player.playerNumber,
+        xPos: player.xPos,
+        yPos: player.yPos,
+      });
+    });
+
+    return gameTransferData;
+  }
+
+  getCurrentBallInfo() {
+    const gameTransferData: Array<Object> = [];
+
+    this.ballArray.forEach((ball) => {
+      gameTransferData.push({
+        id: ball.gameID,
+        xPos: ball.xPos,
+        yPos: ball.yPos,
+      });
+    });
+
+    return gameTransferData;
+  }
+
+  getCurrentBrickInfo() {
+    const gameTransferData: Array<Object> = [];
+
+    this.bricks.forEach((brick) => {
+      gameTransferData.push({
+        id: brick.gameID,
+        xPos: brick.xPos,
+        yPos: brick.yPos,
+        level: brick.life,
+      });
+    });
+
     return gameTransferData;
   }
 

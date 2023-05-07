@@ -15,7 +15,7 @@ const REWARD_WIDTH = 10;
 const REWARD_HEIGHT = 10;
 const BRICK_MARGIN = 10;
 const FPS = 60;
-var CURRENT_GAME_ID = 0;
+let CURRENT_GAME_ID = 0;
 
 /**
  * use this enum to identify game objects
