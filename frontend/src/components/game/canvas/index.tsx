@@ -3,7 +3,7 @@ import { useCanvas } from "@/hooks/useCanvas";
 // import { Bouncer, GameObject, Player } from "@/types/types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
-import { initialBall, initialBouncers, initialBricks } from "./seeds";
+import { initialBalls, initialBouncers, initialBricks } from "./seeds";
 import styles from "./index.module.css";
 import { Brick } from "../brick/Brick";
 import { Bouncer } from "../bouncer/Bouncer";
@@ -22,7 +22,7 @@ const Canvas = ({}) => {
   const { socket } = useSocketContext();
 
   const [bouncers, setBouncers] = useState<Bouncer[]>(initialBouncers);
-  const [ball, setBall] = useState<GameObject>(initialBall);
+  const [balls, setBalls] = useState<GameObject[]>(initialBalls);
   const [bricks, setBricks] = useState<Brick[]>(initialBricks);
 
   const playerId = 0;
@@ -63,20 +63,19 @@ const Canvas = ({}) => {
       window.removeEventListener("keydown", onKeydown);
       window.removeEventListener("keyup", onKeyup);
     };
-  }, [ball, bouncers, bricks, socket]);
+  }, [balls, bouncers, bricks, socket]);
 
   // useEffect(() => {
   //   socket?.on("frame-change", ({ bouncers, ball }) => {
   //     console.log({ bouncers, ball });
   //     setBall(ball);
   //     setBouncers(bouncers);
-  //     drawOnCanvas({ bouncers, ball, bricks });
   //   });
 
   //   return () => {
   //     socket?.off("frame-change");
   //   };
-  // }, [bricks, drawOnCanvas, socket]);
+  // }, [bricks, socket]);
 
   // useEffect(() => {
   //   socket?.on("brick-destroyed", (brick) => {
@@ -89,9 +88,8 @@ const Canvas = ({}) => {
   //       })
   //       .filter((b) => b.level > 0);
   //     setBricks(newBricks);
-  //     drawOnCanvas({ bouncers, ball, bricks });
   //   });
-  // }, [ball, bouncers, bricks, drawOnCanvas, socket]);
+  // }, [ball, bouncers, bricks, socket]);
 
   return (
     <div className={styles.canvas} ref={canvasRef}>
@@ -101,7 +99,9 @@ const Canvas = ({}) => {
       {bouncers.map((bouncer) => (
         <Bouncer key={bouncer.id} {...bouncer} />
       ))}
-      <Ball {...ball} />
+      {balls.map((ball, i) => (
+        <Ball key={i} {...ball} />
+      ))}
     </div>
   );
 };

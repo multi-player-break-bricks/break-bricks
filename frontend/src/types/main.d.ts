@@ -5,16 +5,15 @@ type Player = {
 };
 
 type GameObject = {
+  id: string;
   xPos: number;
   yPos: number;
 };
 
 type Bouncer = GameObject & {
   number: number;
-  id: string;
 };
 
 type Brick = GameObject & {
-  id: string;
   level: number;
 };
