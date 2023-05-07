@@ -11,8 +11,6 @@ export default function TestPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [roomId, setRoomId] = useState("");
 
-  const router = useRouter();
-
   useEffect(() => {
     if (socket) return;
     const tempSocket = connectSocket();
