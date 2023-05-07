@@ -1,5 +1,5 @@
-import * as GameData from "./GameData";
-import playerBoard from "./PlayerBoard";
+import * as GameData from "./GameData.ts";
+import playerBoard from "./PlayerBoard.ts";
 
 export default class Circle
   implements GameData.ICollidable, GameData.IGameObject
@@ -15,7 +15,6 @@ export default class Circle
   gameObjectType: GameData.GameObjectType;
   movingDirectionX: number;
   movingDirectionY: number;
-  gameObject: GameData.IGameObject;
   lastCollidedObject: GameData.ICollidable;
 
   /**
@@ -33,7 +32,7 @@ export default class Circle
     this.displayHeight = this.height = size * 0.75;
     this.movingDirectionX = 0;
     this.movingDirectionY = 0;
-    this.gameObject = this;
+    this.lastCollidedObject = {} as GameData.ICollidable;
   }
 
   setPosition(yPos: number, xPos: number) {
@@ -46,21 +45,17 @@ export default class Circle
     this.movingDirectionY = yDirection;
   }
 
-  /**
-   * @deprecated should not use canvas directly in this class
-   */
-  drawThis(canvasContext) {
-    canvasContext.beginPath();
-    canvasContext.moveTo(this.yPos, this.yPos);
-    canvasContext.arc(
-      this.xPos,
-      this.yPos,
-      this.size,
-      0 * Math.PI,
-      2 * Math.PI
-    );
-    canvasContext.fill();
-  }
+  // drawThis(canvasContext) {
+  //   canvasContext.beginPath();
+  //   canvasContext.moveTo(this.yPos, this.yPos);
+  //   canvasContext.arc(
+  //     this.xPos,
+  //     this.yPos,
+  //     this.size,
+  //     0 * Math.PI,
+  //     2 * Math.PI
+  //   );
+  //   canvasContext.fill();}
 
   /**
    * will move according to the moving direction
@@ -90,7 +85,7 @@ export default class Circle
       if (collidable.gameObjectType == GameData.GameObjectType.player) {
         //if the ball is colliding with the player, the ball flying direction will be changed
         //the ball will be flying to the position based on where it collides with the player
-        let player = <playerBoard>collidable;
+        const player = <playerBoard>collidable;
 
         if (player.name == "player 1" || player.name == "player 3") {
           this.movingDirectionX =
@@ -113,30 +108,28 @@ export default class Circle
         this.movingDirectionX =
           (this.xPos +
             this.width / 2 -
-            (collidable.gameObject.xPos + collidable.width / 2)) /
+            (collidable.xPos + collidable.width / 2)) /
           (collidable.width / 2);
         this.movingDirectionY =
           (this.yPos +
             this.height / 2 -
-            (collidable.gameObject.yPos + collidable.height / 2)) /
+            (collidable.yPos + collidable.height / 2)) /
           (collidable.height / 2);
       } else {
         //the ball will flip the moving direction based on the x or y axis it collides with
 
         //find out which face did this ball hit
         // find the difference between the center of the ball and the center of the colliding object
-        let dx =
-          this.xPos +
-          this.width / 2 -
-          (collidable.gameObject.xPos + collidable.width / 2);
-        let dy =
+        const dx =
+          this.xPos + this.width / 2 - (collidable.xPos + collidable.width / 2);
+        const dy =
           this.yPos +
           this.height / 2 -
-          (collidable.gameObject.yPos + collidable.height / 2);
+          (collidable.yPos + collidable.height / 2);
 
         // find the absolute differences between the x and y positions
-        let absDx = Math.abs(dx);
-        let absDy = Math.abs(dy);
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
 
         // check which face the ball hit based on which absolute difference is larger
         if (absDx > absDy) {
@@ -162,3 +155,5 @@ export default class Circle
     }
   }
 }
+
+export { Circle };

@@ -1,10 +1,10 @@
-import * as GameData from "./GameData";
+import * as GameData from "./GameData.ts";
 
 export default class PlayerBoard
   implements GameData.ICollidable, GameData.IGameObject
 {
   name: string;
-  img: HTMLImageElement;
+  img: string;
   imageHeight: number;
   imageWidth: number;
 
@@ -17,23 +17,39 @@ export default class PlayerBoard
   displayHeight: number;
   displayWidth: number;
 
+  isPlayerMovingLeft: boolean;
+  isPlayerMovingRight: boolean;
+
   wallMargin: number;
 
   gameObjectType: GameData.GameObjectType;
-  gameObject: GameData.IGameObject;
-  colidable: GameData.ICollidable;
 
   /**
-   * @param playerNumber  the player number of the board
+   * @param playerNumber  the player number of the board, can only be 1-4
    * @param canvas        the canvas that the board will be drawn on
    */
   constructor(playerNumber: number) {
+    //player number can only be 1-4
+    if (playerNumber < 1 || playerNumber > 4) {
+      throw new Error("player number can only be 1-4");
+    }
+
+    this.name = "player";
     this.gameObjectType = GameData.GameObjectType.player;
-    this.img = new Image();
+    this.img =
+      "https://www.pngall.com/wp-content/uploads/5/Sports-Ball-Transparent.png";
     this.playerNumber = playerNumber;
+    this.xPos = 0;
+    this.yPos = 0;
+    this.imageHeight = 0;
+    this.imageWidth = 0;
+    this.width = 0;
+    this.height = 0;
+    this.displayHeight = 0;
+    this.displayWidth = 0;
     this.wallMargin = GameData.PLAYER_BOARD_WALL_MARGIN;
-    this.gameObject = this;
-    this.colidable = this;
+    this.isPlayerMovingLeft = false;
+    this.isPlayerMovingRight = false;
 
     //尝试用图片的宽高来控制板子的宽高 但是失败了 所以直接hardcode了，
     //之后如果要改图片的话，需要重新hardcode 或者找到更好的方法
@@ -49,7 +65,8 @@ export default class PlayerBoard
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = canvas.height - (this.displayHeight + this.wallMargin);
 
-      this.img.src = "./imgs/board.png";
+      this.img =
+        "https://www.pngall.com/wp-content/uploads/5/Sports-Ball-Transparent.png";
       this.imageWidth = boardImageWidth;
       this.imageHeight = boardImageHeight;
     } else if (playerNumber == 2) {
@@ -60,7 +77,7 @@ export default class PlayerBoard
       //   this.xPos = 0 + this.wallMargin;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
 
-      this.img.src = "./imgs/board_rotated.png";
+      this.img = "./imgs/board_rotated.png";
       this.imageWidth = boardImageHeight;
       this.imageHeight = boardImageWidth;
     } else if (playerNumber == 3) {
@@ -71,7 +88,7 @@ export default class PlayerBoard
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = this.wallMargin;
 
-      this.img.src = "./imgs/board.png";
+      this.img = "./imgs/board.png";
       this.imageWidth = boardImageWidth;
       this.imageHeight = boardImageHeight;
     } else if (playerNumber == 4) {
@@ -82,7 +99,7 @@ export default class PlayerBoard
       //   this.xPos = canvas.width - this.wallMargin - this.displayWidth;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
 
-      this.img.src = "./imgs/board_rotated.png";
+      this.img = "./imgs/board_rotated.png";
       this.imageWidth = boardImageHeight;
       this.imageHeight = boardImageWidth;
     }
@@ -93,24 +110,24 @@ export default class PlayerBoard
     this.yPos = yPos;
   }
 
-  /**
-   * @deprecated should not use canvas directly in this class
-   */
-  drawThis(canvasContext: CanvasRenderingContext2D) {
-    canvasContext.drawImage(
-      this.img,
-      0,
-      0,
-      this.imageWidth,
-      this.imageHeight,
-      this.xPos,
-      this.yPos,
-      this.displayWidth,
-      this.displayHeight
-    );
-  }
+  // /**
+  //  * @deprecated should not use canvas directly in this class
+  //  */
+  // drawThis(canvasContext: CanvasRenderingContext2D) {
+  //   canvasContext.drawImage(
+  //     this.img,
+  //     0,
+  //     0,
+  //     this.imageWidth,
+  //     this.imageHeight,
+  //     this.xPos,
+  //     this.yPos,
+  //     this.displayWidth,
+  //     this.displayHeight
+  //   );
+  // }
 
-  moveTo(direction) {
+  moveTo(direction: string) {
     if (direction == "top") {
       this.yPos = this.yPos - GameData.PLAYER_MOVE_SPEED;
     } else if (direction == "bottom") {
@@ -120,59 +137,85 @@ export default class PlayerBoard
     } else if (direction == "right") {
       this.xPos = this.xPos + GameData.PLAYER_MOVE_SPEED;
     }
+
+    //restrict the player from moving out of the board
+    if (this.yPos < this.wallMargin) {
+      this.yPos = this.wallMargin;
+    }
+    if (
+      this.yPos >
+      GameData.GAME_CANVAS_HEIGHT - this.displayHeight - this.wallMargin
+    ) {
+      this.yPos =
+        GameData.GAME_CANVAS_HEIGHT - this.displayHeight - this.wallMargin;
+    }
+    if (this.xPos < this.wallMargin) {
+      this.xPos = this.wallMargin;
+    }
+    if (
+      this.xPos >
+      GameData.GAME_CANVAS_WIDTH - this.displayWidth - this.wallMargin
+    ) {
+      this.xPos =
+        GameData.GAME_CANVAS_WIDTH - this.displayWidth - this.wallMargin;
+    }
   }
 
   /**
    * move player based on the player number and the direction
    *
-   * @param direction the direction that the player is moving, can only be "left" or "right"
-   * @throws Error if the direction is invalid
    */
-  movePlayer(direction: string) {
-    let isPlayerMovingLeft = false;
-    let isPlayerMovingRight = false;
-
-    if (direction == "left") {
-      isPlayerMovingLeft = true;
-    }
-    if (direction == "right") {
-      isPlayerMovingRight = true;
-    } else {
-      throw new Error("Invalid direction: " + direction);
-    }
-
+  move() {
     if (this.playerNumber == 1) {
       //player 1 is the bottom player
-      if (isPlayerMovingLeft) {
+      if (this.isPlayerMovingLeft) {
         this.moveTo("left");
       }
-      if (isPlayerMovingRight) {
+      if (this.isPlayerMovingRight) {
         this.moveTo("right");
       }
     } else if (this.playerNumber == 2) {
       //player 2 is the left player
-      if (isPlayerMovingLeft) {
+      if (this.isPlayerMovingLeft) {
         this.moveTo("top");
       }
-      if (isPlayerMovingRight) {
+      if (this.isPlayerMovingRight) {
         this.moveTo("bottom");
       }
     } else if (this.playerNumber == 3) {
       //player 3 is the top player
-      if (isPlayerMovingLeft) {
+      if (this.isPlayerMovingLeft) {
         this.moveTo("right");
       }
-      if (isPlayerMovingRight) {
+      if (this.isPlayerMovingRight) {
         this.moveTo("left");
       }
     } else if (this.playerNumber == 4) {
       //player 4 is the right player
-      if (isPlayerMovingLeft) {
+      if (this.isPlayerMovingLeft) {
         this.moveTo("bottom");
       }
-      if (isPlayerMovingRight) {
+      if (this.isPlayerMovingRight) {
         this.moveTo("top");
       }
     }
   }
+
+  playerStartMovingLeft() {
+    this.isPlayerMovingLeft = true;
+  }
+
+  playerStartMovingRight() {
+    this.isPlayerMovingRight = true;
+  }
+
+  playerStopMovingLeft() {
+    this.isPlayerMovingLeft = false;
+  }
+
+  playerStopMovingRight() {
+    this.isPlayerMovingRight = false;
+  }
 }
+
+export { PlayerBoard };
