@@ -228,45 +228,88 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentBouncerInfo(roomId: string): Array<Object> {
-    const gameTransferData: Array<Object> = [];
+  getCurrentBouncerInfo(roomId: string): Object {
+    let gameTransferData = {
+      roomId: roomId,
+      gameData: [],
+    };
+
+    let gameData: any = [];
 
     this.playersMap.forEach((player, key) => {
-      gameTransferData.push({
+      gameData.push({
         number: player.playerNumber,
         xPos: player.xPos,
         yPos: player.yPos,
       });
     });
 
+    gameTransferData.gameData = gameData;
+
     return gameTransferData;
   }
 
-  getCurrentBallInfo() {
-    const gameTransferData: Array<Object> = [];
+  getCurrentBallInfo(roomId: string): Object {
+    let gameTransferData = {
+      roomId: roomId,
+      gameData: [],
+    };
+
+    let gameData: any = [];
 
     this.ballArray.forEach((ball) => {
-      gameTransferData.push({
+      gameData.push({
         id: ball.gameID,
         xPos: ball.xPos,
         yPos: ball.yPos,
       });
     });
 
+    gameTransferData.gameData = gameData;
+
     return gameTransferData;
   }
 
-  getCurrentBrickInfo() {
-    const gameTransferData: Array<Object> = [];
+  getCurrentBrickInfo(roomId: string): Object {
+    let gameTransferData = {
+      roomId: roomId,
+      gameData: [],
+    };
+
+    let gameData: any = [];
 
     this.bricks.forEach((brick) => {
-      gameTransferData.push({
+      gameData.push({
         id: brick.gameID,
         xPos: brick.xPos,
         yPos: brick.yPos,
         level: brick.life,
       });
     });
+
+    gameTransferData.gameData = gameData;
+
+    return gameTransferData;
+  }
+
+  getCurrentRewardInfo(roomId: string): Object {
+    let gameTransferData = {
+      roomId: roomId,
+      gameData: [],
+    };
+
+    let gameData: any = [];
+
+    this.rewards.forEach((reward) => {
+      gameData.push({
+        id: reward.gameID,
+        xPos: reward.xPos,
+        yPos: reward.yPos,
+        type: reward.rewardType,
+      });
+    });
+
+    gameTransferData.gameData = gameData;
 
     return gameTransferData;
   }
