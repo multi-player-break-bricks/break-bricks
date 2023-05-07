@@ -1,72 +1,109 @@
 import { useSocketContext } from "@/contexts/socketContext";
-import { Player } from "@/types/types";
-import { useRouter } from "next/router";
-import React, { useEffect, useRef, useState } from "react";
+import { useCanvas } from "@/hooks/useCanvas";
+// import { Bouncer, GameObject, Player } from "@/types/types";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Socket } from "socket.io-client";
+import { initialBall, initialBouncers, initialBricks } from "./seeds";
+import styles from "./index.module.css";
+import { Brick } from "../brick/Brick";
+import { Bouncer } from "../bouncer/Bouncer";
+import { useCanvasSize } from "@/hooks/useCanvasSize";
+import { Ball } from "../ball/Ball";
 
-//test data
-let rectWidth = 50;
-let rectHeight = 50;
-
-const Canvas = () => {
+const Canvas = ({}) => {
   //init canvas
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // const { canvasRef, drawRect, drawOnCanvas } = useCanvas();
+
+  const canvasSize = useCanvasSize();
+  const displayRatio = canvasSize / 500;
+
+  const canvasRef = useRef<HTMLDivElement | null>(null);
 
   const { socket } = useSocketContext();
-  const [players, setPlayers] = useState<Player[]>([]);
 
-  const router = useRouter();
+  const [bouncers, setBouncers] = useState<Bouncer[]>(initialBouncers);
+  const [ball, setBall] = useState<GameObject>(initialBall);
+  const [bricks, setBricks] = useState<Brick[]>(initialBricks);
 
-  let canvas = canvasRef.current;
-  canvas?.style.setProperty("width", "500px");
-  canvas?.style.setProperty("height", "500px");
-  let context = canvas?.getContext("2d");
+  const playerId = 0;
 
   useEffect(() => {
-    canvas = canvasRef.current;
-    canvas?.style.setProperty("width", "500px");
-    canvas?.style.setProperty("height", "500px");
-    context = canvas?.getContext("2d");
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    canvas?.style.setProperty("width", `${canvasSize}px`);
+    canvas?.style.setProperty("height", `${canvasSize}px`);
+    if (playerId) {
+      canvas?.style.setProperty("transform", "rotate(90deg)");
+    }
+  }, [canvasRef, canvasSize]);
 
-    //event listeners
-    window.addEventListener("keydown", (event) => {
-      console.log("key pressed: " + event.key);
+  useEffect(() => {
+    const onKeydown = (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft") {
-        rectWidth -= 1;
+        socket?.emit("move-bouncer", { direction: "left", pressed: true });
       }
       if (event.key === "ArrowRight") {
-        rectWidth += 1;
+        socket?.emit("move-bouncer", { direction: "right", pressed: true });
       }
-      if (event.key === "ArrowUp") {
-        rectHeight -= 1;
-      }
-      if (event.key === "ArrowDown") {
-        rectHeight += 1;
-      }
-    });
+    };
 
-    window.addEventListener("keyup", (event) => {
-      console.log("key released: " + event.key);
-    });
-  }, []);
+    const onKeyup = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        socket?.emit("move-bouncer", { direction: "left", pressed: false });
+      }
+      if (event.key === "ArrowRight") {
+        socket?.emit("move-bouncer", { direction: "right", pressed: false });
+      }
+    };
 
-  setInterval(() => {
-    DrawOnCanvas(canvas?.getContext("2d"));
-  }, 100);
+    window.addEventListener("keydown", onKeydown);
+    window.addEventListener("keyup", onKeyup);
+
+    return () => {
+      window.removeEventListener("keydown", onKeydown);
+      window.removeEventListener("keyup", onKeyup);
+    };
+  }, [ball, bouncers, bricks, socket]);
+
+  // useEffect(() => {
+  //   socket?.on("frame-change", ({ bouncers, ball }) => {
+  //     console.log({ bouncers, ball });
+  //     setBall(ball);
+  //     setBouncers(bouncers);
+  //     drawOnCanvas({ bouncers, ball, bricks });
+  //   });
+
+  //   return () => {
+  //     socket?.off("frame-change");
+  //   };
+  // }, [bricks, drawOnCanvas, socket]);
+
+  // useEffect(() => {
+  //   socket?.on("brick-destroyed", (brick) => {
+  //     const newBricks = bricks
+  //       .map((b) => {
+  //         if (b.id === brick.id) {
+  //           return { ...b, level: b.level - 1 };
+  //         }
+  //         return b;
+  //       })
+  //       .filter((b) => b.level > 0);
+  //     setBricks(newBricks);
+  //     drawOnCanvas({ bouncers, ball, bricks });
+  //   });
+  // }, [ball, bouncers, bricks, drawOnCanvas, socket]);
 
   return (
-    <div>
-      <canvas ref={canvasRef} />
+    <div className={styles.canvas} ref={canvasRef}>
+      {bricks.map((brick) => (
+        <Brick key={brick.id} {...brick} />
+      ))}
+      {bouncers.map((bouncer) => (
+        <Bouncer key={bouncer.id} {...bouncer} />
+      ))}
+      <Ball {...ball} />
     </div>
   );
 };
-
-function DrawOnCanvas(canvasctx: CanvasRenderingContext2D | null | undefined) {
-  if (canvasctx === null || canvasctx === undefined) {
-    return;
-  }
-  canvasctx.clearRect(0, 0, 500, 500);
-  canvasctx.fillStyle = "green";
-  canvasctx.fillRect(0, 0, rectWidth, rectHeight);
-}
 
 export default Canvas;
