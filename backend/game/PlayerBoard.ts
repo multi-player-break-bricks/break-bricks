@@ -1,8 +1,9 @@
-import * as GameData from "./GameData.ts";
+import * as GameData from "./GameData";
 
 export default class PlayerBoard
   implements GameData.ICollidable, GameData.IGameObject
 {
+  gameID: number;
   name: string;
   img: string;
   imageHeight: number;
@@ -29,6 +30,7 @@ export default class PlayerBoard
    * @param canvas        the canvas that the board will be drawn on
    */
   constructor(playerNumber: number) {
+    this.gameID = GameData.generateID();
     //player number can only be 1-4
     if (playerNumber < 1 || playerNumber > 4) {
       throw new Error("player number can only be 1-4");
@@ -103,6 +105,10 @@ export default class PlayerBoard
       this.imageWidth = boardImageHeight;
       this.imageHeight = boardImageWidth;
     }
+  }
+
+  onCollision(collidable: GameData.ICollidable): boolean {
+    return false;
   }
 
   setPosition(xPos: number, yPos: number) {
@@ -215,6 +221,14 @@ export default class PlayerBoard
 
   playerStopMovingRight() {
     this.isPlayerMovingRight = false;
+  }
+
+  /**
+   * use this method to make the paddle bigger
+   * when consuming reward
+   */
+  biggerPadddle() {
+    this.displayWidth = this.width = this.width * 1.5;
   }
 }
 

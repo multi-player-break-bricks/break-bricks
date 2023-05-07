@@ -1,8 +1,10 @@
-import * as GameData from "./GameData.ts";
+import Circle from "./Ball";
+import * as GameData from "./GameData";
 
 export default class Brick
   implements GameData.ICollidable, GameData.IGameObject
 {
+  gameID: number;
   name: string;
   xPos: number;
   yPos: number;
@@ -11,18 +13,19 @@ export default class Brick
   displayWidth: number;
   displayHeight: number;
   gameObjectType: GameData.GameObjectType;
-  gameObject: GameData.IGameObject;
-  collidable: GameData.ICollidable;
+  life: number;
+  lastCollidedPlayerId: number;
 
-  constructor() {
+  constructor(life?: number) {
+    this.gameID = GameData.generateID();
     this.xPos = 0;
     this.yPos = 0;
     this.displayWidth = this.width = GameData.BRICK_WIDTH;
     this.displayHeight = this.height = GameData.BRICK_HEIGHT;
     this.gameObjectType = GameData.GameObjectType.brick;
     this.name = "brick";
-    this.gameObject = this;
-    this.collidable = this;
+    this.life = life || 1;
+    this.lastCollidedPlayerId = -1;
   }
 
   /**
@@ -32,6 +35,15 @@ export default class Brick
   setPosition(y: number, x: number) {
     this.xPos = x;
     this.yPos = y;
+  }
+
+  onCollision(collidable: GameData.ICollidable): boolean {
+    if (collidable.gameObjectType === GameData.GameObjectType.circle) {
+      this.life--;
+      this.lastCollidedPlayerId = (<Circle>collidable).lastCollidedPlayerId;
+      return true;
+    }
+    return false;
   }
 
   // drawThis(canvasContext) {

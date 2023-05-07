@@ -1,14 +1,21 @@
 //global game data
 const GAME_CANVAS_WIDTH = 500;
 const GAME_CANVAS_HEIGHT = 500;
+const BRICK_MAP_WIDTH = 400;
+const BRICK_MAP_HEIGHT = 400;
 const BALL_SIZE = 5;
+const BALL_SPEED = 2;
 const PLAYER_BOARD_WIDTH = 50;
 const PLAYER_BOARD_HEIGHT = 10;
 const PLAYER_BOARD_WALL_MARGIN = 10;
 const PLAYER_MOVE_SPEED = 3;
-const BRICK_WIDTH = 25;
-const BRICK_HEIGHT = 25;
+const BRICK_WIDTH = 20;
+const BRICK_HEIGHT = 20;
+const REWARD_WIDTH = 10;
+const REWARD_HEIGHT = 10;
+const BRICK_MARGIN = 10;
 const FPS = 60;
+var CURRENT_GAME_ID = 0;
 
 /**
  * use this enum to identify game objects
@@ -20,6 +27,7 @@ enum GameObjectType {
   player,
   brick,
   wall,
+  reward,
 }
 
 /**
@@ -29,6 +37,7 @@ enum GameObjectType {
  * @field yPos y position of the object
  */
 interface IGameObject {
+  gameID: number;
   name: string;
   xPos: number;
   yPos: number;
@@ -42,11 +51,18 @@ interface IGameObject {
  *              so we will use rectangle for all collidable objects
  */
 interface ICollidable {
+  gameID: number;
   xPos: number;
   yPos: number;
   width: number;
   height: number;
   gameObjectType: GameObjectType;
+
+  /**
+   * @param collidable the object with which this object is colliding
+   * @returns true if object is changing its state after collision, false otherwise
+   */
+  onCollision: (collidable: ICollidable) => boolean;
 }
 
 /**
@@ -79,8 +95,12 @@ class ColliderUtil {
   }
 }
 
+function generateID(): number {
+  return CURRENT_GAME_ID++;
+}
+
 //functions
-export { GameObjectType, ColliderUtil };
+export { GameObjectType, ColliderUtil, generateID };
 
 //type
 export type { IGameObject, ICollidable };
@@ -97,4 +117,11 @@ export {
   PLAYER_MOVE_SPEED,
   PLAYER_BOARD_WALL_MARGIN,
   FPS,
+  CURRENT_GAME_ID,
+  BRICK_MAP_WIDTH,
+  BRICK_MAP_HEIGHT,
+  BRICK_MARGIN,
+  BALL_SPEED,
+  REWARD_WIDTH,
+  REWARD_HEIGHT,
 };
