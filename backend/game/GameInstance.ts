@@ -1,8 +1,8 @@
-import Ball from "./Ball";
-import PlayerBoard from "./PlayerBoard";
-import * as GameData from "./GameData";
-import Brick from "./Brick";
-import Reward, { RewardType } from "./Reward";
+import Ball from "./Ball.ts";
+import PlayerBoard from "./PlayerBoard.ts";
+import * as GameData from "./GameData.ts";
+import Brick from "./Brick.ts";
+import Reward, { RewardType } from "./Reward.ts";
 
 export default class GameInstance {
   gameRoomId: string;

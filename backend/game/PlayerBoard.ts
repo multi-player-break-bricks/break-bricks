@@ -1,4 +1,4 @@
-import * as GameData from "./GameData";
+import * as GameData from "./GameData.ts";
 
 export default class PlayerBoard
   implements GameData.ICollidable, GameData.IGameObject

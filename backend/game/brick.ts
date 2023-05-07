@@ -1,5 +1,5 @@
-import Circle from "./Ball";
-import * as GameData from "./GameData";
+import Circle from "./Ball.ts";
+import * as GameData from "./GameData.ts";
 
 export default class Brick
   implements GameData.ICollidable, GameData.IGameObject
