@@ -25,10 +25,13 @@ export const initialBouncers = [
   },
 ];
 
-export const initialBall = {
-  xPos: 250 - 5,
-  yPos: 400,
-};
+export const initialBalls = [
+  {
+    id: "1",
+    xPos: 250 - 5,
+    yPos: 400,
+  },
+];
 
 export const initialBricks = [
   {
