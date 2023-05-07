@@ -41,3 +41,5 @@ export default class Brick
   //   canvasContext.fill();
   // }
 }
+
+export { Brick };

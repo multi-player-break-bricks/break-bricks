@@ -1,13 +1,14 @@
 //global game data
 const GAME_CANVAS_WIDTH = 500;
 const GAME_CANVAS_HEIGHT = 500;
-const BALL_SIZE = 10;
+const BALL_SIZE = 5;
 const PLAYER_BOARD_WIDTH = 50;
 const PLAYER_BOARD_HEIGHT = 10;
 const PLAYER_BOARD_WALL_MARGIN = 10;
-const PLAYER_MOVE_SPEED = 1;
+const PLAYER_MOVE_SPEED = 3;
 const BRICK_WIDTH = 25;
 const BRICK_HEIGHT = 25;
+const FPS = 60;
 
 /**
  * use this enum to identify game objects
@@ -95,4 +96,5 @@ export {
   BRICK_HEIGHT,
   PLAYER_MOVE_SPEED,
   PLAYER_BOARD_WALL_MARGIN,
+  FPS,
 };

@@ -15,9 +15,12 @@ export default class GameInstance {
 
   ball: Circle;
 
-  constructor(gameRoomId: string) {
+  constructor(gameRoomId: string, CALLBACK_FUNCTION?: any) {
+    //initialize game
+    this.Callback = CALLBACK_FUNCTION;
     this.gameRoomId = gameRoomId;
     this.gameObjects = new Array<GameData.ICollidable>();
+
     //initialize player
     this.playersMap = new Map<number, PlayerBoard>();
     this.playersMap.set(1, (this.player1 = new PlayerBoard(1)));
@@ -55,22 +58,103 @@ export default class GameInstance {
       GameData.GAME_CANVAS_WIDTH / 2,
       GameData.GAME_CANVAS_HEIGHT / 2
     );
+
+    //start game loop
+    setInterval(() => {
+      this.Callback(this.Update());
+    }, 1000 / GameData.FPS);
   }
 
   /**
+   * !!!IMPORTANT!!!
+   * replace this function with a callback function that
+   * sends gameTransferData to client
+   *
+   * @param gameTransferData data received from every update
+   */
+  Callback(gameTransferData: Object) {
+    //send gameTransferData to client
+  }
+
+  /**
+   * what this game do every frame
+   * @returns gameTransferData to send to client
+   */
+  Update(): Object {
+    //instantiate json string to send to client
+    let gameTransferData = {
+      player1: this.player1,
+      player2: this.player2,
+      player3: this.player3,
+      player4: this.player4,
+      ball: this.ball,
+    };
+
+    //update player position
+    this.player1.move();
+    this.player2.move();
+    this.player3.move();
+    this.player4.move();
+
+    //update ball position, ball will be the only thing checking collision
+    this.ball.move();
+
+    return gameTransferData;
+  }
+
+  /**
+   * in case you want to get the current gameTransferData without
+   * callback function, use this function
+   *
+   * @returns gameTransferData to send to client
+   */
+  getCurrentGameTransferData(): Object {
+    let gameTransferData = {
+      player1: this.player1,
+      player2: this.player2,
+      player3: this.player3,
+      player4: this.player4,
+      ball: this.ball,
+    };
+    return gameTransferData;
+  }
+
+  /**
+   * use this function to set player direction, player will move each frame
+   *
    * @param playerNumber the player number indicating which player to move
    * @param direction    the player moving direction, can only be "left" or "right"
+   * @param moving  false if want to set player to stop moving, true if want to set player to start moving to this direction
+   *
    * @throws Error if the direction is invalid
    */
-  movePlayer(playerNumber: number, direction: string) {
+  setPlayerDir(playerNumber: number, direction: string, moving: boolean) {
     //check if string is valid
     if (direction != "left" && direction != "right") {
       throw new Error("Invalid direction");
     }
 
     const player = this.playersMap.get(playerNumber);
+
     if (player) {
-      player.movePlayer(direction);
+      if (direction == "left") {
+        if (moving) {
+          player.playerStartMovingLeft();
+        } else {
+          player.playerStopMovingLeft();
+        }
+      }
+      if (direction == "right") {
+        if (moving) {
+          player.playerStartMovingRight();
+        } else {
+          player.playerStopMovingRight();
+        }
+      }
+    } else {
+      throw new Error("Invalid player number");
     }
   }
 }
+
+export { GameInstance };

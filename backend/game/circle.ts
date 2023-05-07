@@ -155,3 +155,5 @@ export default class Circle
     }
   }
 }
+
+export { Circle };
