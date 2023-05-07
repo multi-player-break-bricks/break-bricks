@@ -12,7 +12,7 @@ import {
   moveWaitRoomToGameRoom,
   findGameRoom,
 } from "./utils/rooms.ts";
-import GameInstance from "./game/gameInstance.ts";
+// import GameInstance from "./game/gameInstance.ts";
 
 const developmentUrl = "http://localhost:3000";
 const productionUrl = "https://lingpal.vercel.app";

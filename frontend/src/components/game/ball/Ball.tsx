@@ -32,7 +32,7 @@ export const Ball = ({ xPos, yPos }: Props) => {
           gradientUnits="userSpaceOnUse"
           gradientTransform="translate(25 25) rotate(90) scale(25)"
         >
-          <stop offset="0.0833333" stop-color="#757575" />
+          <stop offset="0.0833333" stopColor="#757575" />
           <stop offset="1" />
         </radialGradient>
       </defs>

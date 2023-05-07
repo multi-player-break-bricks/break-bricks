@@ -23,8 +23,8 @@ export const Brick = ({ xPos, yPos, level }: Props) => {
     >
       <rect width="150" height="150" fill="#5A1757" />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M140 10H105V15H135V40H140V15V10ZM135 45H140V50H135V45ZM10 140H45V135H15V110H10V135V140ZM10 105H15V100H10V105Z"
         fill="#FAD2F8"
       />
