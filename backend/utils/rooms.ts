@@ -27,15 +27,15 @@ const waitRooms: Record<string, WaitRoom> = {};
 const gameRooms: Record<string, GameRoom> = {};
 const players: Record<string, Player> = {};
 
-export const savePlayerInfo = (
-  playerId: string,
-  name: string,
-  number: number
-) => {
+const savePlayerInfo = (playerId: string, name: string, number: number) => {
   players[playerId] = { id: playerId, name, number, isReady: false };
 };
 
-export const createWaitRoom = (isPublic: boolean, playerId: string) => {
+export const createWaitRoom = (
+  isPublic: boolean,
+  playerId: string,
+  playerName: string
+) => {
   lastWaitRoomNumber = lastWaitRoomNumber + 1;
   const stringifiedLastWaitRoomNumber = lastWaitRoomNumber
     .toString()
@@ -47,12 +47,14 @@ export const createWaitRoom = (isPublic: boolean, playerId: string) => {
     isPublic,
     players: [playerId],
   };
+  savePlayerInfo(playerId, playerName, 1);
   return { waitRoomNumber: stringifiedLastWaitRoomNumber, roomId };
 };
 
 export const joinWaitRoomWithNumber = (
   waitRoomNumber: string,
-  playerId: string
+  playerId: string,
+  playerName: string
 ) => {
   const waitRoom = Object.values(waitRooms).find(
     (room) => room.number === waitRoomNumber
@@ -68,18 +70,23 @@ export const joinWaitRoomWithNumber = (
     };
   }
   waitRoom.players.push(playerId);
+  savePlayerInfo(playerId, playerName, waitRoom.players.length);
   return {
     waitRoomId: waitRoom.id,
     players: waitRoom.players.map((playerId) => players[playerId]),
   };
 };
 
-export const joinRandomRoom = (playerId: string) => {
+export const joinRandomRoom = (playerId: string, playerName: string) => {
   const waitRoom = Object.values(waitRooms).find(
     (room) => room.players.length < 4 && room.isPublic
   );
   if (!waitRoom) {
-    const { roomId, waitRoomNumber } = createWaitRoom(true, playerId);
+    const { roomId, waitRoomNumber } = createWaitRoom(
+      true,
+      playerId,
+      playerName
+    );
     return {
       roomId,
       waitRoomNumber,
@@ -87,6 +94,7 @@ export const joinRandomRoom = (playerId: string) => {
     };
   }
   waitRoom.players.push(playerId);
+  savePlayerInfo(playerId, playerName, waitRoom.players.length);
   return {
     roomId: waitRoom.id,
     waitRoomNumber: waitRoom.number,

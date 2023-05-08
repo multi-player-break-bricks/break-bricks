@@ -12,7 +12,6 @@ import {
   findGameRoom,
   createGameRoomTest,
   getGameInfo,
-  savePlayerInfo,
 } from "./utils/rooms.ts";
 // import GameInstance from "./game/gameInstance.ts";
 
@@ -29,14 +28,13 @@ const io = new Server({
 
 io.on("connection", (socket) => {
   socket.on("create-wait-room", ({ isPublic, name }) => {
-    savePlayerInfo(socket.id, name, 1);
-    const { roomId } = createWaitRoom(isPublic, socket.id);
+    const { roomId } = createWaitRoom(isPublic, socket.id, name);
     socket.join(roomId);
     socket.emit("join-wait-room");
   });
 
   socket.on("join-wait-room-with-id", ({ roomNumber, name }) => {
-    const result = joinWaitRoomWithNumber(roomNumber, socket.id);
+    const result = joinWaitRoomWithNumber(roomNumber, socket.id, name);
     if (result.error) {
       socket.emit("join-wait-room-error", result.error);
       return;
@@ -46,7 +44,6 @@ io.on("connection", (socket) => {
       socket.emit("join-wait-room-error", "No players found");
       return;
     }
-    savePlayerInfo(socket.id, name, players.length);
     socket.join(waitRoomId!);
     socket.emit("join-wait-room");
     io.to(waitRoomId!).emit("wait-room-updated", {
@@ -55,8 +52,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join-random-wait-room", (name) => {
-    const { players, roomId } = joinRandomRoom(socket.id);
-    savePlayerInfo(socket.id, name, players.length);
+    const { players, roomId } = joinRandomRoom(socket.id, name);
     socket.join(roomId);
     socket.emit("join-wait-room");
     io.to(roomId).emit("wait-room-updated", { players });

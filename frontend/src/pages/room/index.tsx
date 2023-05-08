@@ -1,5 +1,4 @@
 import { useSocketContext } from "@/contexts/socketContext";
-import { Player } from "../../types/main";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -24,6 +23,7 @@ export default function RoomPage() {
 
   useEffect(() => {
     socket?.on("join-room-success", (data) => {
+      console.log("players", data.players);
       setPlayers(data.players);
       setRoomNumber(data.number);
     });
