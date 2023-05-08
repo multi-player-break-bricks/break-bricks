@@ -15,19 +15,19 @@ export default function TestPage() {
     if (socket) return;
     const tempSocket = connectSocket();
     tempSocket.emit("join-game-room-test");
-    tempSocket.on("join-room-success", (room) => {
+  }, [connectSocket, disconnectSocket, socket]);
+
+  useEffect(() => {
+    socket?.on("join-room-success", (room) => {
       console.log(room);
       setRoomId(room.id);
       setPlayers(room.players);
-      setInterval(() => {
-        tempSocket.emit("request-game-info", room.id);
-      }, 1000);
     });
 
     return () => {
-      disconnectSocket();
+      socket?.off("join-room-success");
     };
-  }, [connectSocket, disconnectSocket, socket]);
+  }, [socket]);
 
   return (
     <main className="main">

@@ -9,8 +9,9 @@ import { Brick } from "../brick/Brick";
 import { Bouncer } from "../bouncer/Bouncer";
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import { Ball } from "../ball/Ball";
+import { Reward } from "../reward/Reward";
 
-const Canvas = ({}) => {
+const Canvas = () => {
   //init canvas
   // const { canvasRef, drawRect, drawOnCanvas } = useCanvas();
 
@@ -21,9 +22,13 @@ const Canvas = ({}) => {
 
   const { socket } = useSocketContext();
 
+  const [roomId, setRoomId] = useState("");
+  const [players, setPlayers] = useState<Player[]>([]);
+
   const [bouncers, setBouncers] = useState<Bouncer[]>(initialBouncers);
   const [balls, setBalls] = useState<GameObject[]>(initialBalls);
   const [bricks, setBricks] = useState<Brick[]>(initialBricks);
+  const [rewards, setRewards] = useState<Reward[]>([]);
 
   const playerId = 0;
 
@@ -32,28 +37,66 @@ const Canvas = ({}) => {
     const canvas = canvasRef.current;
     canvas?.style.setProperty("width", `${canvasSize}px`);
     canvas?.style.setProperty("height", `${canvasSize}px`);
-    if (playerId) {
-      canvas?.style.setProperty("transform", "rotate(90deg)");
-    }
+    // if (playerId) {
+    //   canvas?.style.setProperty("transform", "rotate(90deg)");
+    // }
   }, [canvasRef, canvasSize]);
 
   useEffect(() => {
+    socket?.on("join-room-success", (room) => {
+      console.log(room);
+      const { gameInfo, id } = room;
+      setRoomId(id);
+      setPlayers(room.players);
+      setBouncers(gameInfo.bouncers);
+      setBalls(gameInfo.balls);
+      setBricks(gameInfo.bricks);
+      setInterval(() => {
+        socket.emit("request-game-info", room.id);
+      }, 1000 / 16);
+    });
+
+    return () => {
+      socket?.off("join-room-success");
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    socket?.on("frame-change", ({ bouncers, balls, bricks, rewards }) => {
+      console.log({ bouncers, balls, bricks });
+      setBouncers(bouncers);
+      setBalls(balls);
+      setBricks(bricks);
+      setRewards(rewards);
+    });
+
+    return () => {
+      socket?.off("frame-change");
+    };
+  }, [socket]);
+
+  const emitMoveBouncer = useCallback(
+    (direction: "left" | "right", pressed: boolean) => {
+      const player = players.find((p) => p.id === socket?.id);
+      socket?.emit("move-bouncer", {
+        direction,
+        pressed,
+        roomId,
+        playerNumber: player?.number,
+      });
+    },
+    [players, roomId, socket]
+  );
+
+  useEffect(() => {
     const onKeydown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") {
-        socket?.emit("move-bouncer", { direction: "left", pressed: true });
-      }
-      if (event.key === "ArrowRight") {
-        socket?.emit("move-bouncer", { direction: "right", pressed: true });
-      }
+      if (event.key === "ArrowLeft") emitMoveBouncer("left", true);
+      if (event.key === "ArrowRight") emitMoveBouncer("right", true);
     };
 
     const onKeyup = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") {
-        socket?.emit("move-bouncer", { direction: "left", pressed: false });
-      }
-      if (event.key === "ArrowRight") {
-        socket?.emit("move-bouncer", { direction: "right", pressed: false });
-      }
+      if (event.key === "ArrowLeft") emitMoveBouncer("left", false);
+      if (event.key === "ArrowRight") emitMoveBouncer("right", false);
     };
 
     window.addEventListener("keydown", onKeydown);
@@ -63,19 +106,7 @@ const Canvas = ({}) => {
       window.removeEventListener("keydown", onKeydown);
       window.removeEventListener("keyup", onKeyup);
     };
-  }, [balls, bouncers, bricks, socket]);
-
-  // useEffect(() => {
-  //   socket?.on("frame-change", ({ bouncers, ball }) => {
-  //     console.log({ bouncers, ball });
-  //     setBall(ball);
-  //     setBouncers(bouncers);
-  //   });
-
-  //   return () => {
-  //     socket?.off("frame-change");
-  //   };
-  // }, [bricks, socket]);
+  }, [balls, bouncers, bricks, emitMoveBouncer, roomId, socket]);
 
   // useEffect(() => {
   //   socket?.on("brick-destroyed", (brick) => {
@@ -99,8 +130,11 @@ const Canvas = ({}) => {
       {bouncers.map((bouncer) => (
         <Bouncer key={bouncer.id} {...bouncer} />
       ))}
-      {balls.map((ball, i) => (
-        <Ball key={i} {...ball} />
+      {balls.map((ball) => (
+        <Ball key={ball.id} {...ball} />
+      ))}
+      {rewards.map((reward) => (
+        <Reward key={reward.id} {...reward} />
       ))}
     </div>
   );
