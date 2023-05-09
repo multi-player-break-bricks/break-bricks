@@ -87,6 +87,7 @@ const Canvas = () => {
   );
 
   useEffect(() => {
+    if (!roomId) return;
     const onKeydown = (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft") emitMoveBouncer("left", true);
       if (event.key === "ArrowRight") emitMoveBouncer("right", true);

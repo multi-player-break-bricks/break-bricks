@@ -92,7 +92,7 @@ io.on("connection", (socket) => {
         countdownInterval = 0;
       }
       count -= 1;
-    }, 1000);
+    }, 100);
   });
 
   socket.on("join-game-room", () => {
