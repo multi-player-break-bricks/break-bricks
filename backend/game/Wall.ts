@@ -69,7 +69,6 @@ export default class Wall
 
       default:
         throw new Error("Player number must be between 1 and 4");
-        break;
     }
   }
 }

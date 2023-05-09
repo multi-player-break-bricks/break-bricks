@@ -5,8 +5,6 @@ export default class PlayerBoard
 {
   gameID: number;
   name: string;
-  imageHeight: number;
-  imageWidth: number;
 
   playerNumber: number;
 
@@ -25,6 +23,7 @@ export default class PlayerBoard
 
   gameObjectType: GameData.GameObjectType;
   colliderType: GameData.ColliderType;
+  onCollision: (collidable: GameData.ICollidable) => boolean;
 
   /**
    * @param playerNumber  the player number of the board, can only be 1-4
@@ -42,8 +41,6 @@ export default class PlayerBoard
     this.playerNumber = playerNumber;
     this.xPos = 0;
     this.yPos = 0;
-    this.imageHeight = 0;
-    this.imageWidth = 0;
     this.width = 0;
     this.height = 0;
     this.displayHeight = 0;
@@ -54,11 +51,7 @@ export default class PlayerBoard
     this.colliderType = GameData.ColliderType.rect;
     this.radius = 0;
 
-    //尝试用图片的宽高来控制板子的宽高 但是失败了 所以直接hardcode了，
-    //之后如果要改图片的话，需要重新hardcode 或者找到更好的方法
-    //tried to do this.imageWidth = img.naturalWidth; but failed, its value is 0 even though the image element does have naturalWidth
-    const boardImageWidth = 360;
-    const boardImageHeight = 180;
+    this.onCollision = () => false;
 
     if (playerNumber == 1) {
       this.name = "player 1";
@@ -67,9 +60,6 @@ export default class PlayerBoard
 
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = canvas.height - (this.displayHeight + this.wallMargin);
-
-      this.imageWidth = boardImageWidth;
-      this.imageHeight = boardImageHeight;
     } else if (playerNumber == 2) {
       this.name = "player 2";
       this.height = this.displayHeight = GameData.PLAYER_BOARD_WIDTH;
@@ -77,9 +67,6 @@ export default class PlayerBoard
 
       //   this.xPos = 0 + this.wallMargin;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
-
-      this.imageWidth = boardImageHeight;
-      this.imageHeight = boardImageWidth;
     } else if (playerNumber == 3) {
       this.name = "player 3";
       this.height = this.displayHeight = GameData.PLAYER_BOARD_HEIGHT;
@@ -87,9 +74,6 @@ export default class PlayerBoard
 
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = this.wallMargin;
-
-      this.imageWidth = boardImageWidth;
-      this.imageHeight = boardImageHeight;
     } else if (playerNumber == 4) {
       this.name = "player 4";
       this.height = this.displayHeight = GameData.PLAYER_BOARD_WIDTH;
@@ -97,14 +81,7 @@ export default class PlayerBoard
 
       //   this.xPos = canvas.width - this.wallMargin - this.displayWidth;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
-
-      this.imageWidth = boardImageHeight;
-      this.imageHeight = boardImageWidth;
     }
-  }
-
-  onCollision(collidable: GameData.ICollidable): boolean {
-    return false;
   }
 
   setPosition(xPos: number, yPos: number) {

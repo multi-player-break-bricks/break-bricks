@@ -66,7 +66,6 @@ export default class Ball
       this.movingDirectionY == undefined
     ) {
       throw new Error("moving direction or position not set");
-      return;
     }
 
     this.xPos += this.movingDirectionX * GameData.BALL_SPEED;

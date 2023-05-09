@@ -7,7 +7,7 @@ import Wall from "./Wall.ts";
 
 export default class GameInstance {
   gameRoomId: string;
-  gameObjects: Array<any>;
+  gameObjects: Array<GameData.IGameObject>;
   gameColliders: Array<GameData.ICollidable>;
 
   playersMap: Map<number, PlayerBoard>;
@@ -26,14 +26,8 @@ export default class GameInstance {
    * @param playerAmount      amount of players in the game
    * @param CALLBACK_FUNCTION callback function to send gameTransferData to client, see {@link Callback}
    */
-  constructor(
-    gameRoomId: string,
-    playerAmount: number,
-    CALLBACK_FUNCTION?: any
-  ) {
-    //initialize game
-    this.Callback = CALLBACK_FUNCTION;
-    this.gameObjects = new Array<any>();
+  constructor(gameRoomId: string, playerAmount: number) {
+    this.gameObjects = new Array<GameData.IGameObject>();
     this.gameRoomId = gameRoomId;
     this.gameColliders = new Array<GameData.ICollidable>();
     this.playersMap = new Map<number, PlayerBoard>();
@@ -92,7 +86,7 @@ export default class GameInstance {
     }
 
     //initialize ball
-    let ball = this.newBall();
+    const ball = this.newBall();
     ball.setPosition(
       GameData.GAME_CANVAS_WIDTH / 2,
       GameData.GAME_CANVAS_HEIGHT / 2
@@ -102,7 +96,7 @@ export default class GameInstance {
     //initialize bricks
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 10; j++) {
-        let brick = this.newBrick();
+        const brick = this.newBrick();
         //set brick position and margin
         brick.setPosition(
           GameData.GAME_CANVAS_WIDTH -
@@ -122,30 +116,19 @@ export default class GameInstance {
 
     //start game loop
     setInterval(() => {
-      this.Callback(this.Update());
+      this.Update();
     }, 1000 / GameData.FPS);
-  }
-
-  /**
-   * !!!IMPORTANT!!!
-   * replace this function with a callback function that
-   * sends gameTransferData to client
-   *
-   * @param gameTransferData data received from every update
-   */
-  Callback(gameTransferData: Object) {
-    //send gameTransferData to client
   }
 
   /**
    * what this game do every frame
    * @returns gameTransferData to send to client
    */
-  Update(): Object {
-    let updatedGameObject = Array<GameData.ICollidable>();
+  Update(): Record<string, unknown> {
+    const updatedGameObject = Array<GameData.ICollidable>();
 
     //update player position
-    for (let player of this.playersMap.values()) {
+    for (const player of this.playersMap.values()) {
       player.move();
     }
 
@@ -174,12 +157,12 @@ export default class GameInstance {
 
     updatedGameObject.forEach((gameObject) => {
       if (gameObject instanceof Brick) {
-        let brick = <Brick>gameObject;
+        const brick = <Brick>gameObject;
         if (brick.life <= 0) {
           this.removeBrick(brick);
         }
       } else if (gameObject instanceof Reward) {
-        let reward = <Reward>gameObject;
+        const reward = <Reward>gameObject;
 
         if (reward.rewardType == RewardType.BiggerPaddle) {
           this.getPlayerByGameId(reward.rewardPlayerId).biggerPadddle();
@@ -188,12 +171,12 @@ export default class GameInstance {
             ball.biggerBall();
           });
         } else if (reward.rewardType == RewardType.extraBall) {
-          let ballArrayCopy = [...this.ballArray];
+          const ballArrayCopy = [...this.ballArray];
           ballArrayCopy.forEach((ball) => {
-            let newB = this.newBall();
+            const newB = this.newBall();
             //generate ramdom number with range [-1,1] for both x and y
-            let x = Math.random() * 2 - 1;
-            let y = Math.random() * 2 - 1;
+            const x = Math.random() * 2 - 1;
+            const y = Math.random() * 2 - 1;
             newB.setPosition(ball.yPos + y, ball.xPos + x);
             newB.SetMovingdirection(y, x);
             newB.lastCollidedPlayerId = ball.lastCollidedPlayerId;
@@ -204,113 +187,107 @@ export default class GameInstance {
       }
     });
 
-    let gameTransferData = this.getCurrentGameTransferData(); //instantiate Object to send to client
+    const gameTransferData = this.getCurrentGameTransferData(); //instantiate Object to send to client
     return gameTransferData;
   }
 
-  getCurrentBouncerInfo(roomId: string): Object {
-    let gameTransferData = {
-      roomId: roomId,
-      gameData: [],
-    };
-
-    let gameData: any = [];
-
-    this.playersMap.forEach((player, key) => {
+  getCurrentBouncerInfo(roomId: string): Record<string, unknown> {
+    const gameData: Array<Record<string, unknown>> = [];
+    this.playersMap.forEach((player) => {
       gameData.push({
         number: player.playerNumber,
         xPos: player.xPos,
         yPos: player.yPos,
+        width: player.displayWidth,
+        height: player.displayHeight,
       });
     });
 
-    gameTransferData.gameData = gameData;
+    const gameTransferData = {
+      roomId: roomId,
+      gameData: gameData,
+    };
 
     return gameTransferData;
   }
 
-  getCurrentBallInfo(roomId: string): Object {
-    let gameTransferData = {
-      roomId: roomId,
-      gameData: [],
-    };
-
-    let gameData: any = [];
-
+  getCurrentBallInfo(roomId: string): Record<string, unknown> {
+    const gameData: Array<Record<string, unknown>> = [];
     this.ballArray.forEach((ball) => {
       gameData.push({
         id: ball.gameID,
         xPos: ball.xPos,
         yPos: ball.yPos,
+        size: ball.size,
       });
     });
 
-    gameTransferData.gameData = gameData;
+    const gameTransferData = {
+      roomId: roomId,
+      gameData: gameData,
+    };
 
     return gameTransferData;
   }
 
-  getCurrentBrickInfo(roomId: string): Object {
-    let gameTransferData = {
-      roomId: roomId,
-      gameData: [],
-    };
-
-    let gameData: any = [];
-
+  getCurrentBrickInfo(roomId: string): Record<string, unknown> {
+    const gameData: Array<Record<string, unknown>> = [];
     this.bricks.forEach((brick) => {
       gameData.push({
         id: brick.gameID,
         xPos: brick.xPos,
         yPos: brick.yPos,
+        width: brick.displayWidth,
+        height: brick.displayHeight,
         level: brick.life,
       });
     });
 
-    gameTransferData.gameData = gameData;
+    const gameTransferData = {
+      roomId: roomId,
+      gameData: gameData,
+    };
 
     return gameTransferData;
   }
 
-  getCurrentRewardInfo(roomId: string): Object {
-    let gameTransferData = {
-      roomId: roomId,
-      gameData: [],
-    };
-
-    let gameData: any = [];
-
+  getCurrentRewardInfo(roomId: string): Record<string, unknown> {
+    const gameData: Array<Record<string, unknown>> = [];
     this.rewards.forEach((reward) => {
       gameData.push({
         id: reward.gameID,
         xPos: reward.xPos,
         yPos: reward.yPos,
+        width: reward.displayWidth,
+        height: reward.displayHeight,
         type: reward.rewardType,
       });
     });
 
-    gameTransferData.gameData = gameData;
+    const gameTransferData = {
+      roomId: roomId,
+      gameData: gameData,
+    };
 
     return gameTransferData;
   }
 
-  getCurrentWallInfo(roomId: string): Object {
-    let gameTransferData = {
-      roomId: roomId,
-      gameData: [],
-    };
-
-    let gameData: any = [];
-
+  getCurrentWallInfo(roomId: string): Record<string, unknown> {
+    const gameData: Array<Record<string, unknown>> = [];
     this.walls.forEach((wall) => {
       gameData.push({
         id: wall.gameID,
         xPos: wall.xPos,
         yPos: wall.yPos,
+        width: wall.displayWidth,
+        height: wall.displayHeight,
       });
     });
 
-    gameTransferData.gameData = gameData;
+    const gameTransferData = {
+      roomId: roomId,
+      gameData: gameData,
+    };
 
     return gameTransferData;
   }
@@ -321,13 +298,13 @@ export default class GameInstance {
    *
    * @returns gameTransferData to send to client
    */
-  getCurrentGameTransferData(): Object {
-    let gameTransferData = {
-      playersMap: Array.from(this.playersMap.values()),
-      balls: this.ballArray,
-      bricks: this.bricks,
-      rewards: this.rewards,
-      walls: this.walls,
+  getCurrentGameTransferData(): Record<string, unknown> {
+    const gameTransferData = {
+      playersMap: this.getCurrentBouncerInfo("testRoomId"),
+      balls: this.getCurrentBallInfo("testRoomId"),
+      bricks: this.getCurrentBrickInfo("testRoomId"),
+      rewards: this.getCurrentRewardInfo("testRoomId"),
+      walls: this.getCurrentWallInfo("testRoomId"),
     };
 
     return gameTransferData;
@@ -418,7 +395,7 @@ export default class GameInstance {
   //remove game object
   removeBrick(brick: Brick) {
     //drop reward
-    let reward = this.newReward(brick.lastCollidedPlayerId);
+    const reward = this.newReward(brick.lastCollidedPlayerId);
 
     if (reward.rewardType == RewardType.None) {
       this.removeReward(reward);
