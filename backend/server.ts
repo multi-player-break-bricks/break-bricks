@@ -8,10 +8,12 @@ import {
   findWaitRoom,
   removePlayerFromRoom,
   updatePlayerReady,
-  moveWaitRoomToGameRoom,
   findGameRoom,
   createGameRoomTest,
   getGameInfo,
+  initializeGameRoom,
+  moveBouncer,
+  getPlayerInfo,
 } from "./utils/rooms.ts";
 // import GameInstance from "./game/gameInstance.ts";
 
@@ -90,7 +92,6 @@ io.on("connection", (socket) => {
       if (count === 0) {
         clearInterval(countdownInterval);
         countdownInterval = 0;
-        moveWaitRoomToGameRoom(roomId);
       }
       count -= 1;
     }, 1000);
@@ -102,12 +103,10 @@ io.on("connection", (socket) => {
       socket.emit("join-room-error", "Room not found");
       return;
     }
-    const gameRoom = findGameRoom(roomId.toString());
-    if (!gameRoom) {
-      socket.emit("join-room-error", "Room not found");
-      return;
-    }
-    socket.emit("join-room-success", gameRoom);
+    const { number } = getPlayerInfo(socket.id);
+    if (number !== 1) return;
+    const gameRoom = initializeGameRoom(roomId.toString());
+    io.to(roomId).emit("join-room-success", gameRoom);
   });
 
   socket.on("disconnect", () => {
@@ -138,13 +137,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("move-bouncer", ({ direction, pressed, roomId }) => {
-    const gameRoom = findGameRoom(roomId.toString());
-    if (!gameRoom) {
-      socket.emit("join-room-error", "Room not found");
-      return;
-    }
-    //TODO: use player number
-    gameRoom.gameInstance.setPlayerDir(1, direction, pressed);
+    moveBouncer(direction, pressed, roomId, socket.id);
   });
 });
 

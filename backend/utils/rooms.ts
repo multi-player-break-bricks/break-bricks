@@ -31,6 +31,10 @@ const savePlayerInfo = (playerId: string, name: string, number: number) => {
   players[playerId] = { id: playerId, name, number, isReady: false };
 };
 
+export const getPlayerInfo = (playerId: string) => {
+  return players[playerId];
+};
+
 export const createWaitRoom = (
   isPublic: boolean,
   playerId: string,
@@ -116,6 +120,7 @@ export const removePlayerFromRoom = (playerId: string) => {
   const waitRoom = Object.values(waitRooms).find((room) =>
     room.players.includes(playerId)
   );
+  delete players[playerId];
   if (waitRoom) {
     waitRoom.players = waitRoom.players.filter((id) => id !== playerId);
     waitRoom.players.forEach((playerId) => {
@@ -153,22 +158,37 @@ export const updatePlayerReady = (
   };
 };
 
-export const moveWaitRoomToGameRoom = (roomId: string) => {
-  const waitRoom = waitRooms[roomId];
-  if (!waitRoom) return;
-  delete waitRooms[roomId];
-  gameRooms[roomId] = {
-    id: roomId,
-    gameInstance: new GameInstance(roomId, () => {}),
-    players: waitRoom.players,
-  };
-};
-
 export const findGameRoom = (roomId: string) => {
   const gameRoom = gameRooms[roomId];
   if (!gameRoom) return;
   return {
     ...gameRoom,
+    players: gameRoom.players.map((playerId) => players[playerId]),
+  };
+};
+
+export const initializeGameRoom = (roomId: string) => {
+  const waitRoom = waitRooms[roomId];
+  if (waitRoom) {
+    delete waitRooms[roomId];
+    gameRooms[roomId] = {
+      id: roomId,
+      gameInstance: new GameInstance(roomId, () => {}),
+      players: waitRoom.players,
+    };
+  }
+
+  const gameRoom = gameRooms[roomId];
+  const { bouncers, balls, bricks } = getGameInfo(gameRoom);
+
+  const bouncersWithId = bouncers.map((bouncer: any, index: number) => ({
+    ...bouncer,
+    id: gameRoom.players[index],
+  }));
+
+  return {
+    id: gameRoom.id,
+    gameInfo: { bouncers: bouncersWithId, balls, bricks },
     players: gameRoom.players.map((playerId) => players[playerId]),
   };
 };
@@ -180,6 +200,18 @@ export const getGameInfo = (gameRoom: GameRoom) => {
   const bricks = gameInstance.getCurrentBrickInfo(id).gameData;
   const rewards = gameInstance.getCurrentRewardInfo(id).gameData;
   return { bouncers, balls, bricks, rewards };
+};
+
+export const moveBouncer = (
+  direction: "left" | "right",
+  pressed: boolean,
+  roomId: string,
+  playerId: string
+) => {
+  const gameRoom = gameRooms[roomId];
+  if (!gameRoom) throw new Error("Game room not found");
+  const { number } = players[playerId];
+  gameRoom.gameInstance.setPlayerDir(number, direction, pressed);
 };
 
 export const createGameRoomTest = (playerId: string) => {

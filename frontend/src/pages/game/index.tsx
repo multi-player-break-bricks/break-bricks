@@ -8,7 +8,6 @@ export default function GamePage() {
   const { socket } = useSocketContext();
   const [players, setPlayers] = useState<Player[]>([]);
   const [roomId, setRoomId] = useState("");
-  const [gameInstance, setGameInstance] = useState<object>({});
 
   const router = useRouter();
 
@@ -19,22 +18,6 @@ export default function GamePage() {
     }
     socket.emit("join-game-room");
   }, [router, socket]);
-
-  useEffect(() => {
-    setInterval(() => {
-      socket?.emit("request-game-info", roomId);
-    }, 1000);
-  }, [socket, roomId]);
-
-  useEffect(() => {
-    socket?.on("game-info", (data) => {
-      console.log(data);
-    });
-
-    return () => {
-      socket?.off("game-info");
-    };
-  }, [socket]);
 
   useEffect(() => {
     socket?.on("join-room-success", (data) => {
@@ -58,9 +41,11 @@ export default function GamePage() {
   }, [router, socket]);
 
   return (
-    <main className="main">
+    <main>
       <h1 className={styles.title}>Game Page</h1>
-      <p>{JSON.stringify(players)}</p>
+      {players.map((player) => (
+        <p key={player.id}>{player.name}</p>
+      ))}
       {<Canvas />}
     </main>
   );

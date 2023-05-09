@@ -1,8 +1,5 @@
 import { useSocketContext } from "@/contexts/socketContext";
-import { useCanvas } from "@/hooks/useCanvas";
-// import { Bouncer, GameObject, Player } from "@/types/types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Socket } from "socket.io-client";
 import { initialBalls, initialBouncers, initialBricks } from "./seeds";
 import styles from "./index.module.css";
 import { Brick } from "../brick/Brick";
@@ -12,14 +9,6 @@ import { Ball } from "../ball/Ball";
 import { Reward } from "../reward/Reward";
 
 const Canvas = () => {
-  //init canvas
-  // const { canvasRef, drawRect, drawOnCanvas } = useCanvas();
-
-  const canvasSize = useCanvasSize();
-  const displayRatio = canvasSize / 500;
-
-  const canvasRef = useRef<HTMLDivElement | null>(null);
-
   const { socket } = useSocketContext();
 
   const [roomId, setRoomId] = useState("");
@@ -30,21 +19,25 @@ const Canvas = () => {
   const [bricks, setBricks] = useState<Brick[]>(initialBricks);
   const [rewards, setRewards] = useState<Reward[]>([]);
 
-  const playerId = 0;
+  const canvasSize = useCanvasSize();
+
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+
+  const playerNumber = players.find((p) => p.id === socket?.id)?.number;
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !playerNumber) return;
     const canvas = canvasRef.current;
     canvas?.style.setProperty("width", `${canvasSize}px`);
     canvas?.style.setProperty("height", `${canvasSize}px`);
-    // if (playerId) {
-    //   canvas?.style.setProperty("transform", "rotate(90deg)");
-    // }
-  }, [canvasRef, canvasSize]);
+    canvas?.style.setProperty(
+      "transform",
+      `rotate(${-90 * (playerNumber - 1)}deg)`
+    );
+  }, [canvasRef, canvasSize, playerNumber]);
 
   useEffect(() => {
     socket?.on("join-room-success", (room) => {
-      console.log(room);
       const { gameInfo, id } = room;
       setRoomId(id);
       setPlayers(room.players);
