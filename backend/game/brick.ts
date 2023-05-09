@@ -1,4 +1,4 @@
-import Circle from "./Ball.ts";
+import Ball from "./Ball.ts";
 import * as GameData from "./GameData.ts";
 
 export default class Brick
@@ -15,6 +15,8 @@ export default class Brick
   gameObjectType: GameData.GameObjectType;
   life: number;
   lastCollidedPlayerId: number;
+  colliderType: GameData.ColliderType;
+  radius: number;
 
   constructor(life?: number) {
     this.gameID = GameData.generateID();
@@ -26,6 +28,8 @@ export default class Brick
     this.name = "brick";
     this.life = life || 1;
     this.lastCollidedPlayerId = -1;
+    this.colliderType = GameData.ColliderType.rect;
+    this.radius = 0;
   }
 
   /**
@@ -40,7 +44,7 @@ export default class Brick
   onCollision(collidable: GameData.ICollidable): boolean {
     if (collidable.gameObjectType === GameData.GameObjectType.circle) {
       this.life--;
-      this.lastCollidedPlayerId = (<Circle>collidable).lastCollidedPlayerId;
+      this.lastCollidedPlayerId = (<Ball>collidable).lastCollidedPlayerId;
       return true;
     }
     return false;

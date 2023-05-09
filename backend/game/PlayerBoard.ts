@@ -5,7 +5,6 @@ export default class PlayerBoard
 {
   gameID: number;
   name: string;
-  img: string;
   imageHeight: number;
   imageWidth: number;
 
@@ -17,6 +16,7 @@ export default class PlayerBoard
   height: number;
   displayHeight: number;
   displayWidth: number;
+  radius: number;
 
   isPlayerMovingLeft: boolean;
   isPlayerMovingRight: boolean;
@@ -24,6 +24,7 @@ export default class PlayerBoard
   wallMargin: number;
 
   gameObjectType: GameData.GameObjectType;
+  colliderType: GameData.ColliderType;
 
   /**
    * @param playerNumber  the player number of the board, can only be 1-4
@@ -38,8 +39,6 @@ export default class PlayerBoard
 
     this.name = "player";
     this.gameObjectType = GameData.GameObjectType.player;
-    this.img =
-      "https://www.pngall.com/wp-content/uploads/5/Sports-Ball-Transparent.png";
     this.playerNumber = playerNumber;
     this.xPos = 0;
     this.yPos = 0;
@@ -52,6 +51,8 @@ export default class PlayerBoard
     this.wallMargin = GameData.PLAYER_BOARD_WALL_MARGIN;
     this.isPlayerMovingLeft = false;
     this.isPlayerMovingRight = false;
+    this.colliderType = GameData.ColliderType.rect;
+    this.radius = 0;
 
     //尝试用图片的宽高来控制板子的宽高 但是失败了 所以直接hardcode了，
     //之后如果要改图片的话，需要重新hardcode 或者找到更好的方法
@@ -67,8 +68,6 @@ export default class PlayerBoard
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = canvas.height - (this.displayHeight + this.wallMargin);
 
-      this.img =
-        "https://www.pngall.com/wp-content/uploads/5/Sports-Ball-Transparent.png";
       this.imageWidth = boardImageWidth;
       this.imageHeight = boardImageHeight;
     } else if (playerNumber == 2) {
@@ -79,7 +78,6 @@ export default class PlayerBoard
       //   this.xPos = 0 + this.wallMargin;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
 
-      this.img = "./imgs/board_rotated.png";
       this.imageWidth = boardImageHeight;
       this.imageHeight = boardImageWidth;
     } else if (playerNumber == 3) {
@@ -90,7 +88,6 @@ export default class PlayerBoard
       //   this.xPos = canvas.width / 2 - this.displayWidth / 2;
       //   this.yPos = this.wallMargin;
 
-      this.img = "./imgs/board.png";
       this.imageWidth = boardImageWidth;
       this.imageHeight = boardImageHeight;
     } else if (playerNumber == 4) {
@@ -101,7 +98,6 @@ export default class PlayerBoard
       //   this.xPos = canvas.width - this.wallMargin - this.displayWidth;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
 
-      this.img = "./imgs/board_rotated.png";
       this.imageWidth = boardImageHeight;
       this.imageHeight = boardImageWidth;
     }
@@ -115,23 +111,6 @@ export default class PlayerBoard
     this.xPos = xPos;
     this.yPos = yPos;
   }
-
-  // /**
-  //  * @deprecated should not use canvas directly in this class
-  //  */
-  // drawThis(canvasContext: CanvasRenderingContext2D) {
-  //   canvasContext.drawImage(
-  //     this.img,
-  //     0,
-  //     0,
-  //     this.imageWidth,
-  //     this.imageHeight,
-  //     this.xPos,
-  //     this.yPos,
-  //     this.displayWidth,
-  //     this.displayHeight
-  //   );
-  // }
 
   moveTo(direction: string) {
     if (direction == "top") {

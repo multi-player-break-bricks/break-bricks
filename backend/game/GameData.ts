@@ -15,6 +15,7 @@ const REWARD_WIDTH = 10;
 const REWARD_HEIGHT = 10;
 const BRICK_MARGIN = 10;
 const FPS = 60;
+const REWARD_PROBABILITY = 0.2;
 let CURRENT_GAME_ID = 0;
 
 /**
@@ -28,6 +29,11 @@ enum GameObjectType {
   brick,
   wall,
   reward,
+}
+
+enum ColliderType {
+  rect,
+  circle,
 }
 
 /**
@@ -57,6 +63,8 @@ interface ICollidable {
   width: number;
   height: number;
   gameObjectType: GameObjectType;
+  colliderType: ColliderType;
+  radius: number;
 
   /**
    * @param collidable the object with which this object is colliding
@@ -84,14 +92,57 @@ class ColliderUtil {
     collidable2: ICollidable
   ): boolean {
     if (
-      collidable1.xPos < collidable2.xPos + collidable2.width &&
-      collidable1.xPos + collidable1.width > collidable2.xPos &&
-      collidable1.yPos < collidable2.yPos + collidable2.height &&
-      collidable1.yPos + collidable1.height > collidable2.yPos
+      collidable1.colliderType === ColliderType.rect &&
+      collidable2.colliderType === ColliderType.rect
     ) {
-      return true;
+      // Rectangle to Rectangle collision
+      return (
+        collidable1.xPos < collidable2.xPos + collidable2.width &&
+        collidable1.xPos + collidable1.width > collidable2.xPos &&
+        collidable1.yPos < collidable2.yPos + collidable2.height &&
+        collidable1.yPos + collidable1.height > collidable2.yPos
+      );
+    } else if (
+      collidable1.colliderType === ColliderType.circle &&
+      collidable2.colliderType === ColliderType.circle
+    ) {
+      // Circle to Circle collision
+      const dx = collidable1.xPos - collidable2.xPos;
+      const dy = collidable1.yPos - collidable2.yPos;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance < collidable1.radius + collidable2.radius;
+    } else {
+      // Rectangle to Circle collision
+      const rect =
+        collidable1.colliderType === ColliderType.rect
+          ? collidable1
+          : collidable2;
+      const circle =
+        collidable1.colliderType === ColliderType.circle
+          ? collidable1
+          : collidable2;
+
+      let testX = circle.xPos;
+      let testY = circle.yPos;
+
+      if (circle.xPos < rect.xPos) {
+        testX = rect.xPos;
+      } else if (circle.xPos > rect.xPos + rect.width) {
+        testX = rect.xPos + rect.width;
+      }
+
+      if (circle.yPos < rect.yPos) {
+        testY = rect.yPos;
+      } else if (circle.yPos > rect.yPos + rect.height) {
+        testY = rect.yPos + rect.height;
+      }
+
+      const dx = circle.xPos - testX;
+      const dy = circle.yPos - testY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      return distance < circle.radius;
     }
-    return false;
   }
 }
 
@@ -100,7 +151,7 @@ function generateID(): number {
 }
 
 //functions
-export { GameObjectType, ColliderUtil, generateID };
+export { GameObjectType, ColliderUtil, generateID, ColliderType };
 
 //type
 export type { IGameObject, ICollidable };
@@ -124,4 +175,5 @@ export {
   BALL_SPEED,
   REWARD_WIDTH,
   REWARD_HEIGHT,
+  REWARD_PROBABILITY,
 };

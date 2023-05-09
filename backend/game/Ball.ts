@@ -1,7 +1,8 @@
 import * as GameData from "./GameData.ts";
 import playerBoard from "./PlayerBoard.ts";
+import Wall from "./Wall.ts";
 
-export default class Circle
+export default class Ball
   implements GameData.ICollidable, GameData.IGameObject
 {
   gameID: number;
@@ -18,6 +19,8 @@ export default class Circle
   movingDirectionY: number;
   lastCollidedObjectId: number;
   lastCollidedPlayerId: number;
+  colliderType: GameData.ColliderType;
+  radius: number;
 
   /**
    * @param yPos
@@ -29,14 +32,16 @@ export default class Circle
     this.xPos = 0;
     this.yPos = 0;
     this.size = size;
+    this.radius = this.size / 2;
     this.gameObjectType = GameData.GameObjectType.circle;
     this.name = "circle";
-    this.displayWidth = this.width = size * 0.8;
-    this.displayHeight = this.height = size * 0.8;
+    this.displayWidth = this.width = -1;
+    this.displayHeight = this.height = -1;
     this.movingDirectionX = 0;
     this.movingDirectionY = 0;
     this.lastCollidedObjectId = -1;
     this.lastCollidedPlayerId = -1;
+    this.colliderType = GameData.ColliderType.circle;
   }
 
   setPosition(yPos: number, xPos: number) {
@@ -48,18 +53,6 @@ export default class Circle
     this.movingDirectionX = xDirection;
     this.movingDirectionY = yDirection;
   }
-
-  // drawThis(canvasContext) {
-  //   canvasContext.beginPath();
-  //   canvasContext.moveTo(this.yPos, this.yPos);
-  //   canvasContext.arc(
-  //     this.xPos,
-  //     this.yPos,
-  //     this.size,
-  //     0 * Math.PI,
-  //     2 * Math.PI
-  //   );
-  //   canvasContext.fill();}
 
   /**
    * will move according to the moving direction
@@ -115,19 +108,32 @@ export default class Circle
           (player.height / 2);
       }
 
+      // Calculate the length of the new direction vector
+      const length = Math.sqrt(
+        this.movingDirectionX * this.movingDirectionX +
+          this.movingDirectionY * this.movingDirectionY
+      );
+
+      // Normalize the new direction vector by dividing the components by the length
+      this.movingDirectionX /= length;
+      this.movingDirectionY /= length;
+
       return true;
     } else if (collidable.gameObjectType == GameData.GameObjectType.circle) {
-      //the ball will change the moving direction based on the x or y axis of the ball it collides with
-      this.movingDirectionX =
-        (this.xPos +
-          this.width / 2 -
-          (collidable.xPos + collidable.width / 2)) /
-        (collidable.width / 2);
-      this.movingDirectionY =
-        (this.yPos +
-          this.height / 2 -
-          (collidable.yPos + collidable.height / 2)) /
-        (collidable.height / 2);
+      // Calculate the direction vector between the center points of the colliding objects
+      const directionX =
+        this.xPos + this.width / 2 - (collidable.xPos + collidable.width / 2);
+      const directionY =
+        this.yPos + this.height / 2 - (collidable.yPos + collidable.height / 2);
+
+      // Calculate the length of the direction vector
+      const length = Math.sqrt(
+        directionX * directionX + directionY * directionY
+      );
+
+      // Normalize the direction vector by dividing the components by the length
+      this.movingDirectionX = directionX / length;
+      this.movingDirectionY = directionY / length;
 
       return true;
     } else if (collidable.gameObjectType == GameData.GameObjectType.brick) {
@@ -166,8 +172,17 @@ export default class Circle
       }
 
       return true;
-    }
+    } else if (collidable.gameObjectType == GameData.GameObjectType.wall) {
+      const wall = <Wall>collidable;
 
+      if (wall.wallNumber == 1 || wall.wallNumber == 3) {
+        this.movingDirectionY = -this.movingDirectionY;
+      } else if (wall.wallNumber == 2 || wall.wallNumber == 4) {
+        this.movingDirectionX = -this.movingDirectionX;
+      }
+
+      return true;
+    }
     return false;
   }
 
@@ -175,10 +190,10 @@ export default class Circle
    * use this function for reward bigger ball
    */
   biggerBall() {
-    this.size *= 1.5;
-    this.displayWidth = this.width = this.size * 0.8;
-    this.displayHeight = this.height = this.size * 0.8;
+    this.radius = this.size += GameData.BALL_SIZE;
+    //this.displayWidth = this.width = this.size;
+    //this.displayHeight = this.height = this.size;
   }
 }
 
-export { Circle };
+export { Ball as Circle };

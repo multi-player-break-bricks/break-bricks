@@ -3,8 +3,7 @@ import PlayerBoard from "./PlayerBoard.ts";
 import * as GameData from "./GameData.ts";
 import Brick from "./Brick.ts";
 import Reward, { RewardType } from "./Reward.ts";
-
-export type GameInstanceType = typeof GameInstance;
+import Wall from "./Wall.ts";
 
 export default class GameInstance {
   gameRoomId: string;
@@ -12,15 +11,10 @@ export default class GameInstance {
   gameColliders: Array<GameData.ICollidable>;
 
   playersMap: Map<number, PlayerBoard>;
-  player1: PlayerBoard;
-  player2: PlayerBoard;
-  player3: PlayerBoard;
-  player4: PlayerBoard;
 
   ballArray: Array<Ball>;
-
   bricks: Array<Brick>;
-
+  walls: Array<Wall>;
   rewards: Array<Reward>;
 
   /**
@@ -29,9 +23,14 @@ export default class GameInstance {
    *              send gameTransferData to client every frame
    *
    * @param gameRoomId        id of the game room
+   * @param playerAmount      amount of players in the game
    * @param CALLBACK_FUNCTION callback function to send gameTransferData to client, see {@link Callback}
    */
-  constructor(gameRoomId: string, CALLBACK_FUNCTION?: any) {
+  constructor(
+    gameRoomId: string,
+    playerAmount: number,
+    CALLBACK_FUNCTION?: any
+  ) {
     //initialize game
     this.Callback = CALLBACK_FUNCTION;
     this.gameObjects = new Array<any>();
@@ -41,36 +40,56 @@ export default class GameInstance {
     this.ballArray = new Array<Ball>();
     this.bricks = new Array<Brick>();
     this.rewards = new Array<Reward>();
+    this.walls = new Array<Wall>();
 
     //initialize player
-    this.player1 = this.newPlayer(1);
-    this.player2 = this.newPlayer(2);
-    this.player3 = this.newPlayer(3);
-    this.player4 = this.newPlayer(4);
+
+    const player1 = this.newPlayer(1);
 
     const player1PosX =
-      GameData.GAME_CANVAS_WIDTH / 2 - this.player1.displayWidth / 2;
+      GameData.GAME_CANVAS_WIDTH / 2 - player1.displayWidth / 2;
     const player1PosY =
-      GameData.GAME_CANVAS_WIDTH -
-      (this.player1.displayHeight + this.player1.wallMargin);
-    this.player1.setPosition(player1PosX, player1PosY);
+      GameData.GAME_CANVAS_WIDTH - (player1.displayHeight + player1.wallMargin);
+    player1.setPosition(player1PosX, player1PosY);
 
-    const player2PosX = 0 + this.player2.wallMargin;
-    const player2PosY =
-      GameData.GAME_CANVAS_HEIGHT / 2 - this.player2.displayHeight / 2;
-    this.player2.setPosition(player2PosX, player2PosY);
+    if (playerAmount >= 2) {
+      const player2 = this.newPlayer(2);
 
-    const player3PosX =
-      GameData.GAME_CANVAS_WIDTH / 2 - this.player3.displayWidth / 2;
-    const player3PosY = 0 + this.player3.wallMargin;
-    this.player3.setPosition(player3PosX, player3PosY);
+      const player2PosX = 0 + player2.wallMargin;
+      const player2PosY =
+        GameData.GAME_CANVAS_HEIGHT / 2 - player2.displayHeight / 2;
+      player2.setPosition(player2PosX, player2PosY);
+    } else {
+      this.newWall(2);
+    }
 
-    const player4PosX =
-      GameData.GAME_CANVAS_WIDTH -
-      (this.player4.displayWidth + this.player4.wallMargin);
-    const player4PosY =
-      GameData.GAME_CANVAS_HEIGHT / 2 - this.player4.displayHeight / 2;
-    this.player4.setPosition(player4PosX, player4PosY);
+    if (playerAmount >= 3) {
+      const player3 = this.newPlayer(3);
+
+      const player3PosX =
+        GameData.GAME_CANVAS_WIDTH / 2 - player3.displayWidth / 2;
+      const player3PosY = 0 + player3.wallMargin;
+      player3.setPosition(player3PosX, player3PosY);
+    } else {
+      this.newWall(3);
+    }
+
+    if (playerAmount >= 4) {
+      const player4 = this.newPlayer(4);
+
+      const player4PosX =
+        GameData.GAME_CANVAS_WIDTH -
+        (player4.displayWidth + player4.wallMargin);
+      const player4PosY =
+        GameData.GAME_CANVAS_HEIGHT / 2 - player4.displayHeight / 2;
+      player4.setPosition(player4PosX, player4PosY);
+    } else {
+      this.newWall(4);
+    }
+
+    if (playerAmount > 4) {
+      throw new Error("playerAmount cannot be greater than 4");
+    }
 
     //initialize ball
     let ball = this.newBall();
@@ -78,10 +97,11 @@ export default class GameInstance {
       GameData.GAME_CANVAS_WIDTH / 2,
       GameData.GAME_CANVAS_HEIGHT / 2
     );
+    ball.lastCollidedPlayerId = player1.gameID;
 
     //initialize bricks
     for (let i = 0; i < 10; i++) {
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < 10; j++) {
         let brick = this.newBrick();
         //set brick position and margin
         brick.setPosition(
@@ -98,7 +118,7 @@ export default class GameInstance {
     }
 
     //test initalization
-    ball.SetMovingdirection(1, 0);
+    ball.SetMovingdirection(1, 1);
 
     //start game loop
     setInterval(() => {
@@ -123,22 +143,11 @@ export default class GameInstance {
    */
   Update(): Object {
     let updatedGameObject = Array<GameData.ICollidable>();
-    //instantiate json string to send to client
-    let gameTransferData = {
-      player1: this.player1,
-      player2: this.player2,
-      player3: this.player3,
-      player4: this.player4,
-      balls: this.ballArray,
-      bricks: this.bricks,
-      rewards: this.rewards,
-    };
 
     //update player position
-    this.player1.move();
-    this.player2.move();
-    this.player3.move();
-    this.player4.move();
+    for (let player of this.playersMap.values()) {
+      player.move();
+    }
 
     //update ball position
     this.ballArray.forEach((ball) => {
@@ -195,42 +204,11 @@ export default class GameInstance {
       }
     });
 
+    let gameTransferData = this.getCurrentGameTransferData(); //instantiate Object to send to client
     return gameTransferData;
   }
 
-  /**
-   * @descriptionin case you want to get the current gameTransferData without
-   *                callback function, use this function
-   *
-   * @returns gameTransferData to send to client
-   */
-  getCurrentGameTransferData(): Object {
-    let gameTransferData = {
-      player1: this.player1,
-      player2: this.player2,
-      player3: this.player3,
-      player4: this.player4,
-      balls: this.ballArray,
-      bricks: this.bricks,
-      rewards: this.rewards,
-    };
-
-    return gameTransferData;
-  }
-
-  /**
-   * @descriptionin use this function to get all game objects data
-   *
-   * @returns all gameTransferData to send to client
-   */
-  debugGetCurrentGameTransferData(): Object {
-    const gameTransferData = {
-      allGameObjects: this.gameObjects,
-    };
-    return gameTransferData;
-  }
-
-  getCurrentBouncerInfo(roomId: string): Record<string, any> {
+  getCurrentBouncerInfo(roomId: string): Object {
     let gameTransferData = {
       roomId: roomId,
       gameData: [],
@@ -251,7 +229,7 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentBallInfo(roomId: string): Record<string, any> {
+  getCurrentBallInfo(roomId: string): Object {
     let gameTransferData = {
       roomId: roomId,
       gameData: [],
@@ -272,7 +250,7 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentBrickInfo(roomId: string): Record<string, any> {
+  getCurrentBrickInfo(roomId: string): Object {
     let gameTransferData = {
       roomId: roomId,
       gameData: [],
@@ -294,7 +272,7 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentRewardInfo(roomId: string): Record<string, any> {
+  getCurrentRewardInfo(roomId: string): Object {
     let gameTransferData = {
       roomId: roomId,
       gameData: [],
@@ -316,6 +294,45 @@ export default class GameInstance {
     return gameTransferData;
   }
 
+  getCurrentWallInfo(roomId: string): Object {
+    let gameTransferData = {
+      roomId: roomId,
+      gameData: [],
+    };
+
+    let gameData: any = [];
+
+    this.walls.forEach((wall) => {
+      gameData.push({
+        id: wall.gameID,
+        xPos: wall.xPos,
+        yPos: wall.yPos,
+      });
+    });
+
+    gameTransferData.gameData = gameData;
+
+    return gameTransferData;
+  }
+
+  /**
+   * @descriptionin case you want to get the current gameTransferData without
+   *                callback function, use this function
+   *
+   * @returns gameTransferData to send to client
+   */
+  getCurrentGameTransferData(): Object {
+    let gameTransferData = {
+      playersMap: Array.from(this.playersMap.values()),
+      balls: this.ballArray,
+      bricks: this.bricks,
+      rewards: this.rewards,
+      walls: this.walls,
+    };
+
+    return gameTransferData;
+  }
+
   /**
    * @description use this function to set player direction, player will move each frame
    *
@@ -331,7 +348,11 @@ export default class GameInstance {
       throw new Error("Invalid direction");
     }
 
-    const player = this.playersMap.get(playerNumber);
+    const player = this.getPlayerByPlayerNumber(playerNumber);
+
+    if (!player) {
+      return;
+    }
 
     if (player) {
       if (direction == "left") {
@@ -386,22 +407,43 @@ export default class GameInstance {
     return reward;
   }
 
+  newWall(playerNumber: number): Wall {
+    const wall = new Wall(playerNumber);
+    this.gameObjects.push(wall);
+    this.gameColliders.push(wall);
+    this.walls.push(wall);
+    return wall;
+  }
+
   //remove game object
   removeBrick(brick: Brick) {
     //drop reward
     let reward = this.newReward(brick.lastCollidedPlayerId);
-    reward.setPosition(
-      brick.yPos + (GameData.BRICK_HEIGHT - GameData.REWARD_HEIGHT),
-      brick.xPos + (GameData.BRICK_WIDTH - GameData.REWARD_WIDTH)
-    );
-    if (brick.lastCollidedPlayerId == this.player1.gameID) {
-      reward.SetMovingdirection(1, 0);
-    } else if (brick.lastCollidedPlayerId == this.player2.gameID) {
-      reward.SetMovingdirection(0, -1);
-    } else if (brick.lastCollidedPlayerId == this.player3.gameID) {
-      reward.SetMovingdirection(-1, 0);
-    } else if (brick.lastCollidedPlayerId == this.player4.gameID) {
-      reward.SetMovingdirection(0, 1);
+
+    if (reward.rewardType == RewardType.None) {
+      this.removeReward(reward);
+    } else {
+      reward.setPosition(
+        brick.yPos + (GameData.BRICK_HEIGHT - GameData.REWARD_HEIGHT),
+        brick.xPos + (GameData.BRICK_WIDTH - GameData.REWARD_WIDTH)
+      );
+      if (
+        this.getPlayerByGameId(brick.lastCollidedPlayerId).playerNumber == 1
+      ) {
+        reward.SetMovingdirection(1, 0);
+      } else if (
+        this.getPlayerByGameId(brick.lastCollidedPlayerId).playerNumber == 2
+      ) {
+        reward.SetMovingdirection(0, -1);
+      } else if (
+        this.getPlayerByGameId(brick.lastCollidedPlayerId).playerNumber == 3
+      ) {
+        reward.SetMovingdirection(-1, 0);
+      } else if (
+        this.getPlayerByGameId(brick.lastCollidedPlayerId).playerNumber == 4
+      ) {
+        reward.SetMovingdirection(0, 1);
+      }
     }
 
     this.gameObjects.splice(this.gameObjects.indexOf(brick), 1);
@@ -416,16 +458,31 @@ export default class GameInstance {
   }
 
   getPlayerByGameId(playerGameId: number): PlayerBoard {
-    if (this.player1.gameID == playerGameId) {
-      return this.player1;
-    } else if (this.player2.gameID == playerGameId) {
-      return this.player2;
-    } else if (this.player3.gameID == playerGameId) {
-      return this.player3;
-    } else if (this.player4.gameID == playerGameId) {
-      return this.player4;
+    let outPlayer: PlayerBoard | undefined = undefined;
+
+    this.playersMap.forEach((player: PlayerBoard) => {
+      if (player.gameID == playerGameId) {
+        outPlayer = player;
+      }
+    });
+
+    if (outPlayer != undefined) {
+      return outPlayer;
     } else {
+      this.playersMap.forEach((player: PlayerBoard) => {
+        console.log(player.gameID);
+      });
+      console.log("Invalid player game id: " + playerGameId);
       throw new Error("Invalid player game id");
+    }
+  }
+
+  getPlayerByPlayerNumber(playerNumber: number): PlayerBoard {
+    const player = this.playersMap.get(playerNumber);
+    if (player) {
+      return player;
+    } else {
+      throw new Error("Invalid player number");
     }
   }
 }

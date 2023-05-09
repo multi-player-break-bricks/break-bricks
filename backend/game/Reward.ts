@@ -16,6 +16,8 @@ export default class Reward
   movingDirectionX: number;
   movingDirectionY: number;
   rewardPlayerId: number;
+  colliderType: GameData.ColliderType;
+  radius: number;
 
   constructor(rewardPlayerId: number, rewardType?: RewardType) {
     this.gameID = GameData.generateID();
@@ -32,6 +34,8 @@ export default class Reward
     this.onCollision = this.onCollision.bind(this);
     this.rewardType = rewardType || this.randomRewardType();
     this.rewardPlayerId = rewardPlayerId;
+    this.colliderType = GameData.ColliderType.rect;
+    this.radius = 0;
   }
 
   /**
@@ -71,16 +75,24 @@ export default class Reward
   }
 
   private randomRewardType(): RewardType {
+    // chance of no reward
+    if (Math.random() > GameData.REWARD_PROBABILITY) {
+      return RewardType.None;
+    }
+
     const rewardTypes = Object.values(RewardType); // Get an array of all enum constants
-    const randomIndex = Math.floor(Math.random() * rewardTypes.length); // Generate a random index
-    return rewardTypes[randomIndex] as unknown as RewardType; // Return the enum constant at the random index
+    const randomIndex = Math.floor(
+      (Math.random() * rewardTypes.length) / 2 + rewardTypes.length / 2
+    ); // Generate a random index
+    return rewardTypes[randomIndex] as RewardType; // Return the enum constant at the random index
   }
 }
 
 enum RewardType {
-  extraBall,
-  biggerBall,
-  BiggerPaddle,
+  None = -1,
+  extraBall = 0,
+  biggerBall = 1,
+  BiggerPaddle = 2,
 }
 
 export { Reward, RewardType };
