@@ -23,7 +23,6 @@ export default function RoomPage() {
 
   useEffect(() => {
     socket?.on("join-room-success", (data) => {
-      console.log("players", data.players);
       setPlayers(data.players);
       setRoomNumber(data.number);
     });

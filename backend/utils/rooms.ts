@@ -220,32 +220,8 @@ export const moveBouncer = (
   playerId: string
 ) => {
   const gameRoom = gameRooms[roomId];
+  console.log(roomId, JSON.stringify(gameRoom, null, 1));
   if (!gameRoom) throw new Error("Game room not found");
   const { number } = players[playerId];
   gameRoom.gameInstance.setPlayerDir(number, direction, pressed);
-};
-
-export const createGameRoomTest = (playerId: string) => {
-  let gameRoom = gameRooms["test"];
-  if (!gameRoom) {
-    gameRooms["test"] = {
-      id: "test",
-      players: [playerId],
-      gameInstance: new GameInstance("test", 1),
-    };
-    gameRoom = gameRooms["test"];
-  }
-  players[playerId] = {
-    id: playerId,
-    name: "test",
-    number: 1,
-    isReady: true,
-  };
-  const { bouncers, balls, bricks } = getGameInfo(gameRoom);
-
-  return {
-    id: gameRoom.id,
-    gameInfo: { bouncers: [{ ...bouncers[0], id: playerId }], balls, bricks },
-    players: gameRoom.players.map((playerId) => players[playerId]),
-  };
 };

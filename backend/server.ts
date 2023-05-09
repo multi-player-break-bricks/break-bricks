@@ -9,7 +9,6 @@ import {
   removePlayerFromRoom,
   updatePlayerReady,
   findGameRoom,
-  createGameRoomTest,
   getGameInfo,
   initializeGameRoom,
   moveBouncer,

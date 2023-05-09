@@ -56,7 +56,6 @@ const Canvas = () => {
 
   useEffect(() => {
     socket?.on("frame-change", ({ bouncers, balls, bricks, rewards }) => {
-      console.log({ bouncers, balls, bricks });
       setBouncers(bouncers);
       setBalls(balls);
       setBricks(bricks);
