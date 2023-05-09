@@ -8,6 +8,8 @@ export default class PlayerBoard
 
   playerNumber: number;
 
+  score: number;
+
   yPos: number;
   xPos: number;
   width: number;
@@ -50,6 +52,7 @@ export default class PlayerBoard
     this.isPlayerMovingRight = false;
     this.colliderType = GameData.ColliderType.rect;
     this.radius = 0;
+    this.score = 0;
 
     this.onCollision = () => false;
 
@@ -82,6 +85,10 @@ export default class PlayerBoard
       //   this.xPos = canvas.width - this.wallMargin - this.displayWidth;
       //   this.yPos = canvas.height / 2 - this.displayHeight / 2;
     }
+  }
+
+  increaseScore(score: number) {
+    this.score += score;
   }
 
   setPosition(xPos: number, yPos: number) {
