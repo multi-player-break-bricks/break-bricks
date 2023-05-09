@@ -238,8 +238,8 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentBouncerInfo(roomId: string): Record<string, unknown> {
-    const gameData: Array<Record<string, unknown>> = [];
+  getCurrentBouncerInfo(): Record<string, number>[] {
+    const gameData: Array<Record<string, number>> = [];
     this.playersMap.forEach((player) => {
       gameData.push({
         number: player.playerNumber,
@@ -251,16 +251,11 @@ export default class GameInstance {
       });
     });
 
-    const gameTransferData = {
-      roomId: roomId,
-      gameData: gameData,
-    };
-
-    return gameTransferData;
+    return gameData;
   }
 
-  getCurrentBallInfo(roomId: string): Record<string, unknown> {
-    const gameData: Array<Record<string, unknown>> = [];
+  getCurrentBallInfo(): Record<string, number>[] {
+    const gameData: Array<Record<string, number>> = [];
     this.balls.forEach((ball) => {
       gameData.push({
         id: ball.gameID,
@@ -270,16 +265,11 @@ export default class GameInstance {
       });
     });
 
-    const gameTransferData = {
-      roomId: roomId,
-      gameData: gameData,
-    };
-
-    return gameTransferData;
+    return gameData;
   }
 
-  getCurrentBrickInfo(roomId: string): Record<string, unknown> {
-    const gameData: Array<Record<string, unknown>> = [];
+  getCurrentBrickInfo(): Record<string, number>[] {
+    const gameData: Array<Record<string, number>> = [];
     this.bricks.forEach((brick) => {
       gameData.push({
         id: brick.gameID,
@@ -291,16 +281,11 @@ export default class GameInstance {
       });
     });
 
-    const gameTransferData = {
-      roomId: roomId,
-      gameData: gameData,
-    };
-
-    return gameTransferData;
+    return gameData;
   }
 
-  getCurrentRewardInfo(roomId: string): Record<string, unknown> {
-    const gameData: Array<Record<string, unknown>> = [];
+  getCurrentRewardInfo(): Record<string, number | RewardType>[] {
+    const gameData: Array<Record<string, number | RewardType>> = [];
     this.rewards.forEach((reward) => {
       gameData.push({
         id: reward.gameID,
@@ -312,16 +297,11 @@ export default class GameInstance {
       });
     });
 
-    const gameTransferData = {
-      roomId: roomId,
-      gameData: gameData,
-    };
-
-    return gameTransferData;
+    return gameData;
   }
 
-  getCurrentWallInfo(roomId: string): Record<string, unknown> {
-    const gameData: Array<Record<string, unknown>> = [];
+  getCurrentWallInfo(): Record<string, number>[] {
+    const gameData: Array<Record<string, number>> = [];
     this.walls.forEach((wall) => {
       gameData.push({
         id: wall.gameID,
@@ -332,12 +312,7 @@ export default class GameInstance {
       });
     });
 
-    const gameTransferData = {
-      roomId: roomId,
-      gameData: gameData,
-    };
-
-    return gameTransferData;
+    return gameData;
   }
 
   /**
@@ -348,11 +323,11 @@ export default class GameInstance {
    */
   getCurrentGameTransferData(): Record<string, unknown> {
     const gameTransferData = {
-      playersMap: this.getCurrentBouncerInfo("testRoomId"),
-      balls: this.getCurrentBallInfo("testRoomId"),
-      bricks: this.getCurrentBrickInfo("testRoomId"),
-      rewards: this.getCurrentRewardInfo("testRoomId"),
-      walls: this.getCurrentWallInfo("testRoomId"),
+      playersMap: this.getCurrentBouncerInfo(),
+      balls: this.getCurrentBallInfo(),
+      bricks: this.getCurrentBrickInfo(),
+      rewards: this.getCurrentRewardInfo(),
+      walls: this.getCurrentWallInfo(),
     };
 
     return gameTransferData;

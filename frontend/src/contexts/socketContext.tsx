@@ -22,7 +22,7 @@ const useSocketContext = () => {
 
 const SocketContextProvider = ({ children }: PropsWithChildren<{}>) => {
   const { socket, connectSocket, disconnectSocket } = useSocket(
-    process.env.NEXT_PUBLIC_REMOTE_BACKEND_URL!
+    process.env.NEXT_PUBLIC_BACKEND_URL!
   );
 
   return (
