@@ -32,3 +32,8 @@ type Reward = GameObject & {
   width: number;
   type: string;
 };
+
+type Wall = GameObject & {
+  height: number;
+  width: number;
+};

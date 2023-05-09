@@ -1,16 +1,7 @@
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = {
-  xPos: number;
-  yPos: number;
-  id: number;
-  height: number;
-  width: number;
-  level: number;
-};
-
-export const Brick = ({ xPos, yPos, height, width, level }: Props) => {
+export const Brick = ({ xPos, yPos, height, width, level }: Brick) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
   const opacity = (level - 1) * 0.12 + 0.4;

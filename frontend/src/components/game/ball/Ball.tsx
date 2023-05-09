@@ -1,16 +1,13 @@
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = { xPos: number; yPos: number; size: number };
-
-export const Ball = ({ xPos, yPos, size }: Props) => {
+export const Ball = ({ xPos, yPos, size }: Ball) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
 
   return (
     <svg
       style={{
-        backgroundColor: "black",
         borderRadius: "50%",
         left: `${xPos * displayRatio}px`,
         top: `${yPos * displayRatio}px`,

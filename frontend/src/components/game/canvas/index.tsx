@@ -1,12 +1,12 @@
 import { useSocketContext } from "@/contexts/socketContext";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { initialBalls, initialBouncers, initialBricks } from "./seeds";
 import styles from "./index.module.css";
 import { Brick } from "../brick/Brick";
 import { Bouncer } from "../bouncer/Bouncer";
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import { Ball } from "../ball/Ball";
 import { Reward } from "../reward/Reward";
+import { Wall } from "../wall/Wall";
 
 const Canvas = () => {
   const { socket } = useSocketContext();
@@ -18,6 +18,7 @@ const Canvas = () => {
   const [balls, setBalls] = useState<Ball[]>([]);
   const [bricks, setBricks] = useState<Brick[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
+  const [walls, setWalls] = useState<Wall[]>([]);
 
   const canvasSize = useCanvasSize();
 
@@ -49,6 +50,7 @@ const Canvas = () => {
       setBouncers(gameInfo.bouncers);
       setBalls(gameInfo.balls);
       setBricks(gameInfo.bricks);
+      setWalls(gameInfo.walls);
       setInterval(() => {
         socket.emit("request-game-info", room.id);
       }, 1000 / 16);
@@ -134,6 +136,9 @@ const Canvas = () => {
       ))}
       {rewards.map((reward) => (
         <Reward key={reward.id} {...reward} />
+      ))}
+      {walls.map((wall) => (
+        <Wall key={wall.id} {...wall} />
       ))}
     </div>
   );

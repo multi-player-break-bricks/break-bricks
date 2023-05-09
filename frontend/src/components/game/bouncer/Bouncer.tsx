@@ -1,16 +1,7 @@
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = {
-  xPos: number;
-  yPos: number;
-  height: number;
-  width: number;
-  number: number;
-  id: number;
-};
-
-export const Bouncer = ({ xPos, yPos, height, width, number }: Props) => {
+export const Bouncer = ({ xPos, yPos, height, width, number }: Bouncer) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
   const rotation = number * 90;

@@ -190,9 +190,9 @@ export const initializeGameRoom = (roomId: string) => {
 
   const gameRoom = gameRooms[roomId];
   console.log("initializeGameRoom", { gameRoom });
-  const { bouncers, balls, bricks } = getGameInfo(gameRoom);
+  const gameInfo = getGameInfo(gameRoom);
 
-  const bouncersWithId = bouncers.map(
+  const bouncersWithId = gameInfo.bouncers.map(
     (bouncer: Record<string, number>, index: number) => ({
       ...bouncer,
       id: gameRoom.players[index],
@@ -201,7 +201,10 @@ export const initializeGameRoom = (roomId: string) => {
 
   return {
     id: gameRoom.id,
-    gameInfo: { bouncers: bouncersWithId, balls, bricks },
+    gameInfo: {
+      ...gameInfo,
+      bouncers: bouncersWithId,
+    },
     players: gameRoom.players.map((playerId) => players[playerId]),
   };
 };
@@ -212,7 +215,8 @@ export const getGameInfo = (gameRoom: GameRoom) => {
   const balls = gameInstance.getCurrentBallInfo();
   const bricks = gameInstance.getCurrentBrickInfo();
   const rewards = gameInstance.getCurrentRewardInfo();
-  return { bouncers, balls, bricks, rewards };
+  const walls = gameInstance.getCurrentWallInfo();
+  return { bouncers, balls, bricks, rewards, walls };
 };
 
 export const moveBouncer = (

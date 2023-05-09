@@ -1,16 +1,7 @@
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = {
-  xPos: number;
-  yPos: number;
-  id: number;
-  height: number;
-  width: number;
-  type: string;
-};
-
-export const Reward = ({ xPos, yPos, height, width, type }: Props) => {
+export const Reward = ({ xPos, yPos, height, width, type }: Reward) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
 
