@@ -21,6 +21,7 @@ export default function GamePage() {
 
   useEffect(() => {
     socket?.on("join-room-success", (data) => {
+      console.log("join-room-success in game room");
       setPlayers(data.players);
       setRoomId(data.roomId);
     });

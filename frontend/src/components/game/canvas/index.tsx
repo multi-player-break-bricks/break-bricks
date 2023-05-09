@@ -37,9 +37,13 @@ const Canvas = () => {
   }, [canvasRef, canvasSize, playerNumber]);
 
   useEffect(() => {
-    socket?.on("join-room-success", (room) => {
+    if (!socket || !socket.connected) {
+      console.log("socket not connected in canvas");
+      return;
+    }
+    socket.on("join-room-success", (room) => {
       const { gameInfo, id, players } = room;
-      console.log({ gameInfo, roomId: id });
+      console.log("join-room-success in canvas", { gameInfo, roomId: id });
       setRoomId(id);
       setPlayers(players);
       setBouncers(gameInfo.bouncers);
@@ -51,7 +55,7 @@ const Canvas = () => {
     });
 
     return () => {
-      socket?.off("join-room-success");
+      socket.off("join-room-success");
     };
   }, [socket]);
 

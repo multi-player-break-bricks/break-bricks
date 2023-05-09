@@ -104,7 +104,9 @@ io.on("connection", (socket) => {
     const { number } = getPlayerInfo(socket.id);
     if (number !== 1) return;
     const gameRoom = initializeGameRoom(roomId.toString());
-    io.to(roomId).emit("join-room-success", gameRoom);
+    setTimeout(() => {
+      io.to(roomId).emit("join-room-success", gameRoom);
+    }, 1000);
   });
 
   socket.on("request-game-info", (roomId) => {
