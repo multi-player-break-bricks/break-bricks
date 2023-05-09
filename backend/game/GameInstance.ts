@@ -479,7 +479,7 @@ export default class GameInstance {
     this.gameObjects.splice(this.gameObjects.indexOf(player), 1);
     this.gameColliders.splice(this.gameColliders.indexOf(player), 1);
     this.playersMap.delete(player.playerNumber);
-    this.walls.push(this.newWall(player.playerNumber));
+    this.newWall(player.playerNumber);
   }
 
   getPlayerByGameId(playerGameId: number): PlayerBoard {
