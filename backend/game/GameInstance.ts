@@ -20,6 +20,8 @@ export default class GameInstance {
 
   updateInterval: number;
 
+  gameStatus: string;
+
   /**
    * @description initialize game
    *              start game loop
@@ -38,6 +40,7 @@ export default class GameInstance {
     this.bricks = new Array<Brick>();
     this.rewards = new Array<Reward>();
     this.walls = new Array<Wall>();
+    this.gameStatus = "game running";
 
     //initialize player
 
@@ -228,10 +231,12 @@ export default class GameInstance {
     if (this.balls.length == 0) {
       gameTransferData = { gameOver: true };
       console.log("game over");
+      this.gameStatus = "game over";
       clearInterval(this.updateInterval);
     } else if (this.bricks.length == 0) {
       gameTransferData = { gameWon: true };
       console.log("game won");
+      this.gameStatus = "game won";
       clearInterval(this.updateInterval);
     }
 
@@ -313,6 +318,13 @@ export default class GameInstance {
     });
 
     return gameData;
+  }
+
+  /**
+   * @returns game status, can be "game over", "game won", "game running"
+   */
+  getGameStatus(): string {
+    return this.gameStatus;
   }
 
   /**
