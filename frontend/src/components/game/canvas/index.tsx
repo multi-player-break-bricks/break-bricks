@@ -14,9 +14,9 @@ const Canvas = () => {
   const [roomId, setRoomId] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
 
-  const [bouncers, setBouncers] = useState<Bouncer[]>(initialBouncers);
-  const [balls, setBalls] = useState<GameObject[]>(initialBalls);
-  const [bricks, setBricks] = useState<Brick[]>(initialBricks);
+  const [bouncers, setBouncers] = useState<Bouncer[]>([]);
+  const [balls, setBalls] = useState<Ball[]>([]);
+  const [bricks, setBricks] = useState<Brick[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
 
   const canvasSize = useCanvasSize();
@@ -38,9 +38,10 @@ const Canvas = () => {
 
   useEffect(() => {
     socket?.on("join-room-success", (room) => {
-      const { gameInfo, id } = room;
+      const { gameInfo, id, players } = room;
+      console.log({ gameInfo, roomId: id });
       setRoomId(id);
-      setPlayers(room.players);
+      setPlayers(players);
       setBouncers(gameInfo.bouncers);
       setBalls(gameInfo.balls);
       setBricks(gameInfo.bricks);
@@ -70,6 +71,7 @@ const Canvas = () => {
   const emitMoveBouncer = useCallback(
     (direction: "left" | "right", pressed: boolean) => {
       const player = players.find((p) => p.id === socket?.id);
+      console.log("emitMoveBouncer from room", roomId);
       socket?.emit("move-bouncer", {
         direction,
         pressed,

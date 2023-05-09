@@ -1,10 +1,16 @@
-import { BRICK_SIZE } from "@/constants";
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = { xPos: number; yPos: number; id: number; level: number };
+type Props = {
+  xPos: number;
+  yPos: number;
+  id: number;
+  height: number;
+  width: number;
+  level: number;
+};
 
-export const Brick = ({ xPos, yPos, level }: Props) => {
+export const Brick = ({ xPos, yPos, height, width, level }: Props) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
   const opacity = (level - 1) * 0.12 + 0.4;
@@ -14,8 +20,8 @@ export const Brick = ({ xPos, yPos, level }: Props) => {
       style={{
         left: `${xPos * displayRatio}px`,
         top: `${yPos * displayRatio}px`,
-        width: `${BRICK_SIZE * displayRatio}px`,
-        height: `${BRICK_SIZE * displayRatio}px`,
+        width: `${width * displayRatio}px`,
+        height: `${height * displayRatio}px`,
         opacity: opacity,
       }}
       viewBox="0 0 150 150"

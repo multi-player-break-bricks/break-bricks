@@ -1,10 +1,16 @@
-import { REWARD_SIZE } from "@/constants";
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = { xPos: number; yPos: number; id: number; type: string };
+type Props = {
+  xPos: number;
+  yPos: number;
+  id: number;
+  height: number;
+  width: number;
+  type: string;
+};
 
-export const Reward = ({ xPos, yPos, type }: Props) => {
+export const Reward = ({ xPos, yPos, height, width, type }: Props) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
 
@@ -13,8 +19,8 @@ export const Reward = ({ xPos, yPos, type }: Props) => {
       style={{
         left: `${xPos * displayRatio}px`,
         top: `${yPos * displayRatio}px`,
-        width: `${REWARD_SIZE * displayRatio}px`,
-        height: `${REWARD_SIZE * displayRatio}px`,
+        width: `${width * displayRatio}px`,
+        height: `${height * displayRatio}px`,
       }}
       viewBox="0 0 110 111"
       fill="none"

@@ -179,6 +179,7 @@ export const findGameRoom = (roomId: string) => {
 export const initializeGameRoom = (roomId: string) => {
   const waitRoom = waitRooms[roomId];
   if (waitRoom) {
+    console.log("deleting wait room");
     delete waitRooms[roomId];
     gameRooms[roomId] = {
       id: roomId,
@@ -188,6 +189,7 @@ export const initializeGameRoom = (roomId: string) => {
   }
 
   const gameRoom = gameRooms[roomId];
+  console.log("initializeGameRoom", { gameRoom });
   const { bouncers, balls, bricks } = getGameInfo(gameRoom);
 
   const bouncersWithId = bouncers.map(

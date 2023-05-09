@@ -1,10 +1,9 @@
-import { BALL_SIZE, BRICK_SIZE } from "@/constants";
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = { xPos: number; yPos: number };
+type Props = { xPos: number; yPos: number; size: number };
 
-export const Ball = ({ xPos, yPos }: Props) => {
+export const Ball = ({ xPos, yPos, size }: Props) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
 
@@ -15,8 +14,8 @@ export const Ball = ({ xPos, yPos }: Props) => {
         borderRadius: "50%",
         left: `${xPos * displayRatio}px`,
         top: `${yPos * displayRatio}px`,
-        width: `${BALL_SIZE * displayRatio}px`,
-        height: `${BALL_SIZE * displayRatio}px`,
+        width: `${size * displayRatio}px`,
+        height: `${size * displayRatio}px`,
       }}
       viewBox="0 0 50 50"
       fill="none"
