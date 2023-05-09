@@ -26,7 +26,7 @@ export default class Brick
     this.displayHeight = this.height = GameData.BRICK_HEIGHT;
     this.gameObjectType = GameData.GameObjectType.brick;
     this.name = "brick";
-    this.life = life || 1;
+    this.life = life === undefined ? 1 : life;
     this.lastCollidedPlayerId = -1;
     this.colliderType = GameData.ColliderType.rect;
     this.radius = 0;
