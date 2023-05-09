@@ -16,7 +16,7 @@ import {
 } from "./utils/rooms.ts";
 
 const developmentUrl = "http://localhost:3000";
-const productionUrl = "https://brick-breaking.vercel.app/";
+const productionUrl = "https://brick-breaking.vercel.app";
 
 let countdownInterval: number;
 
