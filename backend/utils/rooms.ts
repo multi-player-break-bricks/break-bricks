@@ -1,4 +1,5 @@
 import { randomUUID } from "https://deno.land/std@0.134.0/node/crypto.ts";
+import GameInstance from "../game/GameInstance.ts";
 
 let lastWaitRoomNumber = 0;
 
@@ -11,12 +12,14 @@ type WaitRoom = {
 
 type GameRoom = {
   id: string;
+  gameInstance: GameInstance;
   players: string[];
 };
 
 type Player = {
   id: string;
   name: string;
+  number: number;
   isReady: boolean;
 };
 
@@ -24,11 +27,19 @@ const waitRooms: Record<string, WaitRoom> = {};
 const gameRooms: Record<string, GameRoom> = {};
 const players: Record<string, Player> = {};
 
-export const savePlayerName = (playerId: string, name: string) => {
-  players[playerId] = { id: playerId, name, isReady: false };
+const savePlayerInfo = (playerId: string, name: string, number: number) => {
+  players[playerId] = { id: playerId, name, number, isReady: false };
 };
 
-export const createWaitRoom = (isPublic: boolean, playerId: string) => {
+export const getPlayerInfo = (playerId: string) => {
+  return players[playerId];
+};
+
+export const createWaitRoom = (
+  isPublic: boolean,
+  playerId: string,
+  playerName: string
+) => {
   lastWaitRoomNumber = lastWaitRoomNumber + 1;
   const stringifiedLastWaitRoomNumber = lastWaitRoomNumber
     .toString()
@@ -40,12 +51,14 @@ export const createWaitRoom = (isPublic: boolean, playerId: string) => {
     isPublic,
     players: [playerId],
   };
+  savePlayerInfo(playerId, playerName, 1);
   return { waitRoomNumber: stringifiedLastWaitRoomNumber, roomId };
 };
 
 export const joinWaitRoomWithNumber = (
   waitRoomNumber: string,
-  playerId: string
+  playerId: string,
+  playerName: string
 ) => {
   const waitRoom = Object.values(waitRooms).find(
     (room) => room.number === waitRoomNumber
@@ -61,18 +74,23 @@ export const joinWaitRoomWithNumber = (
     };
   }
   waitRoom.players.push(playerId);
+  savePlayerInfo(playerId, playerName, waitRoom.players.length);
   return {
     waitRoomId: waitRoom.id,
     players: waitRoom.players.map((playerId) => players[playerId]),
   };
 };
 
-export const joinRandomRoom = (playerId: string) => {
+export const joinRandomRoom = (playerId: string, playerName: string) => {
   const waitRoom = Object.values(waitRooms).find(
     (room) => room.players.length < 4 && room.isPublic
   );
   if (!waitRoom) {
-    const { roomId, waitRoomNumber } = createWaitRoom(true, playerId);
+    const { roomId, waitRoomNumber } = createWaitRoom(
+      true,
+      playerId,
+      playerName
+    );
     return {
       roomId,
       waitRoomNumber,
@@ -80,6 +98,7 @@ export const joinRandomRoom = (playerId: string) => {
     };
   }
   waitRoom.players.push(playerId);
+  savePlayerInfo(playerId, playerName, waitRoom.players.length);
   return {
     roomId: waitRoom.id,
     waitRoomNumber: waitRoom.number,
@@ -101,8 +120,12 @@ export const removePlayerFromRoom = (playerId: string) => {
   const waitRoom = Object.values(waitRooms).find((room) =>
     room.players.includes(playerId)
   );
+  delete players[playerId];
   if (waitRoom) {
     waitRoom.players = waitRoom.players.filter((id) => id !== playerId);
+    waitRoom.players.forEach((playerId) => {
+      players[playerId].number = waitRoom.players.indexOf(playerId) + 1;
+    });
     return {
       roomId: waitRoom.id,
       players: waitRoom.players.map((playerId) => players[playerId]),
@@ -135,21 +158,83 @@ export const updatePlayerReady = (
   };
 };
 
-export const moveWaitRoomToGameRoom = (roomId: string) => {
-  const waitRoom = waitRooms[roomId];
-  if (!waitRoom) return;
-  delete waitRooms[roomId];
-  gameRooms[roomId] = {
-    id: roomId,
-    players: waitRoom.players,
-  };
-};
-
 export const findGameRoom = (roomId: string) => {
   const gameRoom = gameRooms[roomId];
   if (!gameRoom) return;
   return {
+    ...gameRoom,
+    players: gameRoom.players.map((playerId) => players[playerId]),
+  };
+};
+
+export const initializeGameRoom = (roomId: string) => {
+  const waitRoom = waitRooms[roomId];
+  if (waitRoom) {
+    delete waitRooms[roomId];
+    gameRooms[roomId] = {
+      id: roomId,
+      gameInstance: new GameInstance(roomId, () => {}),
+      players: waitRoom.players,
+    };
+  }
+
+  const gameRoom = gameRooms[roomId];
+  const { bouncers, balls, bricks } = getGameInfo(gameRoom);
+
+  const bouncersWithId = bouncers.map((bouncer: any, index: number) => ({
+    ...bouncer,
+    id: gameRoom.players[index],
+  }));
+
+  return {
     id: gameRoom.id,
+    gameInfo: { bouncers: bouncersWithId, balls, bricks },
+    players: gameRoom.players.map((playerId) => players[playerId]),
+  };
+};
+
+export const getGameInfo = (gameRoom: GameRoom) => {
+  const { gameInstance, id } = gameRoom;
+  const bouncers = gameInstance.getCurrentBouncerInfo(id).gameData;
+  const balls = gameInstance.getCurrentBallInfo(id).gameData;
+  const bricks = gameInstance.getCurrentBrickInfo(id).gameData;
+  const rewards = gameInstance.getCurrentRewardInfo(id).gameData;
+  return { bouncers, balls, bricks, rewards };
+};
+
+export const moveBouncer = (
+  direction: "left" | "right",
+  pressed: boolean,
+  roomId: string,
+  playerId: string
+) => {
+  const gameRoom = gameRooms[roomId];
+  if (!gameRoom) throw new Error("Game room not found");
+  const { number } = players[playerId];
+  gameRoom.gameInstance.setPlayerDir(number, direction, pressed);
+};
+
+export const createGameRoomTest = (playerId: string) => {
+  let gameRoom = gameRooms["test"];
+  if (!gameRoom) {
+    gameRooms["test"] = {
+      id: "test",
+      players: [playerId],
+      gameInstance: new GameInstance("test", () => {}),
+    };
+    gameRoom = gameRooms["test"];
+  }
+  players[playerId] = {
+    id: playerId,
+    name: "test",
+    number: 1,
+    isReady: true,
+  };
+  const { bouncers, balls, bricks } = getGameInfo(gameRoom);
+
+  return {
+    id: gameRoom.id,
+    gameInfo: { bouncers: [{ ...bouncers[0], id: playerId }], balls, bricks },
     players: gameRoom.players.map((playerId) => players[playerId]),
   };
 };

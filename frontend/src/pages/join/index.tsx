@@ -16,7 +16,6 @@ export default function JoinPage() {
   const firstRender = useRef(true);
 
   useEffect(() => {
-    console.log("disconnecting socket");
     if (firstRender.current) {
       firstRender.current = false;
       disconnectSocket();

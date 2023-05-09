@@ -5,12 +5,15 @@ import {
   createWaitRoom,
   joinWaitRoomWithNumber,
   joinRandomRoom,
-  savePlayerName,
   findWaitRoom,
   removePlayerFromRoom,
   updatePlayerReady,
-  moveWaitRoomToGameRoom,
   findGameRoom,
+  createGameRoomTest,
+  getGameInfo,
+  initializeGameRoom,
+  moveBouncer,
+  getPlayerInfo,
 } from "./utils/rooms.ts";
 // import GameInstance from "./game/gameInstance.ts";
 
@@ -27,20 +30,22 @@ const io = new Server({
 
 io.on("connection", (socket) => {
   socket.on("create-wait-room", ({ isPublic, name }) => {
-    savePlayerName(socket.id, name);
-    const { roomId } = createWaitRoom(isPublic, socket.id);
+    const { roomId } = createWaitRoom(isPublic, socket.id, name);
     socket.join(roomId);
     socket.emit("join-wait-room");
   });
 
   socket.on("join-wait-room-with-id", ({ roomNumber, name }) => {
-    savePlayerName(socket.id, name);
-    const result = joinWaitRoomWithNumber(roomNumber, socket.id);
+    const result = joinWaitRoomWithNumber(roomNumber, socket.id, name);
     if (result.error) {
       socket.emit("join-wait-room-error", result.error);
       return;
     }
     const { waitRoomId, players } = result;
+    if (!players) {
+      socket.emit("join-wait-room-error", "No players found");
+      return;
+    }
     socket.join(waitRoomId!);
     socket.emit("join-wait-room");
     io.to(waitRoomId!).emit("wait-room-updated", {
@@ -49,8 +54,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("join-random-wait-room", (name) => {
-    savePlayerName(socket.id, name);
-    const { players, roomId } = joinRandomRoom(socket.id);
+    const { players, roomId } = joinRandomRoom(socket.id, name);
     socket.join(roomId);
     socket.emit("join-wait-room");
     io.to(roomId).emit("wait-room-updated", { players });
@@ -88,7 +92,6 @@ io.on("connection", (socket) => {
       if (count === 0) {
         clearInterval(countdownInterval);
         countdownInterval = 0;
-        moveWaitRoomToGameRoom(roomId);
       }
       count -= 1;
     }, 1000);
@@ -100,12 +103,10 @@ io.on("connection", (socket) => {
       socket.emit("join-room-error", "Room not found");
       return;
     }
-    const gameRoom = findGameRoom(roomId.toString());
-    if (!gameRoom) {
-      socket.emit("join-room-error", "Room not found");
-      return;
-    }
-    socket.emit("join-room-success", gameRoom);
+    const { number } = getPlayerInfo(socket.id);
+    if (number !== 1) return;
+    const gameRoom = initializeGameRoom(roomId.toString());
+    io.to(roomId).emit("join-room-success", gameRoom);
   });
 
   socket.on("disconnect", () => {
@@ -113,6 +114,30 @@ io.on("connection", (socket) => {
     if (!result) return;
     const { roomId, players } = result;
     io.to(roomId).emit("wait-room-updated", { players });
+  });
+
+  // for testing
+  socket.on("join-game-room-test", () => {
+    const room = createGameRoomTest(socket.id);
+    socket.join(room.id);
+    socket.emit("join-room-success", room);
+  });
+
+  socket.on("request-game-info", (roomId) => {
+    const gameRoom = findGameRoom(roomId.toString());
+    if (!gameRoom) {
+      socket.emit("join-room-error", "Room not found");
+      return;
+    }
+    const gameInfo = getGameInfo({
+      ...gameRoom,
+      players: gameRoom.players.map((player) => player.id),
+    });
+    socket.emit("frame-change", gameInfo);
+  });
+
+  socket.on("move-bouncer", ({ direction, pressed, roomId }) => {
+    moveBouncer(direction, pressed, roomId, socket.id);
   });
 });
 

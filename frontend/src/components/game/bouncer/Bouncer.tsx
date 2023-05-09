@@ -2,7 +2,7 @@ import { BOUNCER_HEIGHT, BOUNCER_WIDTH } from "@/constants";
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = { xPos: number; yPos: number; number: number; id: string };
+type Props = { xPos: number; yPos: number; number: number; id: number };
 
 export const Bouncer = ({ xPos, yPos, number }: Props) => {
   const canvasSize = useCanvasSize();

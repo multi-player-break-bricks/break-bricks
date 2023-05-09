@@ -4,6 +4,8 @@ import * as GameData from "./GameData.ts";
 import Brick from "./Brick.ts";
 import Reward, { RewardType } from "./Reward.ts";
 
+export type GameInstanceType = typeof GameInstance;
+
 export default class GameInstance {
   gameRoomId: string;
   gameObjects: Array<any>;
@@ -228,7 +230,7 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentBouncerInfo(roomId: string): Object {
+  getCurrentBouncerInfo(roomId: string): Record<string, any> {
     let gameTransferData = {
       roomId: roomId,
       gameData: [],
@@ -249,7 +251,7 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentBallInfo(roomId: string): Object {
+  getCurrentBallInfo(roomId: string): Record<string, any> {
     let gameTransferData = {
       roomId: roomId,
       gameData: [],
@@ -270,7 +272,7 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentBrickInfo(roomId: string): Object {
+  getCurrentBrickInfo(roomId: string): Record<string, any> {
     let gameTransferData = {
       roomId: roomId,
       gameData: [],
@@ -292,7 +294,7 @@ export default class GameInstance {
     return gameTransferData;
   }
 
-  getCurrentRewardInfo(roomId: string): Object {
+  getCurrentRewardInfo(roomId: string): Record<string, any> {
     let gameTransferData = {
       roomId: roomId,
       gameData: [],

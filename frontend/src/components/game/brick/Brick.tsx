@@ -2,7 +2,7 @@ import { BRICK_SIZE } from "@/constants";
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
 
-type Props = { xPos: number; yPos: number; id: string; level: number };
+type Props = { xPos: number; yPos: number; id: number; level: number };
 
 export const Brick = ({ xPos, yPos, level }: Props) => {
   const canvasSize = useCanvasSize();
@@ -12,7 +12,6 @@ export const Brick = ({ xPos, yPos, level }: Props) => {
   return (
     <svg
       style={{
-        backgroundColor: "tomato",
         left: `${xPos * displayRatio}px`,
         top: `${yPos * displayRatio}px`,
         width: `${BRICK_SIZE * displayRatio}px`,
