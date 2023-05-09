@@ -14,10 +14,9 @@ import {
   moveBouncer,
   getPlayerInfo,
 } from "./utils/rooms.ts";
-// import GameInstance from "./game/gameInstance.ts";
 
 const developmentUrl = "http://localhost:3000";
-const productionUrl = "https://lingpal.vercel.app";
+const productionUrl = "https://brick-breaking.vercel.app/";
 
 let countdownInterval: number;
 
