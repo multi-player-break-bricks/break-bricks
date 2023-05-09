@@ -98,6 +98,8 @@ export default class Ball
             (player.xPos + player.displayWidth / 2)) /
           (player.width / 2);
         this.movingDirectionY = -this.movingDirectionY;
+        //add little bit randomness to the moving direction
+        this.movingDirectionY += Math.random() * 0.1 - 0.05;
       } else if (player.name == "player 2" || player.name == "player 4") {
         this.movingDirectionX = -this.movingDirectionX;
         this.movingDirectionY =
@@ -105,6 +107,9 @@ export default class Ball
             this.height / 2 -
             (player.yPos + player.displayHeight / 2)) /
           (player.height / 2);
+
+        //add little bit randomness to the moving direction
+        this.movingDirectionX += Math.random() * 0.1 - 0.05;
       }
 
       // Calculate the length of the new direction vector
@@ -176,8 +181,12 @@ export default class Ball
 
       if (wall.wallNumber == 1 || wall.wallNumber == 3) {
         this.movingDirectionY = -this.movingDirectionY;
+        //add little bit randomness to the ball
+        this.movingDirectionX += Math.random() * 0.1 - 0.05;
       } else if (wall.wallNumber == 2 || wall.wallNumber == 4) {
         this.movingDirectionX = -this.movingDirectionX;
+        //add little bit randomness to the ball
+        this.movingDirectionY += Math.random() * 0.1 - 0.05;
       }
 
       return true;
