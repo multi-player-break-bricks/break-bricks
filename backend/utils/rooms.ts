@@ -1,6 +1,8 @@
-import { randomUUID, createHash } from "https://deno.land/std@0.134.0/node/crypto.ts";
+import {
+  randomUUID,
+  createHash,
+} from "https://deno.land/std@0.134.0/node/crypto.ts";
 import GameInstance from "../game/GameInstance.ts";
-
 
 type WaitRoom = {
   number: string;
@@ -26,16 +28,16 @@ const waitRooms: Record<string, WaitRoom> = {};
 const gameRooms: Record<string, GameRoom> = {};
 const players: Record<string, Player> = {};
 
-const hash = createHash('sha1');
+const hash = createHash("sha1");
 
 const getRoomNumber = (id: string) => {
   hash.update(id);
-  let roomNumber = parseInt(hash.digest('hex').toString(), 16) % 10000
+  let roomNumber = parseInt(hash.digest("hex").toString(), 16) % 10000;
   while (roomNumber.toString().padStart(4, "0") in waitRooms) {
     roomNumber = (roomNumber + 1) % 10000;
   }
   return roomNumber.toString().padStart(4, "0");
-}
+};
 
 const savePlayerInfo = (playerId: string, name: string, number: number) => {
   players[playerId] = { id: playerId, name, number, isReady: false };
@@ -180,7 +182,7 @@ export const initializeGameRoom = (roomId: string) => {
     delete waitRooms[roomId];
     gameRooms[roomId] = {
       id: roomId,
-      gameInstance: new GameInstance(roomId, () => {}),
+      gameInstance: new GameInstance(roomId, waitRoom.players.length),
       players: waitRoom.players,
     };
   }
@@ -188,10 +190,12 @@ export const initializeGameRoom = (roomId: string) => {
   const gameRoom = gameRooms[roomId];
   const { bouncers, balls, bricks } = getGameInfo(gameRoom);
 
-  const bouncersWithId = bouncers.map((bouncer: any, index: number) => ({
-    ...bouncer,
-    id: gameRoom.players[index],
-  }));
+  const bouncersWithId = bouncers.map(
+    (bouncer: Record<string, number>, index: number) => ({
+      ...bouncer,
+      id: gameRoom.players[index],
+    })
+  );
 
   return {
     id: gameRoom.id,
@@ -201,11 +205,11 @@ export const initializeGameRoom = (roomId: string) => {
 };
 
 export const getGameInfo = (gameRoom: GameRoom) => {
-  const { gameInstance, id } = gameRoom;
-  const bouncers = gameInstance.getCurrentBouncerInfo(id).gameData;
-  const balls = gameInstance.getCurrentBallInfo(id).gameData;
-  const bricks = gameInstance.getCurrentBrickInfo(id).gameData;
-  const rewards = gameInstance.getCurrentRewardInfo(id).gameData;
+  const { gameInstance } = gameRoom;
+  const bouncers = gameInstance.getCurrentBouncerInfo();
+  const balls = gameInstance.getCurrentBallInfo();
+  const bricks = gameInstance.getCurrentBrickInfo();
+  const rewards = gameInstance.getCurrentRewardInfo();
   return { bouncers, balls, bricks, rewards };
 };
 
@@ -227,7 +231,7 @@ export const createGameRoomTest = (playerId: string) => {
     gameRooms["test"] = {
       id: "test",
       players: [playerId],
-      gameInstance: new GameInstance("test", () => {}),
+      gameInstance: new GameInstance("test", 1),
     };
     gameRoom = gameRooms["test"];
   }

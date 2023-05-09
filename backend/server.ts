@@ -109,20 +109,6 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("join-room-success", gameRoom);
   });
 
-  socket.on("disconnect", () => {
-    const result = removePlayerFromRoom(socket.id);
-    if (!result) return;
-    const { roomId, players } = result;
-    io.to(roomId).emit("wait-room-updated", { players });
-  });
-
-  // for testing
-  socket.on("join-game-room-test", () => {
-    const room = createGameRoomTest(socket.id);
-    socket.join(room.id);
-    socket.emit("join-room-success", room);
-  });
-
   socket.on("request-game-info", (roomId) => {
     const gameRoom = findGameRoom(roomId.toString());
     if (!gameRoom) {
@@ -138,6 +124,13 @@ io.on("connection", (socket) => {
 
   socket.on("move-bouncer", ({ direction, pressed, roomId }) => {
     moveBouncer(direction, pressed, roomId, socket.id);
+  });
+
+  socket.on("disconnect", () => {
+    const result = removePlayerFromRoom(socket.id);
+    if (!result) return;
+    const { roomId, players } = result;
+    io.to(roomId).emit("wait-room-updated", { players });
   });
 });
 
