@@ -1,7 +1,6 @@
-import { randomUUID } from "https://deno.land/std@0.134.0/node/crypto.ts";
+import { randomUUID, createHash } from "https://deno.land/std@0.134.0/node/crypto.ts";
 import GameInstance from "../game/GameInstance.ts";
 
-let lastWaitRoomNumber = 0;
 
 type WaitRoom = {
   number: string;
@@ -27,6 +26,17 @@ const waitRooms: Record<string, WaitRoom> = {};
 const gameRooms: Record<string, GameRoom> = {};
 const players: Record<string, Player> = {};
 
+let hash = createHash('sha1');
+
+const getRoomNumber = (id: string) => {
+  hash.update(id);
+  let roomNumber = parseInt(hash.digest('hex').slice(0,4), 16) % 10000
+  while (roomNumber.toString().padStart(4, "0") in waitRooms) {
+    roomNumber = (roomNumber + 1) % 10000;
+  }
+  return roomNumber.toString().padStart(4, "0");
+}
+
 const savePlayerInfo = (playerId: string, name: string, number: number) => {
   players[playerId] = { id: playerId, name, number, isReady: false };
 };
@@ -40,11 +50,8 @@ export const createWaitRoom = (
   playerId: string,
   playerName: string
 ) => {
-  lastWaitRoomNumber = lastWaitRoomNumber + 1;
-  const stringifiedLastWaitRoomNumber = lastWaitRoomNumber
-    .toString()
-    .padStart(4, "0");
   const roomId = randomUUID();
+  const stringifiedLastWaitRoomNumber = getRoomNumber(roomId);
   waitRooms[roomId] = {
     number: stringifiedLastWaitRoomNumber,
     id: roomId,
