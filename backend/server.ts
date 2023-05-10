@@ -116,11 +116,16 @@ io.on("connection", (socket) => {
       socket.emit("join-room-error", "Room not found");
       return;
     }
-    const gameInfo = getGameInfo({
-      ...gameRoom,
-      players: gameRoom.players.map((player) => player.id),
-    });
-    socket.emit("frame-change", gameInfo);
+    const updateInterval = setInterval(() => {
+      const gameInfo = getGameInfo({
+        ...gameRoom,
+        players: gameRoom.players.map((player) => player.id),
+      });
+      if (gameInfo.gameStatus.status !== "game running") {
+        clearInterval(updateInterval);
+      }
+      socket.emit("frame-change", gameInfo);
+    }, 1000 / 16);
   });
 
   socket.on("move-bouncer", ({ direction, pressed, roomId }) => {

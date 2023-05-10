@@ -8,7 +8,12 @@ import { Ball } from "../ball/Ball";
 import { Reward } from "../reward/Reward";
 import { Wall } from "../wall/Wall";
 
-const Canvas = () => {
+type Props = {
+  gameStatus: GameStatus;
+  setGameStatus: React.Dispatch<React.SetStateAction<GameStatus>>;
+};
+
+const Canvas = ({ gameStatus, setGameStatus }: Props) => {
   const { socket } = useSocketContext();
 
   const [roomId, setRoomId] = useState("");
@@ -51,9 +56,7 @@ const Canvas = () => {
       setBalls(gameInfo.balls);
       setBricks(gameInfo.bricks);
       setWalls(gameInfo.walls);
-      setInterval(() => {
-        socket.emit("request-game-info", room.id);
-      }, 1000 / 16);
+      socket.emit("request-game-info", room.id);
     });
 
     return () => {
@@ -62,17 +65,21 @@ const Canvas = () => {
   }, [socket]);
 
   useEffect(() => {
-    socket?.on("frame-change", ({ bouncers, balls, bricks, rewards }) => {
-      setBouncers(bouncers);
-      setBalls(balls);
-      setBricks(bricks);
-      setRewards(rewards);
-    });
+    socket?.on(
+      "frame-change",
+      ({ bouncers, balls, bricks, rewards, gameStatus }) => {
+        setBouncers(bouncers);
+        setBalls(balls);
+        setBricks(bricks);
+        setRewards(rewards);
+        setGameStatus(gameStatus);
+      }
+    );
 
     return () => {
       socket?.off("frame-change");
     };
-  }, [socket]);
+  }, [setGameStatus, socket]);
 
   const emitMoveBouncer = useCallback(
     (direction: "left" | "right", pressed: boolean) => {
@@ -124,7 +131,12 @@ const Canvas = () => {
   // }, [ball, bouncers, bricks, socket]);
 
   return (
-    <div className={styles.canvas} ref={canvasRef}>
+    <div
+      className={`${styles.canvas} ${
+        gameStatus.status !== "game running" ? styles.canvasOverlay : ""
+      }`}
+      ref={canvasRef}
+    >
       {bricks.map((brick) => (
         <Brick key={brick.id} {...brick} />
       ))}
@@ -140,6 +152,18 @@ const Canvas = () => {
       {walls.map((wall) => (
         <Wall key={wall.id} {...wall} />
       ))}
+      {gameStatus.status !== "game running" && (
+        <div
+          style={{
+            transform: playerNumber
+              ? `rotate(${90 * (playerNumber - 1)}deg)`
+              : "",
+          }}
+          className={styles.canvasPopupContainer}
+        >
+          {gameStatus.status}
+        </div>
+      )}
     </div>
   );
 };

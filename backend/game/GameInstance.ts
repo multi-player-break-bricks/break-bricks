@@ -252,7 +252,6 @@ export default class GameInstance {
         yPos: player.yPos,
         width: player.displayWidth,
         height: player.displayHeight,
-        score: player.score,
       });
     });
 
@@ -321,10 +320,14 @@ export default class GameInstance {
   }
 
   /**
-   * @returns game status, can be "game over", "game won", "game running"
+   * @returns game status, can be "game over", "game won", "game running", and scores of all players
    */
-  getGameStatus(): string {
-    return this.gameStatus;
+  getGameStatus() {
+    const scores = Array.from(this.playersMap.values()).map((player) => ({
+      number: player.playerNumber,
+      score: player.score,
+    }));
+    return { status: this.gameStatus, scores };
   }
 
   /**

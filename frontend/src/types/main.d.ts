@@ -37,3 +37,11 @@ type Wall = GameObject & {
   height: number;
   width: number;
 };
+
+type GameStatus = {
+  status: string;
+  scores: {
+    number: number;
+    score: number;
+  }[];
+};

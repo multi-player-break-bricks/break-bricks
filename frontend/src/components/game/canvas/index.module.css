@@ -4,6 +4,26 @@
   overflow: hidden;
 }
 
+.canvas.canvasOverlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.canvasPopupContainer {
+  transform-origin: center;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(246, 238, 220);
+  border-radius: 5px;
+  padding: 1rem;
+  z-index: 2;
+  font-size: 1.5rem;
+}
+
 .canvas > * {
   position: absolute;
 }

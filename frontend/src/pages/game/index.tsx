@@ -6,8 +6,21 @@ import Canvas from "./../../components/game/canvas/index";
 
 export default function GamePage() {
   const { socket } = useSocketContext();
+
+  const initialStatus = {
+    status: "game running",
+    scores: [],
+  };
+
+  const [gameStatus, setGameStatus] = useState<GameStatus>(initialStatus);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [roomId, setRoomId] = useState("");
+
+  const playersWithScore = players.map((player) => {
+    const score = gameStatus.scores.find(
+      (s) => s.number === player.number
+    )?.score;
+    return { ...player, score };
+  });
 
   const router = useRouter();
 
@@ -23,7 +36,6 @@ export default function GamePage() {
     socket?.on("join-room-success", (data) => {
       console.log("join-room-success in game room");
       setPlayers(data.players);
-      setRoomId(data.roomId);
     });
 
     return () => {
@@ -44,10 +56,16 @@ export default function GamePage() {
   return (
     <main>
       <h1 className={styles.title}>Game Page</h1>
-      {players.map((player) => (
-        <p key={player.id}>{player.name}</p>
-      ))}
-      {<Canvas />}
+      <div className={styles.mainContainer}>
+        <Canvas gameStatus={gameStatus} setGameStatus={setGameStatus} />
+        <div className="status">
+          {playersWithScore.map((player) => (
+            <p key={player.id}>
+              {player.name} {player.score}
+            </p>
+          ))}
+        </div>
+      </div>
     </main>
   );
 }

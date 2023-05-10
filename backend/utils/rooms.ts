@@ -228,7 +228,8 @@ export const getGameInfo = (gameRoom: GameRoom) => {
   const bricks = gameInstance.getCurrentBrickInfo();
   const rewards = gameInstance.getCurrentRewardInfo();
   const walls = gameInstance.getCurrentWallInfo();
-  return { bouncers, balls, bricks, rewards, walls };
+  const gameStatus = gameInstance.getGameStatus();
+  return { bouncers, balls, bricks, rewards, walls, gameStatus };
 };
 
 export const moveBouncer = (
