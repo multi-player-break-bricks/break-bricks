@@ -9,11 +9,11 @@ import {
   removePlayerFromRoom,
   updatePlayerReady,
   findGameRoom,
-  getGameInfo,
   initializeGameRoom,
   moveBouncer,
   setPlayerInGame,
   canInitializeGameRoom,
+  getGameInfoUpdates,
 } from "./utils/rooms.ts";
 
 const developmentUrl = "http://localhost:3000";
@@ -117,7 +117,7 @@ io.on("connection", (socket) => {
       return;
     }
     const updateInterval = setInterval(() => {
-      const gameInfo = getGameInfo({
+      const gameInfo = getGameInfoUpdates({
         ...gameRoom,
         players: gameRoom.players.map((player) => player.id),
       });

@@ -21,15 +21,15 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
 
   const [bouncers, setBouncers] = useState<Bouncer[]>([]);
   const [balls, setBalls] = useState<Ball[]>([]);
-  const [bricks, setBricks] = useState<Brick[]>([]);
+  const [bricksMap, setBricksMap] = useState<Record<string, Brick>>({});
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [walls, setWalls] = useState<Wall[]>([]);
 
   const canvasSize = useCanvasSize();
-
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
   const playerNumber = players.find((p) => p.id === socket?.id)?.number;
+  const bricks = Object.values(bricksMap);
 
   useEffect(() => {
     if (!canvasRef.current || !playerNumber) return;
@@ -54,7 +54,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       setPlayers(players);
       setBouncers(gameInfo.bouncers);
       setBalls(gameInfo.balls);
-      setBricks(gameInfo.bricks);
+      setBricksMap(gameInfo.bricks);
       setWalls(gameInfo.walls);
       socket.emit("request-game-info", room.id);
     });
@@ -70,7 +70,9 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       ({ bouncers, balls, bricks, rewards, gameStatus }) => {
         setBouncers(bouncers);
         setBalls(balls);
-        setBricks(bricks);
+        if (Object.keys(bricks).length !== 0) {
+          setBricksMap((prev) => ({ ...prev, ...bricks }));
+        }
         setRewards(rewards);
         setGameStatus(gameStatus);
       }
@@ -114,21 +116,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       window.removeEventListener("keydown", onKeydown);
       window.removeEventListener("keyup", onKeyup);
     };
-  }, [balls, bouncers, bricks, emitMoveBouncer, roomId, socket]);
-
-  // useEffect(() => {
-  //   socket?.on("brick-destroyed", (brick) => {
-  //     const newBricks = bricks
-  //       .map((b) => {
-  //         if (b.id === brick.id) {
-  //           return { ...b, level: b.level - 1 };
-  //         }
-  //         return b;
-  //       })
-  //       .filter((b) => b.level > 0);
-  //     setBricks(newBricks);
-  //   });
-  // }, [ball, bouncers, bricks, socket]);
+  }, [balls, bouncers, bricksMap, emitMoveBouncer, roomId, socket]);
 
   return (
     <div

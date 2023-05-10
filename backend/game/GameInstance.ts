@@ -6,6 +6,15 @@ import Reward, { RewardType } from "./Reward.ts";
 import Wall from "./Wall.ts";
 import BrickMap, { generateBrickMap } from "./BrickMap.ts";
 
+type BrickInfo = {
+  id: number;
+  xPos: number;
+  yPos: number;
+  width: number;
+  height: number;
+  level: number;
+};
+
 export default class GameInstance {
   gameRoomId: string;
   gameObjects: Array<GameData.IGameObject>;
@@ -292,20 +301,22 @@ export default class GameInstance {
     return gameData;
   }
 
-  getCurrentBrickInfo(): Record<string, number>[] {
-    const gameData: Array<Record<string, number>> = [];
-    this.bricks.forEach((brick) => {
-      gameData.push({
-        id: brick.gameID,
-        xPos: brick.xPos,
-        yPos: brick.yPos,
-        width: brick.displayWidth,
-        height: brick.displayHeight,
-        level: brick.life,
-      });
-    });
-
-    return gameData;
+  getCurrentBrickInfo() {
+    return this.bricks.reduce(
+      (bricksMap: Record<string, BrickInfo>, brick) =>
+        ({
+          ...bricksMap,
+          [brick.gameID]: {
+            id: brick.gameID,
+            xPos: brick.xPos,
+            yPos: brick.yPos,
+            width: brick.displayWidth,
+            height: brick.displayHeight,
+            level: brick.life,
+          },
+        } as Record<string, BrickInfo>),
+      {}
+    );
   }
 
   getCurrentRewardInfo(): Record<string, number | RewardType>[] {
@@ -355,22 +366,26 @@ export default class GameInstance {
   /**
    * @returns gameTransferData contains only last frame updated information of brick to send to client
    */
-  getLastFrameUpdatedBrickInfo(): Record<string, number>[] {
-    const gameData: Array<Record<string, number>> = [];
-    this.bricks.forEach((brick) => {
-      if (this.objectUpdatedLasteFrame.includes(<GameData.ICollidable>brick)) {
-        gameData.push({
-          id: brick.gameID,
-          xPos: brick.xPos,
-          yPos: brick.yPos,
-          width: brick.displayWidth,
-          height: brick.displayHeight,
-          level: brick.life,
-        });
-      }
-    });
-
-    return gameData;
+  getLastFrameUpdatedBrickInfo() {
+    return this.bricks.reduce(
+      (updatedBricks: Record<string, BrickInfo>, brick) => {
+        if (
+          this.objectUpdatedLasteFrame.includes(<GameData.ICollidable>brick)
+        ) {
+          const newBrick = {
+            id: brick.gameID,
+            xPos: brick.xPos,
+            yPos: brick.yPos,
+            width: brick.displayWidth,
+            height: brick.displayHeight,
+            level: brick.life,
+          };
+          return { ...updatedBricks, [brick.gameID]: newBrick };
+        }
+        return updatedBricks;
+      },
+      {}
+    );
   }
   //#endregion
 

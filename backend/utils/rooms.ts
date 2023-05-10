@@ -202,7 +202,7 @@ export const initializeGameRoom = (roomId: string) => {
   }
 
   const gameRoom = gameRooms[roomId];
-  const gameInfo = getGameInfo(gameRoom);
+  const gameInfo = getInitialGameInfo(gameRoom);
 
   const bouncersWithId = gameInfo.bouncers.map(
     (bouncer: Record<string, number>, index: number) => ({
@@ -221,11 +221,20 @@ export const initializeGameRoom = (roomId: string) => {
   };
 };
 
-export const getGameInfo = (gameRoom: GameRoom) => {
+export const getInitialGameInfo = (gameRoom: GameRoom) => {
   const { gameInstance } = gameRoom;
   const bouncers = gameInstance.getCurrentBouncerInfo();
   const balls = gameInstance.getCurrentBallInfo();
   const bricks = gameInstance.getCurrentBrickInfo();
+  const walls = gameInstance.getCurrentWallInfo();
+  return { bouncers, balls, bricks, walls };
+};
+
+export const getGameInfoUpdates = (gameRoom: GameRoom) => {
+  const { gameInstance } = gameRoom;
+  const bouncers = gameInstance.getCurrentBouncerInfo();
+  const balls = gameInstance.getCurrentBallInfo();
+  const bricks = gameInstance.getLastFrameUpdatedBrickInfo();
   const rewards = gameInstance.getCurrentRewardInfo();
   const walls = gameInstance.getCurrentWallInfo();
   const gameStatus = gameInstance.getGameStatus();
