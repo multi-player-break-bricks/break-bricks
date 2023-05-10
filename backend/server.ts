@@ -12,7 +12,8 @@ import {
   getGameInfo,
   initializeGameRoom,
   moveBouncer,
-  getPlayerInfo,
+  setPlayerInGame,
+  canInitializeGameRoom,
 } from "./utils/rooms.ts";
 
 const developmentUrl = "http://localhost:3000";
@@ -92,7 +93,7 @@ io.on("connection", (socket) => {
         countdownInterval = 0;
       }
       count -= 1;
-    }, 100);
+    }, 1000);
   });
 
   socket.on("join-game-room", () => {
@@ -101,12 +102,12 @@ io.on("connection", (socket) => {
       socket.emit("join-room-error", "Room not found");
       return;
     }
-    const { number } = getPlayerInfo(socket.id);
-    if (number !== 1) return;
-    setTimeout(() => {
+    setPlayerInGame(socket.id);
+    const allPlayersReady = canInitializeGameRoom(roomId.toString());
+    if (allPlayersReady) {
       const gameRoom = initializeGameRoom(roomId.toString());
       io.to(roomId).emit("join-room-success", gameRoom);
-    }, 1000);
+    }
   });
 
   socket.on("request-game-info", (roomId) => {

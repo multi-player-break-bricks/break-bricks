@@ -22,6 +22,7 @@ type Player = {
   name: string;
   number: number;
   isReady: boolean;
+  isInGame: boolean;
 };
 
 const waitRooms: Record<string, WaitRoom> = {};
@@ -40,11 +41,13 @@ const getRoomNumber = (id: string) => {
 };
 
 const savePlayerInfo = (playerId: string, name: string, number: number) => {
-  players[playerId] = { id: playerId, name, number, isReady: false };
-};
-
-export const getPlayerInfo = (playerId: string) => {
-  return players[playerId];
+  players[playerId] = {
+    id: playerId,
+    name,
+    number,
+    isReady: false,
+    isInGame: false,
+  };
 };
 
 export const createWaitRoom = (
@@ -176,10 +179,20 @@ export const findGameRoom = (roomId: string) => {
   };
 };
 
+export const setPlayerInGame = (playerId: string) => {
+  players[playerId].isInGame = true;
+};
+
+export const canInitializeGameRoom = (roomId: string) => {
+  const room = waitRooms[roomId];
+  if (!room) return false;
+  console.log(room.players.map((playerId) => players[playerId].isInGame));
+  return room.players.every((playerId) => players[playerId].isInGame);
+};
+
 export const initializeGameRoom = (roomId: string) => {
   const waitRoom = waitRooms[roomId];
   if (waitRoom) {
-    console.log("deleting wait room");
     delete waitRooms[roomId];
     gameRooms[roomId] = {
       id: roomId,
@@ -189,7 +202,6 @@ export const initializeGameRoom = (roomId: string) => {
   }
 
   const gameRoom = gameRooms[roomId];
-  console.log("initializeGameRoom", { gameRoom });
   const gameInfo = getGameInfo(gameRoom);
 
   const bouncersWithId = gameInfo.bouncers.map(
@@ -226,7 +238,6 @@ export const moveBouncer = (
   playerId: string
 ) => {
   const gameRoom = gameRooms[roomId];
-  console.log(roomId, JSON.stringify(gameRoom, null, 1));
   if (!gameRoom) throw new Error("Game room not found");
   const { number } = players[playerId];
   gameRoom.gameInstance.setPlayerDir(number, direction, pressed);
