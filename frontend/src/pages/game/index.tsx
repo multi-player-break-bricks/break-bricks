@@ -53,6 +53,19 @@ export default function GamePage() {
     };
   }, [router, socket]);
 
+  useEffect(() => {
+    socket?.on("player-left", (players) => {
+      setPlayers(players);
+      if (players.length < 2) {
+        router.push("/join");
+      }
+    });
+
+    return () => {
+      socket?.off("player-left");
+    };
+  }, [router, socket]);
+
   return (
     <main>
       <h1 className={styles.title}>Game Page</h1>

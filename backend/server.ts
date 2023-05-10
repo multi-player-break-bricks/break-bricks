@@ -135,8 +135,12 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const result = removePlayerFromRoom(socket.id);
     if (!result) return;
-    const { roomId, players } = result;
-    io.to(roomId).emit("wait-room-updated", { players });
+    const { isWaitRoom, roomId, players } = result;
+    if (isWaitRoom) {
+      io.to(roomId).emit("wait-room-updated", { players });
+    } else {
+      io.to(roomId).emit("player-left", players);
+    }
   });
 });
 

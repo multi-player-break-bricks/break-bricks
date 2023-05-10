@@ -132,6 +132,7 @@ export const removePlayerFromRoom = (playerId: string) => {
   const waitRoom = Object.values(waitRooms).find((room) =>
     room.players.includes(playerId)
   );
+  const player = players[playerId];
   delete players[playerId];
   if (waitRoom) {
     waitRoom.players = waitRoom.players.filter((id) => id !== playerId);
@@ -139,6 +140,7 @@ export const removePlayerFromRoom = (playerId: string) => {
       players[playerId].number = waitRoom.players.indexOf(playerId) + 1;
     });
     return {
+      isWaitRoom: true,
       roomId: waitRoom.id,
       players: waitRoom.players.map((playerId) => players[playerId]),
     };
@@ -148,7 +150,14 @@ export const removePlayerFromRoom = (playerId: string) => {
   );
   if (!gameRoom) return;
   gameRoom.players = gameRoom.players.filter((id) => id !== playerId);
+  const playerInstance = gameRoom.gameInstance.getPlayerByPlayerNumber(
+    player.number
+  );
+  if (playerInstance) {
+    gameRoom.gameInstance.removePlayer(playerInstance);
+  }
   return {
+    isWaitRoom: false,
     roomId: gameRoom.id,
     players: gameRoom.players.map((playerId) => players[playerId]),
   };
@@ -186,7 +195,6 @@ export const setPlayerInGame = (playerId: string) => {
 export const canInitializeGameRoom = (roomId: string) => {
   const room = waitRooms[roomId];
   if (!room) return false;
-  console.log(room.players.map((playerId) => players[playerId].isInGame));
   return room.players.every((playerId) => players[playerId].isInGame);
 };
 
