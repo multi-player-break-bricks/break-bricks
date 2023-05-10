@@ -10,6 +10,7 @@ export default class GameInstance {
   gameRoomId: string;
   gameObjects: Array<GameData.IGameObject>;
   gameColliders: Array<GameData.ICollidable>;
+  objectUpdatedLasteFrame: Array<GameData.ICollidable>;
 
   playersMap: Map<number, PlayerBoard>;
 
@@ -29,12 +30,12 @@ export default class GameInstance {
    *
    * @param gameRoomId        id of the game room
    * @param playerAmount      amount of players in the game
-   * @param CALLBACK_FUNCTION callback function to send gameTransferData to client, see {@link Callback}
    */
   constructor(gameRoomId: string, playerAmount: number) {
     this.gameObjects = new Array<GameData.IGameObject>();
     this.gameRoomId = gameRoomId;
     this.gameColliders = new Array<GameData.ICollidable>();
+    this.objectUpdatedLasteFrame = new Array<GameData.ICollidable>();
     this.playersMap = new Map<number, PlayerBoard>();
     this.balls = new Array<Ball>();
     this.bricks = new Array<Brick>();
@@ -152,7 +153,7 @@ export default class GameInstance {
    * @returns gameTransferData to send to client
    */
   Update(): Record<string, unknown> {
-    const updatedGameObject = Array<GameData.ICollidable>();
+    this.objectUpdatedLasteFrame = Array<GameData.ICollidable>();
 
     //update player position
     for (const player of this.playersMap.values()) {
@@ -184,14 +185,14 @@ export default class GameInstance {
         if (gameObject != gameObject2) {
           if (GameData.ColliderUtil.isColliding(gameObject, gameObject2)) {
             if (gameObject.onCollision(gameObject2)) {
-              updatedGameObject.push(gameObject);
+              this.objectUpdatedLasteFrame.push(gameObject);
             }
           }
         }
       });
     });
 
-    updatedGameObject.forEach((gameObject) => {
+    this.objectUpdatedLasteFrame.forEach((gameObject) => {
       if (gameObject instanceof Brick) {
         const brick = <Brick>gameObject;
         if (brick.life <= 0) {
@@ -239,6 +240,25 @@ export default class GameInstance {
       this.gameStatus = "game won";
       clearInterval(this.updateInterval);
     }
+
+    return gameTransferData;
+  }
+
+  //#region get full game data
+  /**
+   * @descriptionin case you want to get the current gameTransferData without
+   *                callback function, use this function
+   *
+   * @returns gameTransferData to send to client
+   */
+  getCurrentGameTransferData(): Record<string, unknown> {
+    const gameTransferData = {
+      playersMap: this.getCurrentBouncerInfo(),
+      balls: this.getCurrentBallInfo(),
+      bricks: this.getCurrentBrickInfo(),
+      rewards: this.getCurrentRewardInfo(),
+      walls: this.getCurrentWallInfo(),
+    };
 
     return gameTransferData;
   }
@@ -329,67 +349,32 @@ export default class GameInstance {
     }));
     return { status: this.gameStatus, scores };
   }
+  //#endregion
 
+  //#region get game data for only updated objects
   /**
-   * @descriptionin case you want to get the current gameTransferData without
-   *                callback function, use this function
-   *
-   * @returns gameTransferData to send to client
+   * @returns gameTransferData contains only last frame updated information of brick to send to client
    */
-  getCurrentGameTransferData(): Record<string, unknown> {
-    const gameTransferData = {
-      playersMap: this.getCurrentBouncerInfo(),
-      balls: this.getCurrentBallInfo(),
-      bricks: this.getCurrentBrickInfo(),
-      rewards: this.getCurrentRewardInfo(),
-      walls: this.getCurrentWallInfo(),
-    };
-
-    return gameTransferData;
-  }
-
-  /**
-   * @description use this function to set player direction, player will move each frame
-   *
-   * @param playerNumber  the player number indicating which player to move
-   * @param direction     the player moving direction, can only be "left" or "right"
-   * @param moving        false if want to set player to stop moving, true if want to set player to start moving to this direction
-   *
-   * @throws Error if the direction is invalid
-   */
-  setPlayerDir(playerNumber: number, direction: string, moving: boolean) {
-    //check if string is valid
-    if (direction != "left" && direction != "right") {
-      throw new Error("Invalid direction");
-    }
-
-    const player = this.getPlayerByPlayerNumber(playerNumber);
-
-    if (!player) {
-      return;
-    }
-
-    if (player) {
-      if (direction == "left") {
-        if (moving) {
-          player.playerStartMovingLeft();
-        } else {
-          player.playerStopMovingLeft();
-        }
+  getLastFrameUpdatedBrickInfo(): Record<string, number>[] {
+    const gameData: Array<Record<string, number>> = [];
+    this.bricks.forEach((brick) => {
+      if (this.objectUpdatedLasteFrame.includes(<GameData.ICollidable>brick)) {
+        gameData.push({
+          id: brick.gameID,
+          xPos: brick.xPos,
+          yPos: brick.yPos,
+          width: brick.displayWidth,
+          height: brick.displayHeight,
+          level: brick.life,
+        });
       }
-      if (direction == "right") {
-        if (moving) {
-          player.playerStartMovingRight();
-        } else {
-          player.playerStopMovingRight();
-        }
-      }
-    } else {
-      throw new Error("Invalid player number");
-    }
-  }
+    });
 
-  //new game object
+    return gameData;
+  }
+  //#endregion
+
+  //#region new game object
   newBall(): Ball {
     const circle = new Ball(GameData.BALL_SIZE);
     this.gameObjects.push(circle);
@@ -430,7 +415,9 @@ export default class GameInstance {
     return wall;
   }
 
-  //remove game object
+  //#endregion
+
+  //#region remove game object
   removeBrick(brick: Brick) {
     //drop reward
     const reward = this.newReward(brick.lastCollidedPlayerId);
@@ -484,7 +471,9 @@ export default class GameInstance {
     this.playersMap.delete(player.playerNumber);
     this.newWall(player.playerNumber);
   }
+  //#endregion
 
+  //#region get player related
   getPlayerByGameId(playerGameId: number): PlayerBoard {
     let outPlayer: PlayerBoard | undefined = undefined;
 
@@ -513,6 +502,48 @@ export default class GameInstance {
       throw new Error("Invalid player number");
     }
   }
+
+  /**
+   * @description use this function to set player direction, player will move each frame
+   *
+   * @param playerNumber  the player number indicating which player to move
+   * @param direction     the player moving direction, can only be "left" or "right"
+   * @param moving        false if want to set player to stop moving, true if want to set player to start moving to this direction
+   *
+   * @throws Error if the direction is invalid
+   */
+  setPlayerDir(playerNumber: number, direction: string, moving: boolean) {
+    //check if string is valid
+    if (direction != "left" && direction != "right") {
+      throw new Error("Invalid direction");
+    }
+
+    const player = this.getPlayerByPlayerNumber(playerNumber);
+
+    if (!player) {
+      return;
+    }
+
+    if (player) {
+      if (direction == "left") {
+        if (moving) {
+          player.playerStartMovingLeft();
+        } else {
+          player.playerStopMovingLeft();
+        }
+      }
+      if (direction == "right") {
+        if (moving) {
+          player.playerStartMovingRight();
+        } else {
+          player.playerStopMovingRight();
+        }
+      }
+    } else {
+      throw new Error("Invalid player number");
+    }
+  }
+  //#endregion
 }
 
 export { GameInstance };
