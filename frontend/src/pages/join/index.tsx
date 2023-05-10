@@ -54,7 +54,6 @@ export default function JoinPage() {
 
   const joinRandomRoom = () => {
     const socket = connectSocket();
-    console.log("join random room, connected:", socket.connected);
     socket.emit("join-random-wait-room", name);
     listenToJoinRoom(socket);
   };

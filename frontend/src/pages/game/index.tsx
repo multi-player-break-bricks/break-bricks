@@ -56,7 +56,7 @@ export default function GamePage() {
   useEffect(() => {
     socket?.on("player-left", (players) => {
       setPlayers(players);
-      if (players.length < 2) {
+      if (players.length < 2 && gameStatus.status === "game running") {
         router.push("/join");
       }
     });
@@ -64,7 +64,7 @@ export default function GamePage() {
     return () => {
       socket?.off("player-left");
     };
-  }, [router, socket]);
+  }, [gameStatus.status, router, socket]);
 
   return (
     <main>

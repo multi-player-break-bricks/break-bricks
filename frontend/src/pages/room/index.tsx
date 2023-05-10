@@ -8,6 +8,7 @@ export default function RoomPage() {
   const { socket } = useSocketContext();
   const [players, setPlayers] = useState<Player[]>([]);
   const [roomNumber, setRoomNumber] = useState("");
+  const [roomId, setRoomId] = useState("");
   const [isReady, setIsReady] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
 
@@ -23,9 +24,9 @@ export default function RoomPage() {
 
   useEffect(() => {
     socket?.on("join-room-success", (data) => {
-      console.log("join-room-success in wait room");
       setPlayers(data.players);
       setRoomNumber(data.number);
+      setRoomId(data.id);
     });
 
     return () => {
@@ -44,8 +45,8 @@ export default function RoomPage() {
   }, [router, socket]);
 
   useEffect(() => {
-    socket?.on("wait-room-updated", (data) => {
-      setPlayers(data.players);
+    socket?.on("wait-room-updated", (players) => {
+      setPlayers(players);
     });
 
     return () => {
@@ -67,7 +68,7 @@ export default function RoomPage() {
   }, [router, socket]);
 
   const getReady = () => {
-    socket?.emit("update-player-ready", { roomNumber, isReady: !isReady });
+    socket?.emit("update-player-ready", { roomId, isReady: !isReady });
     setIsReady(!isReady);
   };
 

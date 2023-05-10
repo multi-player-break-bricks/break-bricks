@@ -4,6 +4,10 @@
   overflow: hidden;
 }
 
+.canvas > * {
+  position: absolute;
+}
+
 .canvas.canvasOverlay::before {
   content: "";
   position: absolute;
@@ -24,6 +28,11 @@
   font-size: 1.5rem;
 }
 
-.canvas > * {
-  position: absolute;
+.gameStatus {
+  margin-bottom: 1rem;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
 }

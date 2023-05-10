@@ -14,6 +14,7 @@ import {
   setPlayerInGame,
   canInitializeGameRoom,
   getGameInfoUpdates,
+  returnToWaitRoomWithId,
 } from "./utils/rooms.ts";
 
 const developmentUrl = "http://localhost:3000";
@@ -47,16 +48,12 @@ io.on("connection", (socket) => {
     }
     socket.join(waitRoomId!);
     socket.emit("join-wait-room");
-    io.to(waitRoomId!).emit("wait-room-updated", {
-      players,
-    });
   });
 
   socket.on("join-random-wait-room", (name) => {
-    const { players, roomId } = joinRandomRoom(socket.id, name);
+    const { roomId } = joinRandomRoom(socket.id, name);
     socket.join(roomId);
     socket.emit("join-wait-room");
-    io.to(roomId).emit("wait-room-updated", { players });
   });
 
   socket.on("join-room", () => {
@@ -71,13 +68,13 @@ io.on("connection", (socket) => {
       return;
     }
     socket.emit("join-room-success", waitRoom);
+    io.to(roomId).emit("wait-room-updated", waitRoom.players);
   });
 
-  socket.on("update-player-ready", ({ roomNumber, isReady }) => {
-    const result = updatePlayerReady(roomNumber, socket.id, isReady);
-    if (!result) return;
-    const { roomId, players } = result;
-    io.to(roomId).emit("wait-room-updated", { players });
+  socket.on("update-player-ready", ({ roomId, isReady }) => {
+    const players = updatePlayerReady(roomId, socket.id, isReady);
+    if (!players) return;
+    io.to(roomId).emit("wait-room-updated", players);
     if (players.length < 2) return;
     if (players.some((player) => !player.isReady)) {
       clearInterval(countdownInterval);
@@ -132,12 +129,16 @@ io.on("connection", (socket) => {
     moveBouncer(direction, pressed, roomId, socket.id);
   });
 
+  socket.on("return-to-wait-room", (roomId) => {
+    returnToWaitRoomWithId(roomId, socket.id);
+  });
+
   socket.on("disconnect", () => {
     const result = removePlayerFromRoom(socket.id);
     if (!result) return;
     const { isWaitRoom, roomId, players } = result;
     if (isWaitRoom) {
-      io.to(roomId).emit("wait-room-updated", { players });
+      io.to(roomId).emit("wait-room-updated", players);
     } else {
       io.to(roomId).emit("player-left", players);
     }

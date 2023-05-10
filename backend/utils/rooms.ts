@@ -128,6 +128,50 @@ export const findWaitRoom = (waitRoomId: string) => {
   };
 };
 
+export const returnToWaitRoomWithId = (
+  waitRoomId: string,
+  playerId: string
+) => {
+  const lastGameRoom = gameRooms[waitRoomId];
+  if (lastGameRoom) {
+    removePlayerFromGameRoom(lastGameRoom, playerId);
+  }
+  if (!waitRooms[waitRoomId]) {
+    const roomId = randomUUID();
+    const stringifiedLastWaitRoomNumber = getRoomNumber(roomId);
+    waitRooms[waitRoomId] = {
+      number: stringifiedLastWaitRoomNumber,
+      id: waitRoomId,
+      isPublic: true,
+      players: [playerId],
+    };
+  } else {
+    waitRooms[waitRoomId].players.push(playerId);
+  }
+  savePlayerInfo(
+    playerId,
+    players[playerId].name,
+    waitRooms[waitRoomId].players.length
+  );
+};
+
+const removePlayerFromWaitRoom = (waitRoom: WaitRoom, playerId: string) => {
+  waitRoom.players = waitRoom.players.filter((id) => id !== playerId);
+  waitRoom.players.forEach((playerId) => {
+    players[playerId].number = waitRoom.players.indexOf(playerId) + 1;
+  });
+  if (waitRoom.players.length === 0) {
+    delete waitRooms[waitRoom.id];
+  }
+};
+
+const removePlayerFromGameRoom = (gameRoom: GameRoom, playerId: string) => {
+  gameRoom.players = gameRoom.players.filter((id) => id !== playerId);
+  if (gameRoom.players.length === 0) {
+    delete gameRooms[gameRoom.id];
+  }
+};
+
 export const removePlayerFromRoom = (playerId: string) => {
   const waitRoom = Object.values(waitRooms).find((room) =>
     room.players.includes(playerId)
@@ -135,10 +179,7 @@ export const removePlayerFromRoom = (playerId: string) => {
   const player = players[playerId];
   delete players[playerId];
   if (waitRoom) {
-    waitRoom.players = waitRoom.players.filter((id) => id !== playerId);
-    waitRoom.players.forEach((playerId) => {
-      players[playerId].number = waitRoom.players.indexOf(playerId) + 1;
-    });
+    removePlayerFromWaitRoom(waitRoom, playerId);
     return {
       isWaitRoom: true,
       roomId: waitRoom.id,
@@ -149,7 +190,7 @@ export const removePlayerFromRoom = (playerId: string) => {
     room.players.includes(playerId)
   );
   if (!gameRoom) return;
-  gameRoom.players = gameRoom.players.filter((id) => id !== playerId);
+  removePlayerFromGameRoom(gameRoom, playerId);
   const playerInstance = gameRoom.gameInstance.getPlayerByPlayerNumber(
     player.number
   );
@@ -164,19 +205,14 @@ export const removePlayerFromRoom = (playerId: string) => {
 };
 
 export const updatePlayerReady = (
-  roomNumber: string,
+  roomId: string,
   playerId: string,
   isReady: boolean
 ) => {
-  const waitRoom = Object.values(waitRooms).find(
-    (room) => room.number === roomNumber
-  );
+  const waitRoom = waitRooms[roomId];
   if (!waitRoom) return;
   players[playerId].isReady = isReady;
-  return {
-    roomId: waitRoom.id,
-    players: waitRoom.players.map((playerId) => players[playerId]),
-  };
+  return waitRoom.players.map((playerId) => players[playerId]);
 };
 
 export const findGameRoom = (roomId: string) => {

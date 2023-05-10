@@ -7,6 +7,7 @@ import { useCanvasSize } from "@/hooks/useCanvasSize";
 import { Ball } from "../ball/Ball";
 import { Reward } from "../reward/Reward";
 import { Wall } from "../wall/Wall";
+import { useRouter } from "next/router";
 
 type Props = {
   gameStatus: GameStatus;
@@ -27,6 +28,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
 
   const canvasSize = useCanvasSize();
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
   const playerNumber = players.find((p) => p.id === socket?.id)?.number;
   const bricks = Object.values(bricksMap);
@@ -86,7 +88,6 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
   const emitMoveBouncer = useCallback(
     (direction: "left" | "right", pressed: boolean) => {
       const player = players.find((p) => p.id === socket?.id);
-      console.log("emitMoveBouncer from room", roomId);
       socket?.emit("move-bouncer", {
         direction,
         pressed,
@@ -117,6 +118,15 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       window.removeEventListener("keyup", onKeyup);
     };
   }, [balls, bouncers, bricksMap, emitMoveBouncer, roomId, socket]);
+
+  const returnToWaitRoom = () => {
+    socket?.emit("return-to-wait-room", roomId);
+    router.push("/room");
+  };
+
+  const leaveRoom = () => {
+    router.push("/join");
+  };
 
   return (
     <div
@@ -149,7 +159,11 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
           }}
           className={styles.canvasPopupContainer}
         >
-          {gameStatus.status}
+          <h2 className={styles.gameStatus}>{gameStatus.status}</h2>
+          <div className={styles.buttonContainer}>
+            <button onClick={returnToWaitRoom}>Play Again</button>
+            <button onClick={leaveRoom}>Leave</button>
+          </div>
         </div>
       )}
     </div>
