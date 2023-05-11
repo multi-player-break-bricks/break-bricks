@@ -72,8 +72,17 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       ({ bouncers, balls, bricks, rewards, gameStatus }) => {
         setBouncers(bouncers);
         setBalls(balls);
-        if (Object.keys(bricks).length !== 0) {
-          setBricksMap((prev) => ({ ...prev, ...bricks }));
+        if (Object.keys(bricks).length) {
+          const updatedBrick = Object.values(bricks)[0] as Brick;
+          if (updatedBrick.level === 0) {
+            setBricksMap((prev) =>
+              Object.fromEntries(
+                Object.entries(prev).filter(([key]) => +key !== updatedBrick.id)
+              )
+            );
+          } else {
+            setBricksMap((prev) => ({ ...prev, ...bricks }));
+          }
         }
         setRewards(rewards);
         setGameStatus(gameStatus);

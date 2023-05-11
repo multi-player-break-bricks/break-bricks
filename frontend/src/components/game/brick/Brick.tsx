@@ -4,7 +4,7 @@ import React from "react";
 export const Brick = ({ xPos, yPos, height, width, level }: Brick) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
-  const opacity = level > 0 ? (level - 1) * 0.12 + 0.4 : 0;
+  const opacity = (level - 1) * 0.12 + 0.4;
 
   return (
     <svg
@@ -19,6 +19,7 @@ export const Brick = ({ xPos, yPos, height, width, level }: Brick) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <p>{level}</p>
       <rect width="150" height="150" fill="#5A1757" />
       <path
         fillRule="evenodd"
