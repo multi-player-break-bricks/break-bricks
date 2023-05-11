@@ -8,9 +8,8 @@ export const Ball = ({ xPos, yPos, size }: Ball) => {
   return (
     <svg
       style={{
-        borderRadius: "50%",
-        left: `${xPos * displayRatio}px`,
-        top: `${yPos * displayRatio}px`,
+        left: `${(xPos - size / 2) * displayRatio}px`,
+        top: `${(yPos - size / 2) * displayRatio}px`,
         width: `${size * displayRatio}px`,
         height: `${size * displayRatio}px`,
       }}

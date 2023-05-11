@@ -9,7 +9,6 @@ import {
   findWaitRoom,
   removePlayerFromRoom,
   updatePlayerReady,
-  findGameRoom,
   initializeGameRoom,
   moveBouncer,
   setPlayerInGame,

@@ -15,7 +15,10 @@ export const Bouncer = ({ xPos, yPos, height, width, number }: Bouncer) => {
           xPos * displayRatio +
           ((number + 1) % 2) * (((width - height) / 2) * displayRatio)
         }px`,
-        top: `${yPos * displayRatio}px`,
+        top: `${
+          yPos * displayRatio -
+          ((number + 1) % 2) * (((width - height) / 2) * displayRatio)
+        }px`,
         width: `${(number % 2 ? width : height) * displayRatio}px`,
         height: `${(number % 2 ? height : width) * displayRatio}px`,
         transform: `rotate(${number % 2 === 0 ? 90 : 0}deg)`,
