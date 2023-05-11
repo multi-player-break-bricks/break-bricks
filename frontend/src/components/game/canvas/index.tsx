@@ -84,9 +84,10 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
   useEffect(() => {
     socket?.on(
       "frame-change",
-      ({ bouncers, balls, bricks, rewards, gameStatus }) => {
+      ({ bouncers, balls, bricks, rewards, walls, gameStatus }) => {
         setBouncers(bouncers);
         setBalls(balls);
+        setWalls(walls);
         updateBricks(bricks);
         setRewards(rewards);
         setGameStatus(gameStatus);
