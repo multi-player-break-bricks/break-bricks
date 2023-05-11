@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.150.0/http/server.ts";
 import { Server } from "https://deno.land/x/socket_io@0.2.0/mod.ts";
+import { FRAME_RATE_SERVER } from "./game/GameData.ts";
 
 import {
   createWaitRoom,
@@ -108,21 +109,17 @@ io.on("connection", (socket) => {
   });
 
   socket.on("request-game-info", (roomId) => {
-    const gameRoom = findGameRoom(roomId.toString());
-    if (!gameRoom) {
-      socket.emit("join-room-error", "Room not found");
-      return;
+    try {
+      const updateInterval = setInterval(() => {
+        const gameInfo = getGameInfoUpdates(roomId.toString());
+        if (gameInfo.gameStatus.status !== "game running") {
+          clearInterval(updateInterval);
+        }
+        socket.emit("frame-change", gameInfo);
+      }, 1000 / FRAME_RATE_SERVER);
+    } catch (error) {
+      socket.emit("join-room-error", error);
     }
-    const updateInterval = setInterval(() => {
-      const gameInfo = getGameInfoUpdates({
-        ...gameRoom,
-        players: gameRoom.players.map((player) => player.id),
-      });
-      if (gameInfo.gameStatus.status !== "game running") {
-        clearInterval(updateInterval);
-      }
-      socket.emit("frame-change", gameInfo);
-    }, 1000 / 16);
   });
 
   socket.on("move-bouncer", ({ direction, pressed, roomId }) => {

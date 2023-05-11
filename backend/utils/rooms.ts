@@ -2,6 +2,7 @@ import {
   randomUUID,
   createHash,
 } from "https://deno.land/std@0.134.0/node/crypto.ts";
+import { FRAME_RATE_SERVER } from "../game/GameData.ts";
 import GameInstance from "../game/GameInstance.ts";
 
 type WaitRoom = {
@@ -15,6 +16,8 @@ type GameRoom = {
   id: string;
   gameInstance: GameInstance;
   players: string[];
+  updates: ReturnType<typeof getUpdates>;
+  shouldUpdate: boolean;
 };
 
 type Player = {
@@ -238,10 +241,13 @@ export const initializeGameRoom = (roomId: string) => {
   const waitRoom = waitRooms[roomId];
   if (waitRoom) {
     delete waitRooms[roomId];
+    const gameInstance = new GameInstance(roomId, waitRoom.players.length);
     gameRooms[roomId] = {
       id: roomId,
-      gameInstance: new GameInstance(roomId, waitRoom.players.length),
+      gameInstance,
       players: waitRoom.players,
+      shouldUpdate: true,
+      updates: getUpdates(gameInstance),
     };
   }
 
@@ -274,15 +280,27 @@ export const getInitialGameInfo = (gameRoom: GameRoom) => {
   return { bouncers, balls, bricks, walls };
 };
 
-export const getGameInfoUpdates = (gameRoom: GameRoom) => {
-  const { gameInstance } = gameRoom;
+const getUpdates = (gameInstance: GameInstance) => {
   const bouncers = gameInstance.getCurrentBouncerInfo();
   const balls = gameInstance.getCurrentBallInfo();
-  const bricks = gameInstance.getLastFrameUpdatedBrickInfo();
+  const bricks = gameInstance.getFrontEndBrickInfo();
   const rewards = gameInstance.getCurrentRewardInfo();
   const walls = gameInstance.getCurrentWallInfo();
   const gameStatus = gameInstance.getGameStatus();
   return { bouncers, balls, bricks, rewards, walls, gameStatus };
+};
+
+export const getGameInfoUpdates = (roomId: string) => {
+  const gameRoom = findGameRoom(roomId.toString());
+  if (!gameRoom) throw new Error("Game room not found");
+  const { shouldUpdate, updates, gameInstance } = gameRoom;
+  if (!shouldUpdate) return updates;
+  gameRooms[roomId].shouldUpdate = false;
+  gameRooms[roomId].updates = getUpdates(gameInstance);
+  setTimeout(() => {
+    gameRooms[roomId].shouldUpdate = true;
+  }, 1000 / FRAME_RATE_SERVER);
+  return gameRooms[roomId].updates;
 };
 
 export const moveBouncer = (

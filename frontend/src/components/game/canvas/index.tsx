@@ -66,24 +66,28 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
     };
   }, [socket]);
 
+  const updateBricks = useCallback((updates: Record<number, Brick>) => {
+    if (!Object.keys(updates).length) return;
+    Object.entries(updates).forEach(([keyToUpdate, newValue]) => {
+      if (newValue.level === 0) {
+        setBricksMap((prev) =>
+          Object.fromEntries(
+            Object.entries(prev).filter(([key]) => key !== keyToUpdate)
+          )
+        );
+      } else {
+        setBricksMap((prev) => ({ ...prev, [keyToUpdate]: newValue }));
+      }
+    });
+  }, []);
+
   useEffect(() => {
     socket?.on(
       "frame-change",
       ({ bouncers, balls, bricks, rewards, gameStatus }) => {
         setBouncers(bouncers);
         setBalls(balls);
-        if (Object.keys(bricks).length) {
-          const updatedBrick = Object.values(bricks)[0] as Brick;
-          if (updatedBrick.level === 0) {
-            setBricksMap((prev) =>
-              Object.fromEntries(
-                Object.entries(prev).filter(([key]) => +key !== updatedBrick.id)
-              )
-            );
-          } else {
-            setBricksMap((prev) => ({ ...prev, ...bricks }));
-          }
-        }
+        updateBricks(bricks);
         setRewards(rewards);
         setGameStatus(gameStatus);
       }
@@ -92,7 +96,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
     return () => {
       socket?.off("frame-change");
     };
-  }, [setGameStatus, socket]);
+  }, [setGameStatus, socket, updateBricks]);
 
   const emitMoveBouncer = useCallback(
     (direction: "left" | "right", pressed: boolean) => {
