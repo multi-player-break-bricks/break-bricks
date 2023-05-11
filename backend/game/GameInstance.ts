@@ -20,6 +20,7 @@ export default class GameInstance {
   gameObjects: Array<GameData.IGameObject>;
   gameColliders: Array<GameData.ICollidable>;
   objectUpdatedLasteFrame: Array<GameData.ICollidable>;
+  frontEndUnreceivedBrickData: Array<Brick>;
 
   playersMap: Map<number, PlayerBoard>;
 
@@ -46,6 +47,7 @@ export default class GameInstance {
     this.gameColliders = new Array<GameData.ICollidable>();
     this.objectUpdatedLasteFrame = new Array<GameData.ICollidable>();
     this.playersMap = new Map<number, PlayerBoard>();
+    this.frontEndUnreceivedBrickData = new Array<Brick>();
     this.balls = new Array<Ball>();
     this.bricks = new Array<Brick>();
     this.rewards = new Array<Reward>();
@@ -204,6 +206,9 @@ export default class GameInstance {
     this.objectUpdatedLasteFrame.forEach((gameObject) => {
       if (gameObject instanceof Brick) {
         const brick = <Brick>gameObject;
+        if (!this.frontEndUnreceivedBrickData.includes(brick)) {
+          this.frontEndUnreceivedBrickData.push(brick);
+        }
         if (brick.life <= 0) {
           const hitPlayer = this.getPlayerByGameId(brick.lastCollidedPlayerId);
           hitPlayer.increaseScore(1);
@@ -366,24 +371,24 @@ export default class GameInstance {
   /**
    * @returns gameTransferData contains only last frame updated information of brick to send to client
    */
-  getLastFrameUpdatedBrickInfo() {
-    return this.objectUpdatedLasteFrame.reduce(
+  getFrontEndBrickInfo() {
+    const gameData = this.frontEndUnreceivedBrickData.reduce(
       (updatedBricks: Record<string, BrickInfo>, brick) => {
-        if (brick instanceof Brick) {
-          const newBrick = {
-            id: brick.gameID,
-            xPos: brick.xPos,
-            yPos: brick.yPos,
-            width: brick.displayWidth,
-            height: brick.displayHeight,
-            level: brick.life,
-          };
-          return { ...updatedBricks, [brick.gameID]: newBrick };
-        }
-        return updatedBricks;
+        const newBrick = {
+          id: brick.gameID,
+          xPos: brick.xPos,
+          yPos: brick.yPos,
+          width: brick.displayWidth,
+          height: brick.displayHeight,
+          level: brick.life,
+        };
+        return { ...updatedBricks, [brick.gameID]: newBrick };
       },
       {}
     );
+
+    this.frontEndUnreceivedBrickData = [];
+    return gameData;
   }
   //#endregion
 
