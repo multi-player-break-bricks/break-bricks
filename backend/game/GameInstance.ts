@@ -367,11 +367,9 @@ export default class GameInstance {
    * @returns gameTransferData contains only last frame updated information of brick to send to client
    */
   getLastFrameUpdatedBrickInfo() {
-    return this.bricks.reduce(
+    return this.objectUpdatedLasteFrame.reduce(
       (updatedBricks: Record<string, BrickInfo>, brick) => {
-        if (
-          this.objectUpdatedLasteFrame.includes(<GameData.ICollidable>brick)
-        ) {
+        if (brick instanceof Brick) {
           const newBrick = {
             id: brick.gameID,
             xPos: brick.xPos,
