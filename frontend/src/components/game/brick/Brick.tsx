@@ -4,7 +4,7 @@ import React from "react";
 export const Brick = ({ xPos, yPos, height, width, level }: Brick) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
-  const opacity = (level - 1) * 0.12 + 0.4;
+  const opacity = level > 0 ? (level - 1) * 0.12 + 0.4 : 0;
 
   return (
     <svg
