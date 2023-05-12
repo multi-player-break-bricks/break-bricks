@@ -45,7 +45,9 @@ function BlockChainLogin() {
     //check if metamask is connected to the right network
     const chainId = await window.ethereum.request({ method: "eth_chainId" });
     if (chainId !== targetChainIDInHex) {
-      alert("Please connect to the Sepolia network");
+      alert(
+        "Please connect to the Sepolia network:\nhttps://medium.com/@mwhc00/how-to-enable-ethereum-test-networks-on-metamask-again-d7831da23a09"
+      );
       return;
     }
 
