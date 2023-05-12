@@ -15,11 +15,13 @@
     "singleQuote": false
   },
   "dependencies": {
+    "@metamask/providers": "^11.0.0",
     "@types/node": "18.16.3",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
     "eslint": "8.39.0",
     "eslint-config-next": "13.3.4",
+    "ethers": "^6.3.0",
     "next": "13.3.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",

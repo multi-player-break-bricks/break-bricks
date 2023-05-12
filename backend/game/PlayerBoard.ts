@@ -191,7 +191,11 @@ export default class PlayerBoard
    * when consuming reward
    */
   biggerPadddle() {
-    this.displayWidth = this.width = this.width * 1.5;
+    if (this.playerNumber == 1 || this.playerNumber == 3) {
+      this.displayWidth = this.width = this.width * 1.5;
+    } else if (this.playerNumber == 2 || this.playerNumber == 4) {
+      this.displayHeight = this.height = this.height * 1.5;
+    }
   }
 }
 

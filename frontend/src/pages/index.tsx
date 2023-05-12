@@ -2,6 +2,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import Head from "next/head";
 import Link from "next/link";
 import styles from "./Home.module.css";
+import login from "@/components/BlockChain/block_chain_login";
 
 export default function Home() {
   const [name, setName] = useLocalStorage("name");
@@ -29,6 +30,7 @@ export default function Home() {
           <Link className="button" href="/join">
             Let&apos;s go
           </Link>
+          {login()}
         </div>
       </main>
     </>
