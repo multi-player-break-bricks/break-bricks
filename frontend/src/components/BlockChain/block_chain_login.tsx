@@ -105,13 +105,11 @@ function BlockChainLogin() {
     const contract = await getElectricBouncerNFTContract();
 
     try {
-      while (true) {
-        const accountBalance = await contract.balanceOf(currentAccount);
-        if (accountBalance > 0) {
-          console.log("NFT found");
-        } else {
-          console.log("NFT not found");
-        }
+      const accountBalance = await contract.balanceOf(currentAccount);
+      if (accountBalance > 0) {
+        console.log("NFT found");
+      } else {
+        console.log("NFT not found");
       }
     } catch (error) {
       console.log(error);
