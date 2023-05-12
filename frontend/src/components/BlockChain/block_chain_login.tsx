@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import React, { useCallback, useEffect } from "react";
 import { ethers } from "ethers";
@@ -8,6 +7,8 @@ import {
   targetChainIDInHex,
 } from "./constants";
 import { MetaMaskInpageProvider } from "@metamask/providers";
+import Fox from "./fox.svg";
+import Image from "next/image";
 
 declare global {
   interface Window {
@@ -26,43 +27,15 @@ const getElectricBouncerNFTContract = async () => {
   return contract;
 };
 
-function login() {
+function BlockChainLogin() {
   const [loggedInBefore, setLoggedInBefore] = useLocalStorage("loggedInBefore");
-  const [loggedIn, setloggedIn] = useLocalStorage("loggedIn");
+  const [, setloggedIn] = useLocalStorage("loggedIn");
   const [currentAccount, setCurrentAccount] = React.useState<any>();
-  const [theNumber, setTheNumber] = React.useState<number>();
-
-  //init
-  useEffect(() => {
-    //if the user has logged in before, try to connect to metamask
-    setloggedIn("false");
-    const init = async () => {
-      if (loggedInBefore == "true") {
-        if (!window.ethereum) {
-          return;
-        }
-        await connectWallet();
-      }
-    };
-    init();
-  }, []);
-
-  useEffect(() => {
-    console.log("test");
-  }, []);
-
-  //listen to account change
-  useEffect(() => {
-    if (!window.ethereum) return;
-    window.ethereum.on("accountsChanged", (accounts: any) =>
-      setCurrentAccount(accounts[0])
-    );
-  });
 
   /**
    * @description connect to metamask
    */
-  const connectWallet = async () => {
+  const connectWallet = useCallback(async () => {
     //check if metamask is installed
     if (!window.ethereum) {
       alert("install MetaMask browser extension for login");
@@ -92,7 +65,34 @@ function login() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [setloggedIn]);
+
+  //init
+  useEffect(() => {
+    //if the user has logged in before, try to connect to metamask
+    setloggedIn("false");
+    const init = async () => {
+      if (loggedInBefore == "true") {
+        if (!window.ethereum) {
+          return;
+        }
+        await connectWallet();
+      }
+    };
+    init();
+  }, [connectWallet, loggedInBefore, setloggedIn]);
+
+  useEffect(() => {
+    console.log("test");
+  }, []);
+
+  //listen to account change
+  useEffect(() => {
+    if (!window.ethereum) return;
+    window.ethereum.on("accountsChanged", (accounts: any) =>
+      setCurrentAccount(accounts[0])
+    );
+  }, []);
 
   /**
    * @description TEST: check if the user has the NFT
@@ -128,7 +128,7 @@ function login() {
           }}
         >
           Login in Metamask
-          <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"></img>
+          <Image src={Fox} alt="fox" width={50} height={50} />
         </button>
       ) : (
         <>
@@ -140,4 +140,4 @@ function login() {
   );
 }
 
-export default login;
+export default BlockChainLogin;
