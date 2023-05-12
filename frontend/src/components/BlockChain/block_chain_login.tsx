@@ -70,7 +70,7 @@ function BlockChainLogin() {
   //init
   useEffect(() => {
     //if the user has logged in before, try to connect to metamask
-    setloggedIn("false");
+
     const init = async () => {
       if (loggedInBefore == "true") {
         if (!window.ethereum) {
@@ -79,8 +79,12 @@ function BlockChainLogin() {
         await connectWallet();
       }
     };
-    init();
-  }, [connectWallet, loggedInBefore, setloggedIn]);
+
+    if (!currentAccount) {
+      setloggedIn("false");
+      init();
+    }
+  }, [connectWallet, currentAccount, loggedInBefore, setloggedIn]);
 
   useEffect(() => {
     console.log("test");
