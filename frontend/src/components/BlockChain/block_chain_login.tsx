@@ -1,8 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { ethers } from "ethers";
-import { contractAbi, contractAddress } from "./constants";
+import {
+  electricNFTContractAbi,
+  electricNFTContractAddress,
+  targetChainIDInHex,
+} from "./constants";
 import { MetaMaskInpageProvider } from "@metamask/providers";
 
 declare global {
@@ -10,12 +14,12 @@ declare global {
     ethereum: MetaMaskInpageProvider;
   }
 }
-const getContract = async () => {
+const getElectricBouncerNFTContract = async () => {
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = provider.getSigner();
   const contract = new ethers.Contract(
-    contractAddress,
-    contractAbi,
+    electricNFTContractAddress,
+    electricNFTContractAbi,
     await signer
   );
 
@@ -28,6 +32,26 @@ function login() {
   const [currentAccount, setCurrentAccount] = React.useState<any>();
   const [theNumber, setTheNumber] = React.useState<number>();
 
+  //init
+  useEffect(() => {
+    //if the user has logged in before, try to connect to metamask
+    setloggedIn("false");
+    const init = async () => {
+      if (loggedInBefore == "true") {
+        if (!window.ethereum) {
+          return;
+        }
+        await connectWallet();
+      }
+    };
+    init();
+  }, []);
+
+  useEffect(() => {
+    console.log("test");
+  }, []);
+
+  //listen to account change
   useEffect(() => {
     if (!window.ethereum) return;
     window.ethereum.on("accountsChanged", (accounts: any) =>
@@ -35,77 +59,67 @@ function login() {
     );
   });
 
-  useEffect(() => {
-    setloggedIn("false");
-    const init = async () => {
-      console.log("loggedInBefore", loggedInBefore);
-      if (loggedInBefore == "true") {
-        if (!window.ethereum) return;
-        await connectWallet();
-        console.log("currentAccount", currentAccount);
-      }
-    };
-    init();
-  }, []);
-
+  /**
+   * @description connect to metamask
+   */
   const connectWallet = async () => {
+    //check if metamask is installed
     if (!window.ethereum) {
       alert("install MetaMask browser extension for login");
       return;
     }
+
+    //check if metamask is connected to the right network
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+    if (chainId !== targetChainIDInHex) {
+      alert("Please connect to the Sepolia network");
+      return;
+    }
+
+    //connect to metamask
     try {
       const { ethereum } = window;
-      if (!ethereum) {
-        alert("Get MetaMask!");
-        return;
-      }
       const accounts: any = await ethereum.request({
         method: "eth_requestAccounts",
       });
       if (!accounts) {
         alert("can not connect to MetaMask. Account not found.");
-        return;
+      } else {
+        setloggedIn("true");
+        console.log("Connected", accounts[0]);
+        setCurrentAccount(accounts[0]);
       }
-      setloggedIn("true");
-      console.log("Connected", accounts[0]);
-      setCurrentAccount(accounts[0]);
     } catch (error) {
       console.log(error);
     }
   };
 
+  /**
+   * @description TEST: check if the user has the NFT
+   */
   const checkNftExistance = async () => {
-    const contract = await getContract();
+    if (!currentAccount) {
+      return;
+    }
 
-    if (!currentAccount) return;
-    console.log("contract", contract);
+    const contract = await getElectricBouncerNFTContract();
 
     try {
-      let idx = 0;
       while (true) {
-        const contractOwner = await contract.ownerOf(idx++);
-        console.log(
-          "contractOwner",
-          contractOwner.toLowerCase() +
-            "\ncurrentAccount: " +
-            currentAccount.toLowerCase()
-        );
-        if (contractOwner.toLowerCase() === currentAccount.toLowerCase()) {
-          console.log("find the owner at idx:", idx);
-          break;
+        const accountBalance = await contract.balanceOf(currentAccount);
+        if (accountBalance > 0) {
+          console.log("NFT found");
+        } else {
+          console.log("NFT not found");
         }
       }
     } catch (error) {
-      console.log("no owner found");
       console.log(error);
     }
-
-    //setTheNumber(Number(result._hex));
   };
 
   return (
     <div className="">
-      <h1>login block chain</h1>
       {!currentAccount ? (
         <button
           onClick={() => {
@@ -114,10 +128,12 @@ function login() {
           }}
         >
           Login in Metamask
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"></img>
         </button>
       ) : (
         <>
           <p>wallet address: {currentAccount}</p>
+          <button onClick={() => checkNftExistance()}> test</button>
         </>
       )}
     </div>
