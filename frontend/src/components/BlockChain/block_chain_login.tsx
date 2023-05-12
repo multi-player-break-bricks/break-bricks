@@ -29,6 +29,7 @@ function login() {
   const [theNumber, setTheNumber] = React.useState<number>();
 
   useEffect(() => {
+    if (!window.ethereum) return;
     window.ethereum.on("accountsChanged", (accounts: any) =>
       setCurrentAccount(accounts[0])
     );
@@ -39,6 +40,7 @@ function login() {
     const init = async () => {
       console.log("loggedInBefore", loggedInBefore);
       if (loggedInBefore == "true") {
+        if (!window.ethereum) return;
         await connectWallet();
         console.log("currentAccount", currentAccount);
       }
@@ -47,6 +49,10 @@ function login() {
   }, []);
 
   const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("install MetaMask browser extension for login");
+      return;
+    }
     try {
       const { ethereum } = window;
       if (!ethereum) {
