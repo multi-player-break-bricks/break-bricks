@@ -19,6 +19,7 @@ type Bouncer = GameObject & {
   height: number;
   width: number;
   number: number;
+  skinName: string;
 };
 
 type Brick = GameObject & {

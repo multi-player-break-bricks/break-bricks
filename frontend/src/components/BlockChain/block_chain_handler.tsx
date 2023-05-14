@@ -20,6 +20,7 @@ type BlockChainContext = {
   isConnectedToMetamask: () => boolean;
   currentWalletAddress: () => string | undefined;
   checkNftExistance: (NFTName: string) => Promise<boolean>;
+  getNFTbyName: (NFTName: string) => void;
 };
 
 export const BlockChainContext = createContext<BlockChainContext | null>(null);
@@ -33,6 +34,55 @@ const getNFTContract = async (
   const contract = new ethers.Contract(NFTAddress, NFTabi, await signer);
 
   return contract;
+};
+
+const getNFT = async (NFTAddress: string, NFTabi: ethers.InterfaceAbi) => {
+  const contract = await getNFTContract(NFTAddress, NFTabi);
+  try {
+    await contract.mint();
+
+    //try {
+    // wasAdded is a boolean. Like any RPC method, an error can be thrown.
+    // const wasAdded = await window.ethereum.request({
+    //   method: "wallet_watchAsset",
+    //   params: {
+    //     type: "ERC20",
+    //     options: {
+    //       address: NFTAddress, // The address of the token.
+    //       symbol: "tokenSymbol", // A ticker symbol or shorthand, up to 5 characters.
+    //       decimals: 18, // The number of decimals in the token.
+    //       image: null,
+    //     },
+    //   },
+    // });
+    //
+    //   if (wasAdded) {
+    //     console.log("Thanks for your interest!");
+    //   } else {
+    //     console.log("Your loss!");
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
+  } catch (error) {
+    console.log(error);
+    alert("get NFT failed");
+  }
+};
+
+const getNFTbyName = async (NFTName: string) => {
+  let nft: NFTtype | undefined;
+  nftContracts.forEach((contract: NFTtype) => {
+    if (contract.skinName === NFTName) {
+      nft = contract;
+    }
+  });
+
+  if (nft === undefined) {
+    throw new Error("NFT not found");
+  }
+
+  await getNFT(nft.address, nft.abi);
 };
 
 /**
@@ -94,6 +144,7 @@ export const BlockChainContextProvider: BlockChainContext = {
   isConnectedToMetamask,
   currentWalletAddress,
   checkNftExistance,
+  getNFTbyName,
 };
 
 function BlockChainHandler() {
