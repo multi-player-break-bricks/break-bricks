@@ -8,6 +8,7 @@ import Image from "next/image";
 import Router from "next/router";
 import styles from "./blockchain.module.css";
 import { createContext } from "react";
+import { nftContracts, NFTtype } from "./NFts";
 
 declare global {
   interface Window {
@@ -18,6 +19,7 @@ declare global {
 type BlockChainContext = {
   isConnectedToMetamask: () => boolean;
   currentWalletAddress: () => string | undefined;
+  checkNftExistance: (NFTName: string) => Promise<boolean>;
 };
 
 export const BlockChainContext = createContext<BlockChainContext | null>(null);
@@ -32,6 +34,40 @@ const getNFTContract = async (
 
   return contract;
 };
+
+/**
+ * @description check if the user has the NFT
+ */
+export async function checkNftExistance(NFTName: string): Promise<boolean> {
+  if (!currentWalletAddress()) {
+    return false;
+  }
+
+  let nft: NFTtype | undefined;
+  nftContracts.forEach((contract: NFTtype) => {
+    if (contract.skinName === NFTName) {
+      nft = contract;
+    }
+  });
+
+  if (nft === undefined) {
+    throw new Error("NFT not found");
+  }
+
+  const contract = await getNFTContract(nft.address, nft.abi);
+
+  try {
+    const accountBalance = await contract.balanceOf(currentWalletAddress());
+    if (accountBalance > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
 
 export const useBlockchainContext = () => {
   const context = useContext(BlockChainContext);
@@ -57,6 +93,7 @@ function currentWalletAddress(): string | undefined {
 export const BlockChainContextProvider: BlockChainContext = {
   isConnectedToMetamask,
   currentWalletAddress,
+  checkNftExistance,
 };
 
 function BlockChainHandler() {
@@ -151,31 +188,6 @@ function BlockChainHandler() {
       }
     });
   }, []);
-
-  /**
-   * @description TEST: check if the user has the NFT
-   */
-  const checkNftExistance = async (
-    abi: ethers.InterfaceAbi,
-    address: string
-  ) => {
-    if (!currentAccount) {
-      return;
-    }
-
-    const contract = await getNFTContract(address, abi);
-
-    try {
-      const accountBalance = await contract.balanceOf(currentAccount);
-      if (accountBalance > 0) {
-        console.log("NFT found");
-      } else {
-        console.log("NFT not found");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   return (
     <div id={styles.blockchain_profile}>

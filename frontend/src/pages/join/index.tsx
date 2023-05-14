@@ -4,7 +4,12 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import styles from "./index.module.css";
-import { useBlockchainContext } from "@/components/BlockChain/block_chain_handler";
+import {
+  checkNftExistance,
+  useBlockchainContext,
+} from "@/components/BlockChain/block_chain_handler";
+import Image from "next/image";
+import { nftContracts, NFTtype } from "@/components/BlockChain/NFts";
 
 export default function JoinPage() {
   const { isConnectedToMetamask, currentWalletAddress } =
@@ -12,12 +17,42 @@ export default function JoinPage() {
   const { connectSocket, disconnectSocket } = useSocketContext();
   const [roomId, setRoomId] = useState("");
   const [skinPanelOpen, setSkinPanelOpen] = useState(false);
+  const [skinAvailableMap, setSkinAvailable] = useState<Map<string, boolean>>(
+    new Map()
+  );
 
   const router = useRouter();
   const [name] = useLocalStorage("name");
+  const [useSkinName, setUseSkinName] = useLocalStorage("useSkin");
 
   const isPublicRef = useRef<HTMLInputElement>(null);
   const firstRender = useRef(true);
+
+  //check if the user has the NFT
+  useEffect(() => {
+    const nftMap = new Map<string, boolean>();
+    const checkNfts = async () => {
+      for (const contract of nftContracts) {
+        try {
+          nftMap.set(
+            contract.skinName,
+            await checkNftExistance(contract.skinName)
+          );
+        } catch (error) {
+          nftMap.set(contract.skinName, false);
+        }
+      }
+      setSkinAvailable(nftMap);
+    };
+    checkNfts();
+    console.log(nftMap);
+  }, [isConnectedToMetamask, currentWalletAddress]);
+
+  useEffect(() => {
+    if (skinAvailableMap.get(useSkinName) === false) {
+      setUseSkinName("default");
+    }
+  }, [skinAvailableMap, useSkinName, setUseSkinName]);
 
   useEffect(() => {
     if (firstRender.current) {
@@ -106,16 +141,49 @@ export default function JoinPage() {
 
         {skinPanelOpen && (
           <div className={styles.skinPanel}>
+            {!useSkinName && setUseSkinName("default")}
             <button onClick={() => setSkinPanelOpen(false)}>close</button>
             <div className={styles.skinList}>
               <div className={styles.skinItem}>
-                <img src="/images/skin1.png" alt="skin1" />
-                <button>select</button>
+                <Image
+                  src={`/images/skin/default.png`}
+                  width={100}
+                  height={100}
+                  alt=""
+                />
+                <h3>default</h3>
+                {useSkinName === "default" && (
+                  <button disabled>selected</button>
+                )}
+                {useSkinName !== "default" && (
+                  <button onClick={() => setUseSkinName("default")}>
+                    select
+                  </button>
+                )}
               </div>
-              <div className={styles.skinItem}>
-                <img src="/images/skin2.png" alt="skin2" />
-                <button>select</button>
-              </div>
+
+              {nftContracts.map((nft) => (
+                <div key={nft.skinName} className={styles.skinItem}>
+                  <Image
+                    src={`/images/skin/${nft.skinName}.png`}
+                    width={100}
+                    height={100}
+                    alt=""
+                  />
+                  <h3>{nft.skinName}</h3>
+                  {useSkinName === nft.skinName && (
+                    <button disabled>selected</button>
+                  )}
+                  {useSkinName !== nft.skinName &&
+                    (skinAvailableMap.get(nft.skinName) ? (
+                      <button onClick={() => setUseSkinName(nft.skinName)}>
+                        select
+                      </button>
+                    ) : (
+                      <button disabled>not available</button>
+                    ))}
+                </div>
+              ))}
             </div>
           </div>
         )}
