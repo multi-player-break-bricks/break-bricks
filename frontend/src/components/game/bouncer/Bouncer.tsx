@@ -1,6 +1,6 @@
 import { useCanvasSize } from "@/hooks/useCanvasSize";
 import React from "react";
-import login from "./../../BlockChain/block_chain_login";
+import login from "../../BlockChain/block_chain_handler";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export const Bouncer = ({ xPos, yPos, height, width, number }: Bouncer) => {

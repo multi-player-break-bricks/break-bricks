@@ -29,3 +29,16 @@
 .container button {
   margin-top: 0.5rem;
 }
+
+.skinPanel{
+  background-color: red;
+  position:fixed;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  max-width: 1300px;
+  height: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  
+}

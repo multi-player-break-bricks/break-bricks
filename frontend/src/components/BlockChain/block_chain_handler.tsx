@@ -1,0 +1,211 @@
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import React, { useCallback, useContext, useEffect } from "react";
+import { ethers } from "ethers";
+import { targetChainIDInHex } from "./constants";
+import { MetaMaskInpageProvider } from "@metamask/providers";
+import Fox from "./fox.svg";
+import Image from "next/image";
+import Router from "next/router";
+import styles from "./blockchain.module.css";
+import { createContext } from "react";
+
+declare global {
+  interface Window {
+    ethereum: MetaMaskInpageProvider;
+  }
+}
+
+type BlockChainContext = {
+  isConnectedToMetamask: () => boolean;
+  currentWalletAddress: () => string | undefined;
+};
+
+export const BlockChainContext = createContext<BlockChainContext | null>(null);
+
+const getNFTContract = async (
+  NFTAddress: string,
+  NFTabi: ethers.InterfaceAbi
+) => {
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(NFTAddress, NFTabi, await signer);
+
+  return contract;
+};
+
+export const useBlockchainContext = () => {
+  const context = useContext(BlockChainContext);
+  if (!context) {
+    throw new Error("useBlockchain must be used within a BlockChainHandler");
+  }
+  return context;
+};
+
+let currentAccount: string | undefined;
+let setCurrentAccount = (account: string | undefined) => {
+  currentAccount = account;
+};
+
+function isConnectedToMetamask() {
+  return currentAccount !== undefined;
+}
+
+function currentWalletAddress(): string | undefined {
+  return currentAccount;
+}
+
+export const BlockChainContextProvider: BlockChainContext = {
+  isConnectedToMetamask,
+  currentWalletAddress,
+};
+
+function BlockChainHandler() {
+  /**
+   * @description connect to metamask
+   */
+  const connectWallet = useCallback(async () => {
+    //check if metamask is installed
+    if (!window.ethereum) {
+      alert("install MetaMask browser extension for login");
+      return;
+    }
+
+    //check if metamask is connected to the right network
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+    if (chainId !== targetChainIDInHex) {
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: targetChainIDInHex }],
+        });
+      } catch (switchError: any) {
+        // This error code indicates that the chain has not been added to MetaMask.
+        if (switchError.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: targetChainIDInHex,
+                },
+              ],
+            });
+          } catch (addError) {
+            // handle "add" error
+          }
+        }
+        // handle other "switch" errors
+      }
+      return;
+    }
+
+    //connect to metamask
+    try {
+      const { ethereum } = window;
+      const accounts: any = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      if (!accounts) {
+        alert("can not connect to MetaMask. Account not found.");
+      } else {
+        console.log("Connected", accounts[0]);
+        Router.push({
+          pathname: "/",
+          query: { address: accounts[0] },
+        });
+        setCurrentAccount(accounts[0]);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  //init
+  // useEffect(() => {
+  //   //if the user has logged in before, try to connect to metamask
+
+  //   const init = async () => {
+  //     if (loggedInBefore == "true") {
+  //       if (!window.ethereum) {
+  //         return;
+  //       }
+  //       await connectWallet();
+  //     }
+  //   };
+
+  //   if (!currentAccount) {
+  //     setloggedIn("false");
+  //     init();
+  //   }
+  // }, [connectWallet, currentAccount, loggedInBefore, setloggedIn]);
+
+  //listen to account change
+  useEffect(() => {
+    if (!window.ethereum) return;
+    window.ethereum.on("accountsChanged", (accounts: any) => {
+      if (accounts.length === 0) {
+        setCurrentAccount(undefined);
+        return;
+      } else {
+        setCurrentAccount(accounts[0]);
+      }
+    });
+  }, []);
+
+  /**
+   * @description TEST: check if the user has the NFT
+   */
+  const checkNftExistance = async (
+    abi: ethers.InterfaceAbi,
+    address: string
+  ) => {
+    if (!currentAccount) {
+      return;
+    }
+
+    const contract = await getNFTContract(address, abi);
+
+    try {
+      const accountBalance = await contract.balanceOf(currentAccount);
+      if (accountBalance > 0) {
+        console.log("NFT found");
+      } else {
+        console.log("NFT not found");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return (
+    <div id={styles.blockchain_profile}>
+      {!currentAccount ? (
+        <button
+          className={styles.chain_login_button}
+          onClick={() => {
+            connectWallet();
+          }}
+        >
+          <div>
+            <h2>Login in Metamask</h2>
+            <Image src={Fox} alt="fox" width={50} height={50} />
+          </div>
+        </button>
+      ) : (
+        <>
+          {
+            //this is only for debugging, should not display the wallet address on screen
+            //<p>wallet address: {currentAccount}</p>
+          }
+          <h2>
+            You have logged in!
+            <br />
+            You can now use skins
+          </h2>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default BlockChainHandler;

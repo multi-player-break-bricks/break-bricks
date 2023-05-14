@@ -4,10 +4,14 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import styles from "./index.module.css";
+import { useBlockchainContext } from "@/components/BlockChain/block_chain_handler";
 
 export default function JoinPage() {
+  const { isConnectedToMetamask, currentWalletAddress } =
+    useBlockchainContext();
   const { connectSocket, disconnectSocket } = useSocketContext();
   const [roomId, setRoomId] = useState("");
+  const [skinPanelOpen, setSkinPanelOpen] = useState(false);
 
   const router = useRouter();
   const [name] = useLocalStorage("name");
@@ -94,6 +98,27 @@ export default function JoinPage() {
             <button onClick={joinRandomRoom}>Quick Start</button>
           </article>
         </div>
+        {isConnectedToMetamask() ? (
+          <button onClick={() => setSkinPanelOpen(true)}>change skin</button>
+        ) : (
+          <button disabled>login to use skin</button>
+        )}
+
+        {skinPanelOpen && (
+          <div className={styles.skinPanel}>
+            <button onClick={() => setSkinPanelOpen(false)}>close</button>
+            <div className={styles.skinList}>
+              <div className={styles.skinItem}>
+                <img src="/images/skin1.png" alt="skin1" />
+                <button>select</button>
+              </div>
+              <div className={styles.skinItem}>
+                <img src="/images/skin2.png" alt="skin2" />
+                <button>select</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
