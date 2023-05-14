@@ -20,6 +20,7 @@ const REWARD_HEIGHT = 10;
 const REWARD_PROBABILITY = 0.2;
 const REWARD_WIDTH = 10;
 const FRAME_RATE_SERVER = 60;
+const SCORE_MULTIPLIER = 10;
 let CURRENT_GAME_ID = 0;
 
 /**
@@ -33,6 +34,7 @@ enum GameObjectType {
   brick,
   wall,
   reward,
+  blockingObject,
 }
 
 enum ColliderType {
@@ -184,4 +186,5 @@ export {
   REWARD_PROBABILITY,
   REWARD_WIDTH,
   FRAME_RATE_SERVER,
+  SCORE_MULTIPLIER,
 };

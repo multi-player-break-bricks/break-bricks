@@ -140,7 +140,10 @@ export default class Ball
       this.movingDirectionY = directionY / length;
 
       return true;
-    } else if (collidable.gameObjectType == GameData.GameObjectType.brick) {
+    } else if (
+      collidable.gameObjectType == GameData.GameObjectType.brick ||
+      collidable.gameObjectType == GameData.GameObjectType.blockingObject
+    ) {
       //the ball will flip the moving direction based on the x or y axis it collides with
 
       //find out which face did this ball hit

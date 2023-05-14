@@ -5,6 +5,7 @@ import Brick from "./Brick.ts";
 import Reward, { RewardType } from "./Reward.ts";
 import Wall from "./Wall.ts";
 import BrickMap, { generateBrickMap } from "./BrickMap.ts";
+import BlockingObject from "./BlockingObject.ts";
 
 type BrickInfo = {
   id: number;
@@ -33,6 +34,8 @@ export default class GameInstance {
 
   gameStatus: string;
 
+  scorePerBrick: number;
+
   /**
    * @description initialize game
    *              start game loop
@@ -53,9 +56,9 @@ export default class GameInstance {
     this.rewards = new Array<Reward>();
     this.walls = new Array<Wall>();
     this.gameStatus = "game running";
+    this.scorePerBrick = GameData.SCORE_MULTIPLIER * playerAmount;
 
     //initialize player
-
     const player1 = this.newPlayer(1);
 
     const player1PosX =
@@ -106,10 +109,11 @@ export default class GameInstance {
     //initialize ball
     const ball = this.newBall();
     ball.setPosition(
-      GameData.GAME_CANVAS_WIDTH / 2,
-      GameData.GAME_CANVAS_HEIGHT / 2
+      player1.yPos - ball.displayHeight,
+      player1.xPos + player1.displayWidth / 2
     );
     ball.lastCollidedPlayerId = player1.gameID;
+    ball.SetMovingdirection(1, 0);
 
     //initialize bricks
     const brickMap: BrickMap = generateBrickMap();
@@ -133,25 +137,34 @@ export default class GameInstance {
       });
     });
 
-    // for (let i = 0; i < 10; i++) {
-    //   for (let j = 0; j < 10; j++) {
-    //     const brick = this.newBrick();
-    //     //set brick position and margin
-    //     brick.setPosition(
-    //       GameData.GAME_CANVAS_WIDTH -
-    //         GameData.BRICK_MAP_WIDTH +
-    //         i * (brick.displayWidth + GameData.BRICK_MARGIN) +
-    //         GameData.BRICK_MARGIN,
-    //       GameData.GAME_CANVAS_HEIGHT -
-    //         GameData.BRICK_MAP_HEIGHT +
-    //         j * (brick.displayHeight + GameData.BRICK_MARGIN) +
-    //         GameData.BRICK_MARGIN
-    //     );
-    //   }
-    // }
+    //instantiate corner blocks
+    this.newBlockingObject(
+      0,
+      0,
+      GameData.PLAYER_BOARD_WIDTH,
+      GameData.PLAYER_BOARD_WIDTH
+    );
 
-    //test initalization
-    ball.SetMovingdirection(1, 1);
+    this.newBlockingObject(
+      GameData.GAME_CANVAS_WIDTH - GameData.PLAYER_BOARD_WIDTH,
+      0,
+      GameData.PLAYER_BOARD_WIDTH,
+      GameData.PLAYER_BOARD_WIDTH
+    );
+
+    this.newBlockingObject(
+      0,
+      GameData.GAME_CANVAS_HEIGHT - GameData.PLAYER_BOARD_WIDTH,
+      GameData.PLAYER_BOARD_WIDTH,
+      GameData.PLAYER_BOARD_WIDTH
+    );
+
+    this.newBlockingObject(
+      GameData.GAME_CANVAS_WIDTH - GameData.PLAYER_BOARD_WIDTH,
+      GameData.GAME_CANVAS_HEIGHT - GameData.PLAYER_BOARD_WIDTH,
+      GameData.PLAYER_BOARD_WIDTH,
+      GameData.PLAYER_BOARD_WIDTH
+    );
 
     //start game loop
     this.updateInterval = setInterval(() => {
@@ -211,7 +224,7 @@ export default class GameInstance {
         }
         if (brick.life <= 0) {
           const hitPlayer = this.getPlayerByGameId(brick.lastCollidedPlayerId);
-          hitPlayer.increaseScore(1);
+          hitPlayer.increaseScore(this.scorePerBrick);
           this.removeBrick(brick);
         }
       } else if (gameObject instanceof Reward) {
@@ -431,6 +444,19 @@ export default class GameInstance {
     this.gameColliders.push(wall);
     this.walls.push(wall);
     return wall;
+  }
+
+  newBlockingObject(
+    xPos: number,
+    yPos: number,
+    width: number,
+    height: number
+  ): BlockingObject {
+    const blockingObject = new BlockingObject(xPos, yPos, width, height);
+    this.gameObjects.push(blockingObject);
+    this.gameColliders.push(blockingObject);
+
+    return blockingObject;
   }
 
   //#endregion
