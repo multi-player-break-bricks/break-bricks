@@ -108,25 +108,37 @@ export default class PlayerBoard
     }
 
     //restrict the player from moving out of the board
-    if (this.yPos < this.wallMargin) {
-      this.yPos = this.wallMargin;
+    //player 1 and 3 is the bottom and top player
+    if (this.playerNumber == 1 || this.playerNumber == 3) {
+      if (this.xPos < GameData.PLAYER_BOARD_WIDTH) {
+        this.xPos = GameData.PLAYER_BOARD_WIDTH;
+      } else if (
+        this.xPos >
+        GameData.GAME_CANVAS_WIDTH -
+          GameData.PLAYER_BOARD_WIDTH -
+          GameData.PLAYER_BOARD_WIDTH
+      ) {
+        this.xPos =
+          GameData.GAME_CANVAS_WIDTH -
+          GameData.PLAYER_BOARD_WIDTH -
+          GameData.PLAYER_BOARD_WIDTH;
+      }
     }
-    if (
-      this.yPos >
-      GameData.GAME_CANVAS_HEIGHT - this.displayHeight - this.wallMargin
-    ) {
-      this.yPos =
-        GameData.GAME_CANVAS_HEIGHT - this.displayHeight - this.wallMargin;
-    }
-    if (this.xPos < this.wallMargin) {
-      this.xPos = this.wallMargin;
-    }
-    if (
-      this.xPos >
-      GameData.GAME_CANVAS_WIDTH - this.displayWidth - this.wallMargin
-    ) {
-      this.xPos =
-        GameData.GAME_CANVAS_WIDTH - this.displayWidth - this.wallMargin;
+    //player 2 and 4 is the left and right player
+    else if (this.playerNumber == 2 || this.playerNumber == 4) {
+      if (this.yPos < GameData.PLAYER_BOARD_WIDTH) {
+        this.yPos = GameData.PLAYER_BOARD_WIDTH;
+      } else if (
+        this.yPos >
+        GameData.GAME_CANVAS_HEIGHT -
+          GameData.PLAYER_BOARD_WIDTH -
+          GameData.PLAYER_BOARD_WIDTH
+      ) {
+        this.yPos =
+          GameData.GAME_CANVAS_HEIGHT -
+          GameData.PLAYER_BOARD_WIDTH -
+          GameData.PLAYER_BOARD_WIDTH;
+      }
     }
   }
 

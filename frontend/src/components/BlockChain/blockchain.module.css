@@ -1,0 +1,15 @@
+#blockchain_profile {
+    display: flex;
+    position:fixed;
+    bottom: 10px;
+    flex-direction: column-reverse;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 100px;
+    width: 100vw;
+}
+
+.chain_login_button{
+    max-width: 200px;
+}
