@@ -45,6 +45,7 @@ export default function GamePage() {
 
   useEffect(() => {
     socket?.on("join-room-error", () => {
+      console.log("join-room-error");
       router.push("/join");
     });
 
@@ -56,9 +57,6 @@ export default function GamePage() {
   useEffect(() => {
     socket?.on("player-left", (players) => {
       setPlayers(players);
-      if (players.length < 2 && gameStatus.status === "game running") {
-        router.push("/join");
-      }
     });
 
     return () => {
