@@ -14,16 +14,31 @@ export const Button = ({
   className,
 }: PropsWithChildren<Props>) => {
   const [isPressed, setIsPressed] = useState(false);
+
+  const handleMouseDown = () => {
+    if (disabled) return;
+    setIsPressed(true);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled) return;
+    setIsPressed(false);
+    onClick?.(e);
+  };
   return (
     <button
       className={`${styles.button} ${className}`}
-      onMouseDown={() => setIsPressed(true)}
-      onMouseUp={(e) => {
-        setIsPressed(false);
-        onClick?.(e);
-      }}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      style={{ cursor: disabled ? "auto" : "pointer" }}
     >
-      <p className={styles.text} style={{ top: isPressed ? "52%" : "45%" }}>
+      <p
+        className={styles.text}
+        style={{
+          top: isPressed ? "52%" : "45%",
+          color: disabled ? "#5A1757" : "white",
+        }}
+      >
         {children}
       </p>
       {isPressed ? (
@@ -74,10 +89,10 @@ export const Button = ({
           xmlns="http://www.w3.org/2000/svg"
         >
           <rect width="260" height="60" fill="#5A1757" />
-          <rect x="219" y="7" width="21" height="5" fill="#FAD2F8" />
+          <rect x="4" y="4" width="240" height="45" fill="#8C4A89" />
           {!disabled && (
             <>
-              <rect x="4" y="4" width="240" height="45" fill="#8C4A89" />
+              <rect x="219" y="7" width="21" height="5" fill="#FAD2F8" />
               <rect
                 x="235"
                 y="26"
