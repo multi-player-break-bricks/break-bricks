@@ -1,9 +1,12 @@
-@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;700&family=Press+Start+2P&display=swap");
 
 :root {
   --max-width: 1100px;
-  --primary-medium: #3753b4;
-  --primary-light: #acbdf9;
+  --primary-dark: #5a1757;
+  --primary-medium: #8c4a89;
+  --primary-light: #c876c4;
+  --primary-lighter: #fad2f8;
+  --accent: #fcb706;
   --success: #4caf50;
   --error: #f44336;
   --warning: #ff9800;
@@ -122,19 +125,40 @@ nav,
 section {
   display: block;
 }
+h1,
+h2,
+h3 {
+  font-family: "Press Start 2P", cursive;
+}
 .main {
-  background-color: var(--primary-light);
+  background-color: var(--primary-lighter);
   color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 100vh;
+  padding: 1.5rem 1rem;
+}
+.main::before {
+  content: "";
+  position: absolute;
+  inset: 1.5rem 1rem;
+  border: 2px solid var(--primary-light);
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding: 2rem;
+  }
+  .main::before {
+    inset: 2rem;
+    border: 4px solid var(--primary-light);
+  }
+}
+.main > div {
+  position: relative;
 }
 input {
   font-family: "Oxanium", sans-serif;
   border: none;
-  border-bottom: 1px solid var(--text);
-  background-color: transparent;
+  font-size: inherit;
 }
 input:focus {
   outline-offset: 4px;
@@ -142,17 +166,11 @@ input:focus {
 body {
   line-height: 1;
 }
-button,
-.button {
+button {
   text-decoration: none;
   border: none;
-  outline: none;
   cursor: pointer;
-  font-family: "Oxanium", sans-serif;
-  background-color: var(--primary-medium);
-  color: #fff;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  background-color: transparent;
 }
 button:disabled {
   background-color: var(--gray-light);

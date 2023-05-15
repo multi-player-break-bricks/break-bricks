@@ -1,11 +1,13 @@
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import Head from "next/head";
-import Link from "next/link";
 import styles from "./Home.module.css";
 import BlockChainLogin from "@/components/BlockChain/block_chain_login";
+import { Button } from "@/components/button/Button";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const [name, setName] = useLocalStorage("name");
+  const router = useRouter();
 
   return (
     <>
@@ -17,20 +19,28 @@ export default function Home() {
       </Head>
       <main className="main">
         <div className={styles.container}>
-          <h1 className={styles.title}>Break Bricks Multiplayer</h1>
-          <div className={styles.inputGroup}>
-            <label htmlFor="name">Enter a name to get started</label>
+          <header>
+            <h1 className={styles.title}>
+              Break <br />
+              Bricks
+            </h1>
+            <h2 className={styles.subtitle}>Multiplayer</h2>
+          </header>
+          <div className={styles.login}>
+            <h3>Enter a name to get started</h3>
             <input
               type="text"
-              id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
+            <Button
+              onClick={() => router.push("/join")}
+              className={styles.startButton}
+            >
+              Let&apos;s go
+            </Button>
+            <BlockChainLogin />
           </div>
-          <Link className="button" href="/join">
-            Let&apos;s go
-          </Link>
-          <BlockChainLogin />
         </div>
       </main>
     </>

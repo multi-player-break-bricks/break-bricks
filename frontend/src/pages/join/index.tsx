@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import styles from "./index.module.css";
+import { Button } from "@/components/button/Button";
 
 export default function JoinPage() {
   const { connectSocket, disconnectSocket } = useSocketContext();
@@ -64,15 +65,15 @@ export default function JoinPage() {
   return (
     <main className="main">
       <div className={styles.container}>
-        <h1 className={styles.title}>To join a game, you can</h1>
+        <h1 className={styles.title}>Select a way to start</h1>
         <div className={styles.waysToJoin}>
           <article>
-            <h2>Create your own room and get a room id.</h2>
+            <h2>Create a new room.</h2>
             <div className={styles.checkboxGroup}>
               <input type="checkbox" id="isPublic" ref={isPublicRef} />
               <label htmlFor="isPublic">Public room</label>
             </div>
-            <button onClick={createRoom}>Create Room</button>
+            <Button onClick={createRoom}>Create</Button>
           </article>
           <article>
             <h2>Join a room with a room id.</h2>
@@ -85,9 +86,9 @@ export default function JoinPage() {
                 onChange={(e) => setRoomId(e.target.value)}
               />
             </div>
-            <button disabled={!isValidRoomId} onClick={joinRoomWithId}>
+            <Button disabled={!isValidRoomId} onClick={joinRoomWithId}>
               Join
-            </button>
+            </Button>
           </article>
           <article>
             <h2>Join a random room.</h2>

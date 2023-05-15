@@ -1,19 +1,53 @@
 .container {
-  width: 90%;
-  min-height: 250px;
-  max-width: 1200px;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  max-height: 160vw;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
 .title {
-  font-size: 2rem;
+  font-size: clamp(2.5rem, 12vw, 6rem);
+  color: var(--primary-dark);
 }
 
-.inputGroup {
+.subtitle {
+  margin-top: 2rem;
+  font-size: clamp(1.5rem, 7.5vw, 4.5rem);
+  --text-padding: 0.25rem;
+  text-shadow: var(--text-padding) 0 0 white,
+    calc(-1 * var(--text-padding)) 0 0 white, 0 var(--text-padding) 0 white,
+    0 calc(-1 * var(--text-padding)) 0 white,
+    var(--text-padding) var(--text-padding) 0 white,
+    calc(-1 * var(--text-padding)) calc(-1 * var(--text-padding)) 0 white,
+    calc(-1 * var(--text-padding)) var(--text-padding) 0 white,
+    var(--text-padding) calc(-1 * var(--text-padding)) 0 white;
+  color: var(--accent);
+}
+
+.login {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+}
+
+.login h3 {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: clamp(1rem, 5vw, 1.5rem);
+  color: var(--primary-dark);
+}
+
+.login input {
+  display: block;
+  width: 25ch;
+  padding: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.startButton {
+  margin-top: 1rem;
 }
