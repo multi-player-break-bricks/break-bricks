@@ -75,7 +75,6 @@ io.on("connection", (socket) => {
     const players = updatePlayerReady(roomId, socket.id, isReady);
     if (!players) return;
     io.to(roomId).emit("wait-room-updated", players);
-    if (players.length < 2) return;
     if (players.some((player) => !player.isReady)) {
       clearInterval(countdownInterval);
       countdownInterval = 0;
