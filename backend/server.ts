@@ -120,8 +120,13 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("move-bouncer", ({ direction, pressed, roomId }) => {
-    moveBouncer(direction, pressed, roomId, socket.id);
+  socket.on("move-bouncer", ({ direction, pressed }) => {
+    const roomId = [...socket.rooms].find((room) => room !== socket.id);
+    if (!roomId) {
+      socket.emit("join-room-error", "Room not found");
+      return;
+    }
+    moveBouncer(direction, pressed, roomId.toString(), socket.id);
   });
 
   socket.on("return-to-wait-room", (roomId) => {

@@ -105,11 +105,10 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       socket?.emit("move-bouncer", {
         direction,
         pressed,
-        roomId,
         playerNumber: player?.number,
       });
     },
-    [players, roomId, socket]
+    [players, socket]
   );
 
   useEffect(() => {
