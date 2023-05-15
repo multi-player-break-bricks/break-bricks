@@ -241,7 +241,11 @@ export const initializeGameRoom = (roomId: string) => {
   const waitRoom = waitRooms[roomId];
   if (waitRoom) {
     delete waitRooms[roomId];
-    const gameInstance = new GameInstance(roomId, waitRoom.players.length);
+    const gameInstance = new GameInstance(
+      roomId,
+      waitRoom.players.length,
+      "god"
+    );
     gameRooms[roomId] = {
       id: roomId,
       gameInstance,
