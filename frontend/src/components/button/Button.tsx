@@ -14,13 +14,14 @@ export const Button = ({
   className,
 }: PropsWithChildren<Props>) => {
   const [isPressed, setIsPressed] = useState(false);
-  console.log({ disabled });
   return (
     <button
       className={`${styles.button} ${className}`}
-      onClick={onClick}
       onMouseDown={() => setIsPressed(true)}
-      onMouseUp={() => setIsPressed(false)}
+      onMouseUp={(e) => {
+        setIsPressed(false);
+        onClick?.(e);
+      }}
     >
       <p className={styles.text} style={{ top: isPressed ? "52%" : "45%" }}>
         {children}

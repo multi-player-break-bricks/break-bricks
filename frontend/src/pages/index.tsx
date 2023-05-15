@@ -1,7 +1,6 @@
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import Head from "next/head";
 import styles from "./Home.module.css";
-import BlockChainLogin from "@/components/BlockChain/block_chain_login";
 import { Button } from "@/components/button/Button";
 import { useRouter } from "next/router";
 
@@ -39,7 +38,6 @@ export default function Home() {
             >
               Let&apos;s go
             </Button>
-            <BlockChainLogin />
           </div>
         </div>
       </main>

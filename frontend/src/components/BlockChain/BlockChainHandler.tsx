@@ -147,7 +147,7 @@ export const BlockChainContextProvider: BlockChainContext = {
   getNFTbyName,
 };
 
-function BlockChainHandler() {
+export function BlockChainHandler() {
   /**
    * @description connect to metamask
    */
@@ -270,5 +270,3 @@ function BlockChainHandler() {
     </div>
   );
 }
-
-export default BlockChainHandler;

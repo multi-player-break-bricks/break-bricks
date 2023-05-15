@@ -7,9 +7,10 @@ import styles from "./index.module.css";
 import {
   checkNftExistance,
   useBlockchainContext,
-} from "@/components/BlockChain/block_chain_handler";
+} from "@/components/BlockChain/BlockChainHandler";
 import Image from "next/image";
 import { nftContracts, NFTtype } from "@/components/BlockChain/NFts";
+import { Button } from "@/components/button/Button";
 
 export default function JoinPage() {
   const { isConnectedToMetamask, currentWalletAddress, getNFTbyName } =

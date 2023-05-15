@@ -1,10 +1,11 @@
 import { SocketContextProvider } from "@/contexts/socketContext";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import BlockChainHandler, {
+import {
+  BlockChainHandler,
   BlockChainContext,
   BlockChainContextProvider,
-} from "../components/BlockChain/block_chain_handler";
+} from "../components/BlockChain/BlockChainHandler";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
