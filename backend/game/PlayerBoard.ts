@@ -115,12 +115,12 @@ export default class PlayerBoard
       } else if (
         this.xPos >
         GameData.GAME_CANVAS_WIDTH -
-          GameData.PLAYER_BOARD_WIDTH -
+          this.width -
           GameData.PLAYER_BOARD_WIDTH
       ) {
         this.xPos =
           GameData.GAME_CANVAS_WIDTH -
-          GameData.PLAYER_BOARD_WIDTH -
+          this.width -
           GameData.PLAYER_BOARD_WIDTH;
       }
     }
@@ -131,12 +131,12 @@ export default class PlayerBoard
       } else if (
         this.yPos >
         GameData.GAME_CANVAS_HEIGHT -
-          GameData.PLAYER_BOARD_WIDTH -
+        this.height -
           GameData.PLAYER_BOARD_WIDTH
       ) {
         this.yPos =
           GameData.GAME_CANVAS_HEIGHT -
-          GameData.PLAYER_BOARD_WIDTH -
+          this.height -
           GameData.PLAYER_BOARD_WIDTH;
       }
     }
@@ -144,7 +144,6 @@ export default class PlayerBoard
 
   /**
    * move player based on the player number and the direction
-   *
    */
   move() {
     if (this.playerNumber == 1) {

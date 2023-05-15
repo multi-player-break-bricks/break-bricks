@@ -33,6 +33,7 @@ export default class GameInstance {
   updateInterval: number;
 
   gameStatus: string;
+  isGameStart: boolean;
 
   scorePerBrick: number;
 
@@ -44,7 +45,7 @@ export default class GameInstance {
    * @param gameRoomId        id of the game room
    * @param playerAmount      amount of players in the game
    */
-  constructor(gameRoomId: string, playerAmount: number) {
+  constructor(gameRoomId: string, playerAmount: number, mode?: string) {
     this.gameObjects = new Array<GameData.IGameObject>();
     this.gameRoomId = gameRoomId;
     this.gameColliders = new Array<GameData.ICollidable>();
@@ -57,6 +58,7 @@ export default class GameInstance {
     this.walls = new Array<Wall>();
     this.gameStatus = "game running";
     this.scorePerBrick = GameData.SCORE_MULTIPLIER * playerAmount;
+    this.isGameStart = false;
 
     //initialize player
     const player1 = this.newPlayer(1);
@@ -113,7 +115,6 @@ export default class GameInstance {
       player1.xPos + player1.displayWidth / 2
     );
     ball.lastCollidedPlayerId = player1.gameID;
-    ball.SetMovingdirection(1, 0);
 
     //initialize bricks
     const brickMap: BrickMap = generateBrickMap();
@@ -166,10 +167,29 @@ export default class GameInstance {
       GameData.PLAYER_BOARD_WIDTH
     );
 
+    //god mode
+    if(mode === "god"){
+      //instantiate 4 wall
+      this.newWall(1);
+      this.newWall(2);
+      this.newWall(3);
+      this.newWall(4);
+    }
+
     //start game loop
     this.updateInterval = setInterval(() => {
       this.Update();
     }, 1000 / GameData.FPS);
+  }
+
+
+  startGame():void{
+
+    if(!this.isGameStart)    
+    {    
+      this.balls[0].SetMovingdirection(1, 0);
+      this.isGameStart = true;
+    }
   }
 
   /**
@@ -587,6 +607,7 @@ export default class GameInstance {
       throw new Error("Invalid player number");
     }
   }
+
   //#endregion
 }
 
