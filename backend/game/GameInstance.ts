@@ -169,6 +169,10 @@ export default class GameInstance {
 
     //god mode
     if(mode === "god"){
+      //remove all walls from array
+      this.walls.forEach((wall) => {
+        this.removeWall(wall);
+      });
       //instantiate 4 wall
       this.newWall(1);
       this.newWall(2);
@@ -534,6 +538,12 @@ export default class GameInstance {
     this.gameColliders.splice(this.gameColliders.indexOf(player), 1);
     this.playersMap.delete(player.playerNumber);
     this.newWall(player.playerNumber);
+  }
+
+  removeWall(wall: Wall) {
+    this.gameObjects.splice(this.gameObjects.indexOf(wall), 1);
+    this.gameColliders.splice(this.gameColliders.indexOf(wall), 1);
+    this.walls.splice(this.walls.indexOf(wall), 1);
   }
   //#endregion
 
