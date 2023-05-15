@@ -36,6 +36,7 @@ export default function RoomPage() {
 
   useEffect(() => {
     socket?.on("join-room-error", () => {
+      console.log("join-room-error");
       router.push("/join");
     });
 
