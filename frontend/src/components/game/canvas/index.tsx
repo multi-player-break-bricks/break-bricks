@@ -7,6 +7,7 @@ import { useCanvasSize } from "@/hooks/useCanvasSize";
 import { Ball } from "../ball/Ball";
 import { Reward } from "../reward/Reward";
 import { Wall } from "../wall/Wall";
+import { BlockingObject } from "../blockingObject/BlockingObject";
 import { useRouter } from "next/router";
 
 type Props = {
@@ -25,6 +26,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
   const [bricksMap, setBricksMap] = useState<Record<string, Brick>>({});
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [walls, setWalls] = useState<Wall[]>([]);
+  const [blockingObjects, setBlockingObjects] = useState<BlockingObject[]>([]);
 
   const canvasSize = useCanvasSize();
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -58,6 +60,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       setBalls(gameInfo.balls);
       setBricksMap(gameInfo.bricks);
       setWalls(gameInfo.walls);
+      setBlockingObjects(gameInfo.blockingObjects);
       socket.emit("request-game-info", room.id);
     });
 
@@ -84,20 +87,21 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
   useEffect(() => {
     socket?.on(
       "frame-change",
-      ({ bouncers, balls, bricks, rewards, walls, gameStatus }) => {
+      ({ bouncers, balls, bricks, rewards, walls, blockingObjects, gameStatus }) => {
         setBouncers(bouncers);
         setBalls(balls);
         setWalls(walls);
         updateBricks(bricks);
         setRewards(rewards);
         setGameStatus(gameStatus);
+        setBlockingObjects(blockingObjects);
       }
     );
 
     return () => {
       socket?.off("frame-change");
     };
-  }, [setGameStatus, socket, updateBricks]);
+  }, [setGameStatus, socket, updateBricks,]);
 
   const emitMoveBouncer = useCallback(
     (direction: "left" | "right", pressed: boolean) => {
@@ -162,6 +166,9 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       ))}
       {walls.map((wall) => (
         <Wall key={wall.id} {...wall} />
+      ))}
+      {blockingObjects.map((blockingObject) => (
+        <BlockingObject key={blockingObject.id} {...blockingObject} />
       ))}
       {gameStatus.status !== "game running" && (
         <div

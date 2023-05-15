@@ -281,7 +281,8 @@ export const getInitialGameInfo = (gameRoom: GameRoom) => {
   const balls = gameInstance.getCurrentBallInfo();
   const bricks = gameInstance.getCurrentBrickInfo();
   const walls = gameInstance.getCurrentWallInfo();
-  return { bouncers, balls, bricks, walls };
+  const blockingObjects = gameInstance.getCurrentBlockingObjectInfo();
+  return { bouncers, balls, bricks, walls, blockingObjects };
 };
 
 const getUpdates = (gameInstance: GameInstance) => {
@@ -290,8 +291,9 @@ const getUpdates = (gameInstance: GameInstance) => {
   const bricks = gameInstance.getFrontEndBrickInfo();
   const rewards = gameInstance.getCurrentRewardInfo();
   const walls = gameInstance.getCurrentWallInfo();
+  const blockingObjects = gameInstance.getCurrentBlockingObjectInfo();
   const gameStatus = gameInstance.getGameStatus();
-  return { bouncers, balls, bricks, rewards, walls, gameStatus };
+  return { bouncers, balls, bricks, rewards, walls, gameStatus, blockingObjects };
 };
 
 export const getGameInfoUpdates = (roomId: string) => {
