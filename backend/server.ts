@@ -59,11 +59,13 @@ io.on("connection", (socket) => {
   socket.on("join-room", () => {
     const roomId = [...socket.rooms].find((room) => room !== socket.id);
     if (!roomId) {
+      console.log("Room not found in join-room");
       socket.emit("join-room-error", "Room not found");
       return;
     }
     const waitRoom = findWaitRoom(roomId.toString());
     if (!waitRoom) {
+      console.log("Room not found in join-room");
       socket.emit("join-room-error", "Room not found");
       return;
     }
@@ -95,6 +97,7 @@ io.on("connection", (socket) => {
   socket.on("join-game-room", () => {
     const roomId = [...socket.rooms].find((room) => room !== socket.id);
     if (!roomId) {
+      console.log("Room not found in join-game-room");
       socket.emit("join-room-error", "Room not found");
       return;
     }
@@ -116,6 +119,7 @@ io.on("connection", (socket) => {
         socket.emit("frame-change", gameInfo);
       }, 1000 / FRAME_RATE_SERVER);
     } catch (error) {
+      console.log("join-room-error in request-game-info");
       socket.emit("join-room-error", error);
     }
   });
@@ -123,6 +127,7 @@ io.on("connection", (socket) => {
   socket.on("move-bouncer", ({ direction, pressed }) => {
     const roomId = [...socket.rooms].find((room) => room !== socket.id);
     if (!roomId) {
+      console.log("Room not found in move-bouncer");
       socket.emit("join-room-error", "Room not found");
       return;
     }
