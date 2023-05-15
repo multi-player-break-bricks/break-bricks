@@ -29,6 +29,7 @@ export default class GameInstance {
   bricks: Array<Brick>;
   walls: Array<Wall>;
   rewards: Array<Reward>;
+  blockingObjects: Array<BlockingObject>;
 
   updateInterval: number;
 
@@ -59,6 +60,7 @@ export default class GameInstance {
     this.gameStatus = "game running";
     this.scorePerBrick = GameData.SCORE_MULTIPLIER * playerAmount;
     this.isGameStart = false;
+    this.blockingObjects = new Array<BlockingObject>();
 
     //initialize player
     const player1 = this.newPlayer(1);
@@ -392,6 +394,21 @@ export default class GameInstance {
     return gameData;
   }
 
+  getCurrentBlockingObjectInfo(): Record<string, number>[] {
+    const gameData: Array<Record<string, number>> = [];
+    this.blockingObjects.forEach((blockingObject) => {
+      gameData.push({
+        id: blockingObject.gameID,
+        xPos: blockingObject.xPos,
+        yPos: blockingObject.yPos,
+        width: blockingObject.displayWidth,
+        height: blockingObject.displayHeight,
+      });
+    });
+
+    return gameData;
+  }
+
   /**
    * @returns game status, can be "game over", "game won", "game running", and scores of all players
    */
@@ -479,6 +496,7 @@ export default class GameInstance {
     const blockingObject = new BlockingObject(xPos, yPos, width, height);
     this.gameObjects.push(blockingObject);
     this.gameColliders.push(blockingObject);
+    this.blockingObjects.push(blockingObject);
 
     return blockingObject;
   }
