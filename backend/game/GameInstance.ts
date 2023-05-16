@@ -113,7 +113,7 @@ export default class GameInstance {
     //initialize ball
     const ball = this.newBall();
     ball.setPosition(
-      player1.yPos - ball.displayHeight,
+      player1.yPos - GameData.BALL_SIZE,
       player1.xPos + player1.displayWidth / 2
     );
     ball.lastCollidedObjectId = player1.gameID;
@@ -171,7 +171,7 @@ export default class GameInstance {
     );
 
     //god mode
-    if(mode === "god"){
+    if (mode === "god") {
       //remove all walls from array
       this.walls.forEach((wall) => {
         this.removeWall(wall);
@@ -189,10 +189,8 @@ export default class GameInstance {
     }, 1000 / GameData.FPS);
   }
 
-
-  startGame():void{
-    if(!this.isGameStart)    
-    {    
+  startGame(): void {
+    if (!this.isGameStart) {
       this.balls[0].SetMovingdirection(-1, 0);
       this.isGameStart = true;
     }
@@ -206,11 +204,11 @@ export default class GameInstance {
     this.objectUpdatedLasteFrame = Array<GameData.ICollidable>();
 
     //before shooting ball
-    if(!this.isGameStart)    
-    {    
+    if (!this.isGameStart) {
       this.balls[0].setPosition(
-        this.getPlayerByPlayerNumber(1).yPos - this.balls[0].displayHeight,
-        this.getPlayerByPlayerNumber(1).xPos + this.getPlayerByPlayerNumber(1).displayWidth / 2
+        this.getPlayerByPlayerNumber(1).yPos - GameData.BALL_SIZE,
+        this.getPlayerByPlayerNumber(1).xPos +
+          this.getPlayerByPlayerNumber(1).displayWidth / 2
       );
     }
 
@@ -517,13 +515,14 @@ export default class GameInstance {
     //drop reward
     const reward = this.newReward(brick.lastCollidedPlayerId);
 
-    if (reward.rewardType == RewardType.None) {
+    if (reward.rewardType === RewardType.None) {
       this.removeReward(reward);
     } else {
       reward.setPosition(
         brick.yPos + (GameData.BRICK_HEIGHT - GameData.REWARD_HEIGHT),
         brick.xPos + (GameData.BRICK_WIDTH - GameData.REWARD_WIDTH)
       );
+
       if (
         this.getPlayerByGameId(brick.lastCollidedPlayerId).playerNumber == 1
       ) {

@@ -75,23 +75,24 @@ export default class Reward
 
   private randomRewardType(): RewardType {
     // chance of no reward
-    if (Math.random() > GameData.REWARD_PROBABILITY) {
+    if (Math.random() > 0.2) {
       return RewardType.None;
     }
 
     const rewardTypes = Object.values(RewardType); // Get an array of all enum constants
     const randomIndex = Math.floor(
-      (Math.random() * rewardTypes.length) / 2 + rewardTypes.length / 2
+      Math.random() * (rewardTypes.length / 2 - 1) + rewardTypes.length / 2 + 1
     ); // Generate a random index
+
     return rewardTypes[randomIndex] as RewardType; // Return the enum constant at the random index
   }
 }
 
 enum RewardType {
-  None = -1,
-  extraBall = 0,
-  biggerBall = 1,
-  BiggerPaddle = 2,
+  None = 0,
+  extraBall = 1,
+  biggerBall = 2,
+  BiggerPaddle = 3,
 }
 
 export { Reward, RewardType };

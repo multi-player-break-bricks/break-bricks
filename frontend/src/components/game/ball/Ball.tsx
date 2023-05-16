@@ -8,10 +8,11 @@ export const Ball = ({ xPos, yPos, size }: Ball) => {
   return (
     <svg
       style={{
-        left: `${(xPos - size / 2) * displayRatio}px`,
-        top: `${(yPos - size / 2) * displayRatio}px`,
-        width: `${size * displayRatio}px`,
-        height: `${size * displayRatio}px`,
+        position: "absolute",
+        left: `${(xPos - size) * displayRatio}px`,
+        top: `${(yPos - size) * displayRatio}px`,
+        width: `${size * 2 * displayRatio}px`,
+        height: `${size * 2 * displayRatio}px`,
       }}
       viewBox="0 0 50 50"
       fill="none"
