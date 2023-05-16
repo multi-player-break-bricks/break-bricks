@@ -1,21 +1,16 @@
 import { SocketContextProvider } from "@/contexts/socketContext";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import {
-  BlockChainHandler,
-  BlockChainContext,
-  BlockChainContextProvider,
-} from "../components/BlockChain/BlockChainHandler";
+import { BlockChainHandler } from "../components/BlockChain/BlockChainHandler";
+import { MetamaskContextProvider } from "@/contexts/metaMaskContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <>
-      <BlockChainContext.Provider value={BlockChainContextProvider}>
-        <SocketContextProvider>
-          <Component {...pageProps} />
-          <BlockChainHandler />
-        </SocketContextProvider>
-      </BlockChainContext.Provider>
-    </>
+    <MetamaskContextProvider>
+      <SocketContextProvider>
+        <Component {...pageProps} />
+        <BlockChainHandler />
+      </SocketContextProvider>
+    </MetamaskContextProvider>
   );
 }

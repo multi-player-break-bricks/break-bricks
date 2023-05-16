@@ -4,53 +4,26 @@ import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import styles from "./index.module.css";
-import {
-  checkNftExistance,
-  useBlockchainContext,
-} from "@/components/BlockChain/BlockChainHandler";
 import Image from "next/image";
 import { nftContracts, NFTtype } from "@/components/BlockChain/NFts";
 import { Button } from "@/components/button/Button";
+import { useSkin } from "@/hooks/useSkin";
+import { getNFTbyName } from "@/lib/blockChainHelpers";
+import { useMetamaskContext } from "@/contexts/metaMaskContext";
 
 export default function JoinPage() {
-  const { isConnectedToMetamask, currentWalletAddress, getNFTbyName } =
-    useBlockchainContext();
+  const { currentAccount } = useMetamaskContext();
   const { connectSocket, disconnectSocket } = useSocketContext();
   const [roomId, setRoomId] = useState("");
   const [skinPanelOpen, setSkinPanelOpen] = useState(false);
-  const [skinAvailableMap, setSkinAvailable] = useState<Map<string, boolean>>(
-    new Map()
-  );
 
   const router = useRouter();
   const [name] = useLocalStorage("name");
   const [useSkinName, setUseSkinName] = useLocalStorage("useSkin");
+  const { skinAvailableMap } = useSkin();
 
   const isPublicRef = useRef<HTMLInputElement>(null);
   const firstRender = useRef(true);
-
-  useEffect(() => {
-    if (!window.ethereum) return;
-
-    window.ethereum.on("message", () => {
-      checkNfts();
-    });
-
-    window.ethereum.on("accountsChanged", () => {
-      checkNfts();
-    });
-  }, []);
-
-  //check if the user has the NFT
-  useEffect(() => {
-    checkNfts();
-  }, [setSkinPanelOpen, isConnectedToMetamask, currentWalletAddress]);
-
-  useEffect(() => {
-    if (skinAvailableMap.get(useSkinName) === false) {
-      setUseSkinName("default");
-    }
-  }, [skinAvailableMap, useSkinName, setUseSkinName]);
 
   useEffect(() => {
     if (firstRender.current) {
@@ -98,20 +71,20 @@ export default function JoinPage() {
   const isValidRoomId =
     roomId.length === 4 && parseInt(roomId) > 0 && parseInt(roomId) < 10000;
 
-  const checkNfts = async () => {
-    const nftMap = new Map<string, boolean>();
-    for (const contract of nftContracts) {
-      try {
-        nftMap.set(
-          contract.skinName,
-          await checkNftExistance(contract.skinName)
-        );
-      } catch (error) {
-        nftMap.set(contract.skinName, false);
-      }
-    }
-    setSkinAvailable(nftMap);
-  };
+  // const checkNfts = async () => {
+  //   const nftMap = new Map<string, boolean>();
+  //   for (const contract of nftContracts) {
+  //     try {
+  //       nftMap.set(
+  //         contract.skinName,
+  //         await checkNftExistance(contract.skinName)
+  //       );
+  //     } catch (error) {
+  //       nftMap.set(contract.skinName, false);
+  //     }
+  //   }
+  //   setSkinAvailable(nftMap);
+  // };
 
   return (
     <main className="main">
@@ -147,7 +120,7 @@ export default function JoinPage() {
           </article>
         </div>
 
-        {isConnectedToMetamask() ? (
+        {currentAccount ? (
           <button onClick={() => setSkinPanelOpen(true)}>change skin</button>
         ) : (
           <button disabled>login to use skin</button>
