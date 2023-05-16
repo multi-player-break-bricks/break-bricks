@@ -116,6 +116,7 @@ export default class GameInstance {
       player1.yPos - ball.displayHeight,
       player1.xPos + player1.displayWidth / 2
     );
+    ball.lastCollidedObjectId = player1.gameID;
     ball.lastCollidedPlayerId = player1.gameID;
 
     //initialize bricks
@@ -190,10 +191,9 @@ export default class GameInstance {
 
 
   startGame():void{
-
     if(!this.isGameStart)    
     {    
-      this.balls[0].SetMovingdirection(1, 0);
+      this.balls[0].SetMovingdirection(-1, 0);
       this.isGameStart = true;
     }
   }
@@ -204,6 +204,15 @@ export default class GameInstance {
    */
   Update(): Record<string, unknown> {
     this.objectUpdatedLasteFrame = Array<GameData.ICollidable>();
+
+    //before shooting ball
+    if(!this.isGameStart)    
+    {    
+      this.balls[0].setPosition(
+        this.getPlayerByPlayerNumber(1).yPos - this.balls[0].displayHeight,
+        this.getPlayerByPlayerNumber(1).xPos + this.getPlayerByPlayerNumber(1).displayWidth / 2
+      );
+    }
 
     //update player position
     for (const player of this.playersMap.values()) {

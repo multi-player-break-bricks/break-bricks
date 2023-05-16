@@ -115,11 +115,19 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
     [players, socket]
   );
 
+  const emitPlayer1Shooting = useCallback(
+    () => {
+      socket?.emit("player-1-shoot-starting-ball", {});
+    },
+    [socket]
+  );
+
   useEffect(() => {
     if (!roomId) return;
     const onKeydown = (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft") emitMoveBouncer("left", true);
       if (event.key === "ArrowRight") emitMoveBouncer("right", true);
+      if (event.key === " ") emitPlayer1Shooting();
     };
 
     const onKeyup = (event: KeyboardEvent) => {
@@ -134,7 +142,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       window.removeEventListener("keydown", onKeydown);
       window.removeEventListener("keyup", onKeyup);
     };
-  }, [balls, bouncers, bricksMap, emitMoveBouncer, roomId, socket]);
+  }, [balls, bouncers, bricksMap, emitMoveBouncer, emitPlayer1Shooting, roomId, socket]);
 
   const returnToWaitRoom = () => {
     socket?.emit("return-to-wait-room", roomId);
