@@ -75,7 +75,7 @@ export default class Reward
 
   private randomRewardType(): RewardType {
     // chance of no reward
-    if (Math.random() > 0.2) {
+    if (Math.random() > GameData.REWARD_PROBABILITY) {
       return RewardType.None;
     }
 
