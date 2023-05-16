@@ -1,11 +1,11 @@
 import { useSocketContext } from "@/contexts/socketContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import styles from "./index.module.css";
 import Image from "next/image";
-import { nftContracts, NFTtype } from "@/components/BlockChain/NFts";
+import { nftContracts } from "@/components/BlockChain/NFts";
 import { Button } from "@/components/button/Button";
 import { useSkin } from "@/hooks/useSkin";
 import { getNFTbyName } from "@/lib/blockChainHelpers";
@@ -71,20 +71,11 @@ export default function JoinPage() {
   const isValidRoomId =
     roomId.length === 4 && parseInt(roomId) > 0 && parseInt(roomId) < 10000;
 
-  // const checkNfts = async () => {
-  //   const nftMap = new Map<string, boolean>();
-  //   for (const contract of nftContracts) {
-  //     try {
-  //       nftMap.set(
-  //         contract.skinName,
-  //         await checkNftExistance(contract.skinName)
-  //       );
-  //     } catch (error) {
-  //       nftMap.set(contract.skinName, false);
-  //     }
-  //   }
-  //   setSkinAvailable(nftMap);
-  // };
+  const changeSkin = (skinName: string) => {
+    setUseSkinName(skinName);
+    const socket = connectSocket();
+    socket.emit("change-skin", skinName);
+  };
 
   return (
     <main className="main">
@@ -143,9 +134,7 @@ export default function JoinPage() {
                   <button disabled>selected</button>
                 )}
                 {useSkinName !== "default" && (
-                  <button onClick={() => setUseSkinName("default")}>
-                    select
-                  </button>
+                  <button onClick={() => changeSkin("default")}>select</button>
                 )}
               </div>
 
@@ -163,7 +152,7 @@ export default function JoinPage() {
                   )}
                   {useSkinName !== nft.skinName &&
                     (skinAvailableMap.get(nft.skinName) ? (
-                      <button onClick={() => setUseSkinName(nft.skinName)}>
+                      <button onClick={() => changeSkin(nft.skinName)}>
                         select
                       </button>
                     ) : (

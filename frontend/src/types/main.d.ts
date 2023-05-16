@@ -3,6 +3,7 @@ type Player = {
   number: number;
   name: string;
   isReady: boolean;
+  skin: string;
 };
 
 type GameObject = {
@@ -19,7 +20,6 @@ type Bouncer = GameObject & {
   height: number;
   width: number;
   number: number;
-  skinName: string;
 };
 
 type Brick = GameObject & {

@@ -6,8 +6,14 @@ import {
   electricNFTContract,
 } from "@/components/BlockChain/NFts";
 
-export const Bouncer = ({ xPos, yPos, height, width, number }: Bouncer) => {
-  const [useSkinName] = useLocalStorage("useSkin");
+export const Bouncer = ({
+  xPos,
+  yPos,
+  height,
+  width,
+  number,
+  skin,
+}: Bouncer & { skin: string }) => {
   const canvasSize = useCanvasSize();
   const displayRatio = canvasSize / 500;
   const rotation = number * 90;
@@ -34,7 +40,7 @@ export const Bouncer = ({ xPos, yPos, height, width, number }: Bouncer) => {
       viewBox="0 0 400 80"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {useSkinName === loveNFTContract.skinName && (
+      {skin === loveNFTContract.skinName && (
         <g>
           <title>Layer 1</title>
           <path
@@ -55,7 +61,7 @@ export const Bouncer = ({ xPos, yPos, height, width, number }: Bouncer) => {
           />
         </g>
       )}
-      {useSkinName === electricNFTContract.skinName && (
+      {skin === electricNFTContract.skinName && (
         <g>
           <title>Layer 1</title>
           <path
@@ -142,8 +148,8 @@ export const Bouncer = ({ xPos, yPos, height, width, number }: Bouncer) => {
           />
         </g>
       )}
-      {useSkinName !== loveNFTContract.skinName &&
-        useSkinName !== electricNFTContract.skinName && (
+      {skin !== loveNFTContract.skinName &&
+        skin !== electricNFTContract.skinName && (
           <>
             <path d="M0 0H400L385 15H15L0 0Z" fill="#B3FEE3" />
             <path d="M385 15L400 0V80H0L15 65H385V15Z" fill="#117954" />

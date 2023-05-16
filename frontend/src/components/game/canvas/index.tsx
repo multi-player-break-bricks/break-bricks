@@ -34,6 +34,11 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
 
   const playerNumber = players.find((p) => p.id === socket?.id)?.number;
   const bricks = Object.values(bricksMap);
+  const bouncersWithSkin = bouncers.map((bouncer) => {
+    const skin =
+      players.find((p) => p.number === bouncer.number)?.skin || "default";
+    return { ...bouncer, skin };
+  });
 
   useEffect(() => {
     if (!canvasRef.current || !playerNumber) return;
@@ -87,7 +92,15 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
   useEffect(() => {
     socket?.on(
       "frame-change",
-      ({ bouncers, balls, bricks, rewards, walls, blockingObjects, gameStatus }) => {
+      ({
+        bouncers,
+        balls,
+        bricks,
+        rewards,
+        walls,
+        blockingObjects,
+        gameStatus,
+      }) => {
         setBouncers(bouncers);
         setBalls(balls);
         setWalls(walls);
@@ -101,7 +114,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
     return () => {
       socket?.off("frame-change");
     };
-  }, [setGameStatus, socket, updateBricks,]);
+  }, [setGameStatus, socket, updateBricks]);
 
   const emitMoveBouncer = useCallback(
     (direction: "left" | "right", pressed: boolean) => {
@@ -115,12 +128,9 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
     [players, socket]
   );
 
-  const emitPlayer1Shooting = useCallback(
-    () => {
-      socket?.emit("player-1-shoot-starting-ball", {});
-    },
-    [socket]
-  );
+  const emitPlayer1Shooting = useCallback(() => {
+    socket?.emit("player-1-shoot-starting-ball", {});
+  }, [socket]);
 
   useEffect(() => {
     if (!roomId) return;
@@ -142,7 +152,15 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       window.removeEventListener("keydown", onKeydown);
       window.removeEventListener("keyup", onKeyup);
     };
-  }, [balls, bouncers, bricksMap, emitMoveBouncer, emitPlayer1Shooting, roomId, socket]);
+  }, [
+    balls,
+    bouncers,
+    bricksMap,
+    emitMoveBouncer,
+    emitPlayer1Shooting,
+    roomId,
+    socket,
+  ]);
 
   const returnToWaitRoom = () => {
     socket?.emit("return-to-wait-room", roomId);
@@ -163,7 +181,7 @@ const Canvas = ({ gameStatus, setGameStatus }: Props) => {
       {bricks.map((brick) => (
         <Brick key={brick.id} {...brick} />
       ))}
-      {bouncers.map((bouncer) => (
+      {bouncersWithSkin.map((bouncer) => (
         <Bouncer key={bouncer.id} {...bouncer} />
       ))}
       {balls.map((ball) => (

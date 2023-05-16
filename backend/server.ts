@@ -16,6 +16,7 @@ import {
   getGameInfoUpdates,
   returnToWaitRoomWithId,
   player1ShootStartingBall,
+  changeSkin,
 } from "./utils/rooms.ts";
 
 const developmentUrl = "http://localhost:3000";
@@ -34,6 +35,16 @@ io.on("connection", (socket) => {
     const { roomId } = createWaitRoom(isPublic, socket.id, name);
     socket.join(roomId);
     socket.emit("join-wait-room");
+  });
+
+  socket.on("change-skin", (skin) => {
+    const roomId = [...socket.rooms].find((room) => room !== socket.id);
+    if (!roomId) {
+      console.log("Room not found in change-skin");
+      socket.emit("join-room-error", "Room not found");
+      return;
+    }
+    changeSkin(socket.id, skin);
   });
 
   socket.on("join-wait-room-with-id", ({ roomNumber, name }) => {

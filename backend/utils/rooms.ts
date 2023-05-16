@@ -26,6 +26,7 @@ type Player = {
   number: number;
   isReady: boolean;
   isInGame: boolean;
+  skin: string;
 };
 
 const waitRooms: Record<string, WaitRoom> = {};
@@ -50,7 +51,12 @@ const savePlayerInfo = (playerId: string, name: string, number: number) => {
     number,
     isReady: false,
     isInGame: false,
+    skin: "default",
   };
+};
+
+export const changeSkin = (playerId: string, skin: string) => {
+  players[playerId].skin = skin;
 };
 
 export const createWaitRoom = (
@@ -293,7 +299,15 @@ const getUpdates = (gameInstance: GameInstance) => {
   const walls = gameInstance.getCurrentWallInfo();
   const blockingObjects = gameInstance.getCurrentBlockingObjectInfo();
   const gameStatus = gameInstance.getGameStatus();
-  return { bouncers, balls, bricks, rewards, walls, gameStatus, blockingObjects };
+  return {
+    bouncers,
+    balls,
+    bricks,
+    rewards,
+    walls,
+    gameStatus,
+    blockingObjects,
+  };
 };
 
 export const getGameInfoUpdates = (roomId: string) => {
@@ -321,10 +335,10 @@ export const moveBouncer = (
   gameRoom.gameInstance.setPlayerDir(number, direction, pressed);
 };
 
-export const player1ShootStartingBall=(roomId: string, playerId: string)=>{
-  if(players[playerId].number != 1) return;
+export const player1ShootStartingBall = (roomId: string, playerId: string) => {
+  if (players[playerId].number != 1) return;
 
   const gameRoom = gameRooms[roomId];
   if (!gameRoom) throw new Error("Game room not found");
   gameRoom.gameInstance.startGame();
-}
+};
