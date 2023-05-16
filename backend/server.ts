@@ -15,6 +15,7 @@ import {
   canInitializeGameRoom,
   getGameInfoUpdates,
   returnToWaitRoomWithId,
+  player1ShootStartingBall,
 } from "./utils/rooms.ts";
 
 const developmentUrl = "http://localhost:3000";
@@ -132,6 +133,16 @@ io.on("connection", (socket) => {
       return;
     }
     moveBouncer(direction, pressed, roomId.toString(), socket.id);
+  });
+
+  socket.on("player-1-shoot-starting-ball", () => {
+    const roomId = [...socket.rooms].find((room) => room !== socket.id);
+    if (!roomId) {
+      console.log("Room not found in player-1-shoot-starting-ball");
+      socket.emit("join-room-error", "Room not found");
+      return;
+    }
+    player1ShootStartingBall(roomId.toString(), socket.id);
   });
 
   socket.on("return-to-wait-room", (roomId) => {

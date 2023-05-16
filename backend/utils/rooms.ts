@@ -244,7 +244,7 @@ export const initializeGameRoom = (roomId: string) => {
     const gameInstance = new GameInstance(
       roomId,
       waitRoom.players.length,
-      "god"
+      "normal"
     );
     gameRooms[roomId] = {
       id: roomId,
@@ -281,7 +281,8 @@ export const getInitialGameInfo = (gameRoom: GameRoom) => {
   const balls = gameInstance.getCurrentBallInfo();
   const bricks = gameInstance.getCurrentBrickInfo();
   const walls = gameInstance.getCurrentWallInfo();
-  return { bouncers, balls, bricks, walls };
+  const blockingObjects = gameInstance.getCurrentBlockingObjectInfo();
+  return { bouncers, balls, bricks, walls, blockingObjects };
 };
 
 const getUpdates = (gameInstance: GameInstance) => {
@@ -290,8 +291,9 @@ const getUpdates = (gameInstance: GameInstance) => {
   const bricks = gameInstance.getFrontEndBrickInfo();
   const rewards = gameInstance.getCurrentRewardInfo();
   const walls = gameInstance.getCurrentWallInfo();
+  const blockingObjects = gameInstance.getCurrentBlockingObjectInfo();
   const gameStatus = gameInstance.getGameStatus();
-  return { bouncers, balls, bricks, rewards, walls, gameStatus };
+  return { bouncers, balls, bricks, rewards, walls, gameStatus, blockingObjects };
 };
 
 export const getGameInfoUpdates = (roomId: string) => {
@@ -318,3 +320,11 @@ export const moveBouncer = (
   const { number } = players[playerId];
   gameRoom.gameInstance.setPlayerDir(number, direction, pressed);
 };
+
+export const player1ShootStartingBall=(roomId: string, playerId: string)=>{
+  if(players[playerId].number != 1) return;
+
+  const gameRoom = gameRooms[roomId];
+  if (!gameRoom) throw new Error("Game room not found");
+  gameRoom.gameInstance.startGame();
+}

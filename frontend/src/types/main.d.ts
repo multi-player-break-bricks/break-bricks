@@ -39,6 +39,11 @@ type Wall = GameObject & {
   width: number;
 };
 
+type BlockingObject = GameObject & {
+  height: number;
+  width: number;
+};
+
 type GameStatus = {
   status: string;
   scores: {

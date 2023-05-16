@@ -29,6 +29,7 @@ export default class GameInstance {
   bricks: Array<Brick>;
   walls: Array<Wall>;
   rewards: Array<Reward>;
+  blockingObjects: Array<BlockingObject>;
 
   updateInterval: number;
 
@@ -59,6 +60,7 @@ export default class GameInstance {
     this.gameStatus = "game running";
     this.scorePerBrick = GameData.SCORE_MULTIPLIER * playerAmount;
     this.isGameStart = false;
+    this.blockingObjects = new Array<BlockingObject>();
 
     //initialize player
     const player1 = this.newPlayer(1);
@@ -114,6 +116,7 @@ export default class GameInstance {
       player1.yPos - ball.displayHeight,
       player1.xPos + player1.displayWidth / 2
     );
+    ball.lastCollidedObjectId = player1.gameID;
     ball.lastCollidedPlayerId = player1.gameID;
 
     //initialize bricks
@@ -188,10 +191,9 @@ export default class GameInstance {
 
 
   startGame():void{
-
     if(!this.isGameStart)    
     {    
-      this.balls[0].SetMovingdirection(1, 0);
+      this.balls[0].SetMovingdirection(-1, 0);
       this.isGameStart = true;
     }
   }
@@ -202,6 +204,15 @@ export default class GameInstance {
    */
   Update(): Record<string, unknown> {
     this.objectUpdatedLasteFrame = Array<GameData.ICollidable>();
+
+    //before shooting ball
+    if(!this.isGameStart)    
+    {    
+      this.balls[0].setPosition(
+        this.getPlayerByPlayerNumber(1).yPos - this.balls[0].displayHeight,
+        this.getPlayerByPlayerNumber(1).xPos + this.getPlayerByPlayerNumber(1).displayWidth / 2
+      );
+    }
 
     //update player position
     for (const player of this.playersMap.values()) {
@@ -392,6 +403,21 @@ export default class GameInstance {
     return gameData;
   }
 
+  getCurrentBlockingObjectInfo(): Record<string, number>[] {
+    const gameData: Array<Record<string, number>> = [];
+    this.blockingObjects.forEach((blockingObject) => {
+      gameData.push({
+        id: blockingObject.gameID,
+        xPos: blockingObject.xPos,
+        yPos: blockingObject.yPos,
+        width: blockingObject.displayWidth,
+        height: blockingObject.displayHeight,
+      });
+    });
+
+    return gameData;
+  }
+
   /**
    * @returns game status, can be "game over", "game won", "game running", and scores of all players
    */
@@ -479,6 +505,7 @@ export default class GameInstance {
     const blockingObject = new BlockingObject(xPos, yPos, width, height);
     this.gameObjects.push(blockingObject);
     this.gameColliders.push(blockingObject);
+    this.blockingObjects.push(blockingObject);
 
     return blockingObject;
   }
