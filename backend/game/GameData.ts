@@ -1,6 +1,6 @@
 //global game data
 const BALL_SIZE = 5;
-const BALL_SPEED = 2;
+const BALL_SPEED = 4;
 const BRICK_HEIGHT = 20;
 const BRICK_MAP_HEIGHT = 400;
 const BRICK_MAP_WIDTH = 400;
@@ -19,7 +19,7 @@ const PLAYER_MOVE_SPEED = 3;
 const REWARD_HEIGHT = 10;
 const REWARD_PROBABILITY = 0.2;
 const REWARD_WIDTH = 10;
-const FRAME_RATE_SERVER = 16;
+const FRAME_RATE_SERVER = 60;
 const SCORE_MULTIPLIER = 10;
 let CURRENT_GAME_ID = 0;
 
