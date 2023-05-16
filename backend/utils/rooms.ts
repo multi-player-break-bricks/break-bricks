@@ -322,7 +322,6 @@ export const moveBouncer = (
 };
 
 export const player1ShootStartingBall=(roomId: string, playerId: string)=>{
-  console.log(players[playerId].number);
   if(players[playerId].number != 1) return;
 
   const gameRoom = gameRooms[roomId];
