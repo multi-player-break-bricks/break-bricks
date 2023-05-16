@@ -113,7 +113,7 @@ export default class GameInstance {
     //initialize ball
     const ball = this.newBall();
     ball.setPosition(
-      player1.yPos - GameData.BALL_SIZE * 2,
+      player1.yPos - GameData.BALL_SIZE,
       player1.xPos + player1.displayWidth / 2
     );
     ball.lastCollidedObjectId = player1.gameID;
@@ -206,7 +206,7 @@ export default class GameInstance {
     //before shooting ball
     if (!this.isGameStart) {
       this.balls[0].setPosition(
-        this.getPlayerByPlayerNumber(1).yPos - GameData.BALL_SIZE * 2,
+        this.getPlayerByPlayerNumber(1).yPos - GameData.BALL_SIZE,
         this.getPlayerByPlayerNumber(1).xPos +
           this.getPlayerByPlayerNumber(1).displayWidth / 2
       );

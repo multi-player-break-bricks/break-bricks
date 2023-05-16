@@ -1,5 +1,5 @@
 //global game data
-const BALL_SIZE = 5;
+const BALL_SIZE = 3;
 const BALL_SPEED = 4;
 const BRICK_HEIGHT = 20;
 const BRICK_MAP_HEIGHT = 400;
