@@ -16,7 +16,6 @@ import {
   getGameInfoUpdates,
   returnToWaitRoomWithId,
   player1ShootStartingBall,
-  changeSkin,
 } from "./utils/rooms.ts";
 
 const developmentUrl = "http://localhost:3000";
@@ -31,24 +30,19 @@ const io = new Server({
 });
 
 io.on("connection", (socket) => {
-  socket.on("create-wait-room", ({ isPublic, name }) => {
-    const { roomId } = createWaitRoom(isPublic, socket.id, name);
+  socket.on("create-wait-room", ({ isPublic, name, skinName }) => {
+    const { roomId } = createWaitRoom(isPublic, socket.id, name, skinName);
     socket.join(roomId);
     socket.emit("join-wait-room");
   });
 
-  socket.on("change-skin", (skin) => {
-    const roomId = [...socket.rooms].find((room) => room !== socket.id);
-    if (!roomId) {
-      console.log("Room not found in change-skin");
-      socket.emit("join-room-error", "Room not found");
-      return;
-    }
-    changeSkin(socket.id, skin);
-  });
-
-  socket.on("join-wait-room-with-id", ({ roomNumber, name }) => {
-    const result = joinWaitRoomWithNumber(roomNumber, socket.id, name);
+  socket.on("join-wait-room-with-id", ({ roomNumber, name, skinName }) => {
+    const result = joinWaitRoomWithNumber(
+      roomNumber,
+      socket.id,
+      name,
+      skinName
+    );
     if (result.error) {
       socket.emit("join-wait-room-error", result.error);
       return;
@@ -62,8 +56,8 @@ io.on("connection", (socket) => {
     socket.emit("join-wait-room");
   });
 
-  socket.on("join-random-wait-room", (name) => {
-    const { roomId } = joinRandomRoom(socket.id, name);
+  socket.on("join-random-wait-room", ({ name, skinName }) => {
+    const { roomId } = joinRandomRoom(socket.id, name, skinName);
     socket.join(roomId);
     socket.emit("join-wait-room");
   });
