@@ -655,11 +655,13 @@ export default class GameInstance {
           const newBrick = this.newBrick();
           newBrick.setPosition(
             GameData.GAME_CANVAS_WIDTH -
-              GameData.BRICK_MAP_WIDTH +
-              j * newBrick.displayWidth,
+              GameData.BRICK_MAP_WIDTH -
+              GameData.BRICK_WIDTH / 2 +
+              j * GameData.BRICK_WIDTH,
             GameData.GAME_CANVAS_HEIGHT -
-              GameData.BRICK_MAP_HEIGHT +
-              i * newBrick.displayHeight
+              GameData.BRICK_MAP_HEIGHT -
+              GameData.BRICK_WIDTH / 2 +
+              i * GameData.BRICK_WIDTH
           );
           newBrick.life = brick.life;
           //push to update list
