@@ -19,7 +19,7 @@ export default function JoinPage() {
 
   const router = useRouter();
   const [name] = useLocalStorage("name");
-  const [useSkinName, setUseSkinName] = useLocalStorage("useSkin");
+  const [skinName, setSkinName] = useLocalStorage("useSkin");
   const { skinAvailableMap } = useSkin();
 
   const isPublicRef = useRef<HTMLInputElement>(null);
@@ -46,6 +46,7 @@ export default function JoinPage() {
     socket.emit("create-wait-room", {
       isPublic: isPublicRef.current?.checked,
       name,
+      skinName,
     });
     listenToJoinRoom(socket);
   };
@@ -55,6 +56,7 @@ export default function JoinPage() {
     socket.emit("join-wait-room-with-id", {
       roomNumber: roomId,
       name,
+      skinName,
     });
     listenToJoinRoom(socket);
     socket.on("join-wait-room-error", (error) => {
@@ -64,18 +66,12 @@ export default function JoinPage() {
 
   const joinRandomRoom = () => {
     const socket = connectSocket();
-    socket.emit("join-random-wait-room", name);
+    socket.emit("join-random-wait-room", { name, skinName });
     listenToJoinRoom(socket);
   };
 
   const isValidRoomId =
     roomId.length === 4 && parseInt(roomId) > 0 && parseInt(roomId) < 10000;
-
-  const changeSkin = (skinName: string) => {
-    setUseSkinName(skinName);
-    const socket = connectSocket();
-    socket.emit("change-skin", skinName);
-  };
 
   return (
     <main className="main">
@@ -119,7 +115,7 @@ export default function JoinPage() {
 
         {skinPanelOpen && (
           <div className={styles.skinPanel}>
-            {!useSkinName && setUseSkinName("default")}
+            {!skinName && setSkinName("default")}
             <button onClick={() => setSkinPanelOpen(false)}>close</button>
             <div className={styles.skinList}>
               <div className={styles.skinItem}>
@@ -130,11 +126,9 @@ export default function JoinPage() {
                   alt=""
                 />
                 <h3>default</h3>
-                {useSkinName === "default" && (
-                  <button disabled>selected</button>
-                )}
-                {useSkinName !== "default" && (
-                  <button onClick={() => changeSkin("default")}>select</button>
+                {skinName === "default" && <button disabled>selected</button>}
+                {skinName !== "default" && (
+                  <button onClick={() => setSkinName("default")}>select</button>
                 )}
               </div>
 
@@ -147,12 +141,12 @@ export default function JoinPage() {
                     alt=""
                   />
                   <h3>{nft.skinName}</h3>
-                  {useSkinName === nft.skinName && (
+                  {skinName === nft.skinName && (
                     <button disabled>selected</button>
                   )}
-                  {useSkinName !== nft.skinName &&
+                  {skinName !== nft.skinName &&
                     (skinAvailableMap.get(nft.skinName) ? (
-                      <button onClick={() => changeSkin(nft.skinName)}>
+                      <button onClick={() => setSkinName(nft.skinName)}>
                         select
                       </button>
                     ) : (

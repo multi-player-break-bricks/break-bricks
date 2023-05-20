@@ -44,14 +44,19 @@ const getRoomNumber = (id: string) => {
   return roomNumber.toString().padStart(4, "0");
 };
 
-const savePlayerInfo = (playerId: string, name: string, number: number) => {
+const savePlayerInfo = (
+  playerId: string,
+  name: string,
+  number: number,
+  skinName: string
+) => {
   players[playerId] = {
     id: playerId,
     name,
     number,
     isReady: false,
     isInGame: false,
-    skin: "default",
+    skin: skinName,
   };
 };
 
@@ -62,7 +67,8 @@ export const changeSkin = (playerId: string, skin: string) => {
 export const createWaitRoom = (
   isPublic: boolean,
   playerId: string,
-  playerName: string
+  playerName: string,
+  skinName: string
 ) => {
   const roomId = randomUUID();
   const stringifiedLastWaitRoomNumber = getRoomNumber(roomId);
@@ -72,14 +78,15 @@ export const createWaitRoom = (
     isPublic,
     players: [playerId],
   };
-  savePlayerInfo(playerId, playerName, 1);
+  savePlayerInfo(playerId, playerName, 1, skinName);
   return { waitRoomNumber: stringifiedLastWaitRoomNumber, roomId };
 };
 
 export const joinWaitRoomWithNumber = (
   waitRoomNumber: string,
   playerId: string,
-  playerName: string
+  playerName: string,
+  skinName: string
 ) => {
   const waitRoom = Object.values(waitRooms).find(
     (room) => room.number === waitRoomNumber
@@ -95,14 +102,18 @@ export const joinWaitRoomWithNumber = (
     };
   }
   waitRoom.players.push(playerId);
-  savePlayerInfo(playerId, playerName, waitRoom.players.length);
+  savePlayerInfo(playerId, playerName, waitRoom.players.length, skinName);
   return {
     waitRoomId: waitRoom.id,
     players: waitRoom.players.map((playerId) => players[playerId]),
   };
 };
 
-export const joinRandomRoom = (playerId: string, playerName: string) => {
+export const joinRandomRoom = (
+  playerId: string,
+  playerName: string,
+  skinName: string
+) => {
   const waitRoom = Object.values(waitRooms).find(
     (room) => room.players.length < 4 && room.isPublic
   );
@@ -110,7 +121,8 @@ export const joinRandomRoom = (playerId: string, playerName: string) => {
     const { roomId, waitRoomNumber } = createWaitRoom(
       true,
       playerId,
-      playerName
+      playerName,
+      skinName
     );
     return {
       roomId,
@@ -119,7 +131,7 @@ export const joinRandomRoom = (playerId: string, playerName: string) => {
     };
   }
   waitRoom.players.push(playerId);
-  savePlayerInfo(playerId, playerName, waitRoom.players.length);
+  savePlayerInfo(playerId, playerName, waitRoom.players.length, skinName);
   return {
     roomId: waitRoom.id,
     waitRoomNumber: waitRoom.number,
@@ -160,7 +172,8 @@ export const returnToWaitRoomWithId = (
   savePlayerInfo(
     playerId,
     players[playerId].name,
-    waitRooms[waitRoomId].players.length
+    waitRooms[waitRoomId].players.length,
+    players[playerId].skin
   );
 };
 
