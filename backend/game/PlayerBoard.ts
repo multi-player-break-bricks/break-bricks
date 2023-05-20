@@ -114,14 +114,10 @@ export default class PlayerBoard
         this.xPos = GameData.PLAYER_BOARD_WIDTH;
       } else if (
         this.xPos >
-        GameData.GAME_CANVAS_WIDTH -
-          this.width -
-          GameData.PLAYER_BOARD_WIDTH
+        GameData.GAME_CANVAS_WIDTH - this.width - GameData.PLAYER_BOARD_WIDTH
       ) {
         this.xPos =
-          GameData.GAME_CANVAS_WIDTH -
-          this.width -
-          GameData.PLAYER_BOARD_WIDTH;
+          GameData.GAME_CANVAS_WIDTH - this.width - GameData.PLAYER_BOARD_WIDTH;
       }
     }
     //player 2 and 4 is the left and right player
@@ -130,9 +126,7 @@ export default class PlayerBoard
         this.yPos = GameData.PLAYER_BOARD_WIDTH;
       } else if (
         this.yPos >
-        GameData.GAME_CANVAS_HEIGHT -
-        this.height -
-          GameData.PLAYER_BOARD_WIDTH
+        GameData.GAME_CANVAS_HEIGHT - this.height - GameData.PLAYER_BOARD_WIDTH
       ) {
         this.yPos =
           GameData.GAME_CANVAS_HEIGHT -
@@ -204,9 +198,22 @@ export default class PlayerBoard
   biggerPadddle() {
     if (this.playerNumber == 1 || this.playerNumber == 3) {
       this.displayWidth = this.width = this.width * 1.5;
+      //max width is 1/3 of the canvas width
+      if (this.width > GameData.GAME_CANVAS_WIDTH / 3) {
+        this.displayWidth = this.width = GameData.GAME_CANVAS_WIDTH / 3;
+      }
     } else if (this.playerNumber == 2 || this.playerNumber == 4) {
       this.displayHeight = this.height = this.height * 1.5;
+      //max height is 1/3 of the canvas height
+      if (this.height > GameData.GAME_CANVAS_HEIGHT / 3) {
+        this.displayHeight = this.height = GameData.GAME_CANVAS_HEIGHT / 3;
+      }
     }
+  }
+
+  reset() {
+    this.width = this.displayWidth = GameData.PLAYER_BOARD_WIDTH;
+    this.height = this.displayHeight = GameData.PLAYER_BOARD_HEIGHT;
   }
 }
 

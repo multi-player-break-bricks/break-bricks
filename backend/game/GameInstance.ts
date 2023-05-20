@@ -4,7 +4,11 @@ import * as GameData from "./GameData.ts";
 import Brick from "./Brick.ts";
 import Reward, { RewardType } from "./Reward.ts";
 import Wall from "./Wall.ts";
-import BrickMap, { generateBrickMap } from "./BrickMap.ts";
+import BrickMap, {
+  generateBrickMap,
+  mapTemplates,
+  convertNumberToBrickMap,
+} from "./BrickMap.ts";
 import BlockingObject from "./BlockingObject.ts";
 
 type BrickInfo = {
@@ -38,6 +42,9 @@ export default class GameInstance {
 
   scorePerBrick: number;
 
+  mapsTemplates: number[][][];
+  currentMapNumber: number;
+
   /**
    * @description initialize game
    *              start game loop
@@ -61,6 +68,8 @@ export default class GameInstance {
     this.scorePerBrick = GameData.SCORE_MULTIPLIER * playerAmount;
     this.isGameStart = false;
     this.blockingObjects = new Array<BlockingObject>();
+    this.mapsTemplates = mapTemplates.sort(() => Math.random() - 0.5);
+    this.currentMapNumber = 0;
 
     //initialize player
     const player1 = this.newPlayer(1);
@@ -120,26 +129,7 @@ export default class GameInstance {
     ball.lastCollidedPlayerId = player1.gameID;
 
     //initialize bricks
-    const brickMap: BrickMap = generateBrickMap();
-
-    brickMap.map.forEach((brickRow, i) => {
-      brickRow.forEach((brick, j) => {
-        if (brick.life != 0) {
-          const newBrick = this.newBrick();
-          newBrick.setPosition(
-            GameData.GAME_CANVAS_WIDTH -
-              GameData.BRICK_MAP_WIDTH +
-              j * (newBrick.displayWidth + GameData.BRICK_MARGIN) +
-              GameData.BRICK_MARGIN,
-            GameData.GAME_CANVAS_HEIGHT -
-              GameData.BRICK_MAP_HEIGHT +
-              i * (newBrick.displayHeight + GameData.BRICK_MARGIN) +
-              GameData.BRICK_MARGIN
-          );
-          newBrick.life = brick.life;
-        }
-      });
-    });
+    this.generateNewMap();
 
     //instantiate corner blocks
     this.newBlockingObject(
@@ -288,16 +278,17 @@ export default class GameInstance {
 
     let gameTransferData = this.getCurrentGameTransferData(); //instantiate Object to send to client
 
-    //game over or game won
+    //if all bricks are destroyed, generate new bricks and reset things expect score
+    if (this.bricks.length == 0) {
+      //initialize new bricks
+      this.reset();
+      this.generateNewMap();
+    }
+    //game over
     if (this.balls.length == 0) {
       gameTransferData = { gameOver: true };
       console.log("game over");
       this.gameStatus = "game over";
-      clearInterval(this.updateInterval);
-    } else if (this.bricks.length == 0) {
-      gameTransferData = { gameWon: true };
-      console.log("game won");
-      this.gameStatus = "game won";
       clearInterval(this.updateInterval);
     }
 
@@ -642,6 +633,72 @@ export default class GameInstance {
     } else {
       throw new Error("Invalid player number");
     }
+  }
+
+  //#endregion
+
+  //#region map related
+  generateNewMap() {
+    let brickMap: BrickMap;
+    //initialize bricks
+    if (this.currentMapNumber < this.mapsTemplates.length) {
+      brickMap = convertNumberToBrickMap(
+        this.mapsTemplates[this.currentMapNumber]
+      );
+    } else {
+      brickMap = generateBrickMap();
+    }
+
+    brickMap.map.forEach((brickRow, i) => {
+      brickRow.forEach((brick, j) => {
+        if (brick.life != 0) {
+          const newBrick = this.newBrick();
+          newBrick.setPosition(
+            GameData.GAME_CANVAS_WIDTH -
+              GameData.BRICK_MAP_WIDTH +
+              j * newBrick.displayWidth,
+            GameData.GAME_CANVAS_HEIGHT -
+              GameData.BRICK_MAP_HEIGHT +
+              i * newBrick.displayHeight
+          );
+          newBrick.life = brick.life;
+          //push to update list
+          this.frontEndUnreceivedBrickData.push(newBrick);
+        }
+      });
+    });
+
+    this.currentMapNumber++;
+  }
+
+  //reset everything to initial state
+  reset() {
+    this.isGameStart = false;
+
+    //distroy all rewards
+    this.rewards.forEach((reward) => {
+      this.removeReward(reward);
+    });
+
+    //reset player
+    this.playersMap.forEach((player) => {
+      player.reset();
+    });
+
+    //distroy all balls
+    this.balls.forEach((ball) => {
+      this.removeBall(ball);
+    });
+
+    //initialize ball
+    const player1 = this.getPlayerByPlayerNumber(1);
+    const ball = this.newBall();
+    ball.setPosition(
+      player1.yPos - GameData.BALL_SIZE,
+      player1.xPos + player1.displayWidth / 2
+    );
+    ball.lastCollidedObjectId = player1.gameID;
+    ball.lastCollidedPlayerId = player1.gameID;
   }
 
   //#endregion

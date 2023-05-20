@@ -21,6 +21,8 @@ export default class Ball
   lastCollidedPlayerId: number;
   colliderType: GameData.ColliderType;
   radius: number;
+  damage: number;
+  isFireBall: boolean;
 
   /**
    * @param yPos
@@ -42,6 +44,8 @@ export default class Ball
     this.lastCollidedObjectId = -1;
     this.lastCollidedPlayerId = -1;
     this.colliderType = GameData.ColliderType.circle;
+    this.damage = 1;
+    this.isFireBall = false;
   }
 
   setPosition(yPos: number, xPos: number) {
@@ -146,12 +150,10 @@ export default class Ball
     ) {
       //the ball will flip the moving direction based on the x or y axis it collides with
 
-      //find out which face did this ball hit
+      // find out which face did this ball hit
       // find the difference between the center of the ball and the center of the colliding object
-      const dx =
-        this.xPos + this.width / 2 - (collidable.xPos + collidable.width / 2);
-      const dy =
-        this.yPos + this.height / 2 - (collidable.yPos + collidable.height / 2);
+      const dx = this.xPos - (collidable.xPos + collidable.width / 2);
+      const dy = this.yPos - (collidable.yPos + collidable.height / 2);
 
       // find the absolute differences between the x and y positions
       const absDx = Math.abs(dx);
@@ -162,20 +164,30 @@ export default class Ball
         // ball hit either left or right face of colliding object
         if (dx < 0) {
           // ball hit right face of colliding object
-          this.movingDirectionX = -this.movingDirectionX;
-        } else {
+          this.movingDirectionX = -Math.abs(this.movingDirectionX);
+        } else if (dx > 0) {
           // ball hit left face of colliding object
           this.movingDirectionX = Math.abs(this.movingDirectionX);
+        } else {
+          // ball hit the corner of the colliding object
+          this.movingDirectionX = -this.movingDirectionX;
         }
-      } else {
+      } else if (absDx < absDy) {
         // ball hit either top or bottom face of colliding object
         if (dy < 0) {
           // ball hit bottom face of colliding object
-          this.movingDirectionY = -this.movingDirectionY;
-        } else {
+          this.movingDirectionY = -Math.abs(this.movingDirectionY);
+        } else if (dy > 0) {
           // ball hit top face of colliding object
           this.movingDirectionY = Math.abs(this.movingDirectionY);
+        } else {
+          // ball hit the corner of the colliding object
+          this.movingDirectionY = -this.movingDirectionY;
         }
+      } else {
+        // ball hit the corner of the colliding object
+        this.movingDirectionX = -this.movingDirectionX;
+        this.movingDirectionY = -this.movingDirectionY;
       }
 
       return true;
@@ -204,6 +216,19 @@ export default class Ball
     this.radius = this.size += GameData.BALL_SIZE;
     //this.displayWidth = this.width = this.size;
     //this.displayHeight = this.height = this.size;
+  }
+
+  /**
+   * use this function for reward fire ball
+   * fire ball will destroy any brick it hits for 5 seconds
+   */
+  fireBall() {
+    this.isFireBall = true;
+    const fireBallTimer = 5;
+
+    setTimeout(() => {
+      this.isFireBall = false;
+    }, fireBallTimer * 1000);
   }
 }
 

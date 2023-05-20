@@ -23,7 +23,7 @@ export default class BlockingObject
     this.displayWidth = this.width = width;
     this.displayHeight = this.height = height;
     this.gameObjectType = GameData.GameObjectType.blockingObject;
-    this.name = "brick";
+    this.name = "blockingObject";
     this.colliderType = GameData.ColliderType.rect;
     this.radius = 0;
     this.onCollision = () => false;
