@@ -9,6 +9,16 @@
   align-items: center;
 }
 
+.board {
+  width: 90%;
+  max-width: 1200px;
+  padding: 3rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  background-color: white;
+}
+
 .title {
   font-size: clamp(2.5rem, 12vw, 6rem);
   color: var(--primary-dark);

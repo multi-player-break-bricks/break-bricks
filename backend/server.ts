@@ -16,7 +16,10 @@ import {
   getGameInfoUpdates,
   returnToWaitRoomWithId,
   player1ShootStartingBall,
+  findGameRoom,
 } from "./utils/rooms.ts";
+
+import { readLeaderboard, insertRecord } from "./utils/leaderboard.ts";
 
 const developmentUrl = "http://localhost:3000";
 const productionUrl = "https://brick-breaking.vercel.app";
@@ -79,6 +82,13 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("wait-room-updated", waitRoom.players);
   });
 
+  socket.on("fetch-leaderboard", () => {
+    const leaderboard = readLeaderboard();
+    //console.log("show-leaderboard");
+    socket.emit("show-leaderboard", leaderboard)
+    return;
+  })
+
   socket.on("update-player-ready", ({ roomId, isReady }) => {
     const players = updatePlayerReady(roomId, socket.id, isReady);
     if (!players) return;
@@ -120,6 +130,17 @@ io.on("connection", (socket) => {
       const updateInterval = setInterval(() => {
         const gameInfo = getGameInfoUpdates(roomId.toString());
         if (gameInfo.gameStatus.status !== "game running") {
+          const gameRoom = findGameRoom(roomId);
+          if (!gameRoom) {
+            console.log("Room not found in request-game-info");
+            socket.emit("join-room-error", "Room not found");
+          } else {
+            const time = new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'});
+            for (const score of gameInfo.gameStatus.scores) {
+              const playerName = gameRoom.players.find((p) => p.number === score.number)!.name;
+              insertRecord(playerName, score.score, time)
+            }
+          }
           clearInterval(updateInterval);
         }
         socket.emit("frame-change", gameInfo);
